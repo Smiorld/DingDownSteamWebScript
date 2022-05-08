@@ -12,6 +12,5 @@
 # TODO list: 
 1. Add English language output
 2. Add time zone support (currently the time represented is GMT +8)
-3. Display all storing state on searching page.
-4. Display most storing state on the main page.
+3. Display all games storing state on searching page.
 
