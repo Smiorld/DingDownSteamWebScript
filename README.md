@@ -9,8 +9,8 @@
 2. Display the storing state of a certain game on the title field of the steam detail page.
 3. Display all games storing state on searching page.
 4. Search page full support with infinite scroll
+5. Home page full support
 
 # TODO list: 
 1. Add English language output
 2. Add time zone support (currently the time represented is GMT +8)
-3. Home page full support
