@@ -7,10 +7,9 @@
 # Implemented functionalities
 1. Send post quest to the DingDown api and get correct response.
 2. Display the storing state of a certain game on the title field of the steam detail page.
+3. Display all games storing state on searching page.
 
 
 # TODO list: 
 1. Add English language output
 2. Add time zone support (currently the time represented is GMT +8)
-3. Display all games storing state on searching page.
-
