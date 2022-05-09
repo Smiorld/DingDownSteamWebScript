@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         叮当公共库收录情况（测试）
 // @namespace    http://tampermonkey.net/
-// @version      0.8
+// @version      0.9
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Julius
 // @match        https://store.steampowered.com/*
@@ -113,7 +113,6 @@ window.addEventListener("load",function(){
                     }
                 }
                 else if(child.href.split('/')[3]=='bundle'){
-                    let data = {Id: child.href.split('/')[4]};
                     let title = child.children[1].children[0].children[0];
                     if(!title.getAttribute("dinged")){
                         title.setAttribute("dinged","dinged");
@@ -126,27 +125,115 @@ window.addEventListener("load",function(){
 })
 
 //mutation检测是否在搜索结果内部分有变化。若有，触发脚本
-if(window.location.pathname.split('/')[1]=='search'){
-    let tmp_script = document.querySelector('#responsive_page_template_content').children[0].innerHTML;
-    let position = tmp_script.search(/"infiniscroll"/);
-    let infiniscroll = tmp_script[position+15];//为0时没有无限下滚，为1时有。这个决定了整个页面变化的div如何定位。
-    var targetNode;
-    if(infiniscroll == 0){
-        targetNode = document.querySelector('#search_results');
+
+//主页. xxx0是服务于global_hover_content的，xxx1是服务于类搜索结果的部分的
+if(window.location=='https://store.steampowered.com/'){
+    let targetNode0 = document.querySelector('body');
+    let targetNode1 = document.querySelector('#last_tab');
+    let config = {
+        subtree: true,
+        attributes: true,
+        childList: true,
+        characterData: true
+    };
+    let callback0 = mutations => {
+        mutations.forEach(mutation => {
+            try{
+                let global_hover_content = document.getElementById('global_hover_content');
+                let children = global_hover_content.children;
+                for(let i=0; i<children.length;i++){
+                    let child = children[i];
+                    let data = {Id: child.id.slice(10)};
+                    if(!child.getAttribute("dinged")){
+                        child.setAttribute("dinged","dinged");
+                        GM_xmlhttpRequest ( {
+                            method:     "POST",
+                            url:        "https://ruku.ga/CheckId",
+                            data:       JSON.stringify(data),
+                            timeout:    20000,
+                            responseType:"json",
+                            ontimeout:  function (){
+                                console.log ("post request time out");
+                            },
+                            onload:     function (response) {
+                                console.log ("got response");
+                                if (response.response.Data.Id == "0"){
+                                    child.children[1].innerHTML = "<span style='color:red;'>（未收录）</span>"+child.children[1].innerHTML;
+                                }
+                                else{
+                                    child.children[1].innerHTML = "<span style='color:green;'>（已收录）</span>"+child.children[1].innerHTML;
+                                }
+                            }
+                        } );
+                    }
+                }
+            }
+            catch(e){
+                //exception handle;
+            }
+        })
     }
-    else if(infiniscroll == 1){
-        targetNode = document.querySelector('#search_results_loading');
+
+    let callback1 = mutations => {
+        let tags= targetNode1.getAttribute("value");
+        let display = document.querySelector('#'+tags);//the box for searching result. each child in it is an <a>.
+        let children = display.children;
+        for(let i=1; i<children.length; i++){
+            let child = children[i];
+            if(child.href.split('/')[3]=='app'){
+                let data = {Id: child.href.split('/')[4]};
+                let title = child.children[2].children[0];
+                if(!title.getAttribute("dinged")){
+                    title.setAttribute("dinged","dinged");
+                    GM_xmlhttpRequest ( {
+                        method:     "POST",
+                        url:        "https://ruku.ga/CheckId",
+                        data:       JSON.stringify(data),
+                        timeout:    20000,
+                        responseType:"json",
+                        ontimeout:  function (){
+                            console.log ("post request time out");
+                        },
+                        onload:     function (response) {
+                            console.log ("got response");
+                            if (response.response.Data.Id == "0"){
+                                title.innerHTML = "<span style='color:red;'>（未收录）</span>"+title.innerHTML;
+                            }
+                            else{
+                                title.innerHTML = "<span style='color:green;'>（已收录）</span>"+title.innerHTML;
+                            }
+                        }
+                    } );
+                }
+            }
+            else if(child.href.split('/')[3]=='bundle'){
+                let title = child.children[2].children[0];
+                console.log(title);
+                if(!title.getAttribute("dinged")){
+                    title.setAttribute("dinged","dinged");
+                    title.innerHTML = "<span style='color:orange;'>（合集）</span>" +title.innerHTML;
+                }
+            }
+        }
     }
-    else{
-        console.log("'infiniscroll' part doesn't work properly.")
-    }
-    var config = {
+
+    const observer0 = new MutationObserver(callback0);
+    const observer1 = new MutationObserver(callback1);
+    observer0.observe(targetNode0, config);
+    observer1.observe(targetNode1, config);
+}
+
+//搜索页面
+else if(window.location.pathname.split('/')[1]=='search'){
+    let targetNode = document.querySelector('#search_results');
+    let config = {
+        subtree: true,
         attributes: true,
         childList: true,
         characterData: true
     };
 
-    var callback = mutations => {
+    let callback = mutations => {
         mutations.forEach(mutation => {
             let searching_result = document.querySelector('#search_resultsRows');//the box for searching result. each child in it is an <a>.
             let children = searching_result.children;
@@ -180,7 +267,6 @@ if(window.location.pathname.split('/')[1]=='search'){
                     }
                 }
                 else if(child.href.split('/')[3]=='bundle'){
-                    let data = {Id: child.href.split('/')[4]};
                     let title = child.children[1].children[0].children[0];
                     if(!title.getAttribute("dinged")){
                         title.setAttribute("dinged","dinged");
