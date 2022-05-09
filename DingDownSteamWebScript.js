@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         叮当公共库收录情况（测试）
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Julius
 // @match        https://store.steampowered.com/app/*
