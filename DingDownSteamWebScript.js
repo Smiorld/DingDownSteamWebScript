@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         叮当公共库收录情况（测试）
 // @namespace    http://tampermonkey.net/
-// @version      0.7
+// @version      0.8
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Julius
 // @match        https://store.steampowered.com/*
@@ -24,6 +24,7 @@ window.addEventListener("load",function(){
                 let data = {Id: child.href.split('/')[4]};
                 let title = child.children[2].children[0];
                 if(!title.getAttribute("dinged")){
+                    title.setAttribute("dinged","dinged");
                     GM_xmlhttpRequest ( {
                         method:     "POST",
                         url:        "https://ruku.ga/CheckId",
@@ -44,7 +45,6 @@ window.addEventListener("load",function(){
                         }
                     } );
                 }
-                title.setAttribute("dinged","dinged");
             }
         }
     }
@@ -53,6 +53,7 @@ window.addEventListener("load",function(){
         let data = {Id: window.location.pathname.split('/')[2]};
         let title = document.getElementById("appHubAppName");
         if(!title.getAttribute("dinged")){
+            title.setAttribute("dinged","dinged");
             GM_xmlhttpRequest ( {
                 method:     "POST",
                 url:        "https://ruku.ga/CheckId",
@@ -65,21 +66,20 @@ window.addEventListener("load",function(){
                 onload:     function (response) {
                     console.log ("got response");
                     if (response.response.Data.Id == "0"){
-                        title.innerHTML = "<span style='color:red;'>（未收录）</span>"+title.innerHTML;
+                        title.innerHTML += " ----- 公共库未收录"
                     }
                     else{
-                        title.innerHTML = "<span style='color:green;'>（已收录）</span>"+title.innerHTML;
+                        title.innerHTML += " <br> 已收录，提交者："+response.response.Data.NickName+"，入库时间："+response.response.Data.Date;
                     }
                 }
             } );
         }
-        title.setAttribute("dinged","dinged");
     }
 
     else if(window.location.pathname.split('/')[1]=='search'){
         let tmp_script = document.querySelector('#responsive_page_template_content').children[0].innerHTML;
         let position = tmp_script.search(/"infiniscroll"/);
-        let infiniscroll = tmp_script[position+15];//为0时没有无限下滚，为1时有。这个决定了整个页面变化的div如何定位。
+        let infiniscroll = tmp_script[position+15];//为0时没有无限下滚，为1时有。这个决定了整个页面变化的div如何定位。经过实测，如果无限下滚，则不需要onload的时候触发一次。
         if(infiniscroll==0){
             let searching_result = document.querySelector('#search_resultsRows');//the box for searching result. each child in it is an <a>.
             let children = searching_result.children;
@@ -90,6 +90,7 @@ window.addEventListener("load",function(){
                     let data = {Id: child.href.split('/')[4]};
                     let title = child.children[1].children[0].children[0];
                     if(!title.getAttribute("dinged")){
+                        title.setAttribute("dinged","dinged");
                         GM_xmlhttpRequest ( {
                             method:     "POST",
                             url:        "https://ruku.ga/CheckId",
@@ -110,7 +111,14 @@ window.addEventListener("load",function(){
                             }
                         } );
                     }
-                    title.setAttribute("dinged","dinged");
+                }
+                else if(child.href.split('/')[3]=='bundle'){
+                    let data = {Id: child.href.split('/')[4]};
+                    let title = child.children[1].children[0].children[0];
+                    if(!title.getAttribute("dinged")){
+                        title.setAttribute("dinged","dinged");
+                        title.innerHTML = "<span style='color:orange;'>（合集）</span>" +title.innerHTML;
+                    }
                 }
             }
         }
@@ -149,6 +157,7 @@ if(window.location.pathname.split('/')[1]=='search'){
                     let data = {Id: child.href.split('/')[4]};
                     let title = child.children[1].children[0].children[0];
                     if(!title.getAttribute("dinged")){
+                        title.setAttribute("dinged","dinged");
                         GM_xmlhttpRequest ( {
                             method:     "POST",
                             url:        "https://ruku.ga/CheckId",
@@ -169,7 +178,14 @@ if(window.location.pathname.split('/')[1]=='search'){
                             }
                         } );
                     }
-                    title.setAttribute("dinged","dinged");
+                }
+                else if(child.href.split('/')[3]=='bundle'){
+                    let data = {Id: child.href.split('/')[4]};
+                    let title = child.children[1].children[0].children[0];
+                    if(!title.getAttribute("dinged")){
+                        title.setAttribute("dinged","dinged");
+                        title.innerHTML = "<span style='color:orange;'>（合集）</span>" +title.innerHTML;
+                    }
                 }
             }
         });
