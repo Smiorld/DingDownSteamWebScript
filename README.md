@@ -13,3 +13,5 @@
 # TODO list: 
 1. Add English language output
 2. Add time zone support (currently the time represented is GMT +8)
+3. Search page full support with infinite scroll
+4. Home page full support
