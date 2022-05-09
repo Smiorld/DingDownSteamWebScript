@@ -14,3 +14,5 @@
 # TODO list: 
 1. Add English language output
 2. Add time zone support (currently the time represented is GMT +8)
+3. https://store.steampowered.com/specials
+4. https://store.steampowered.com/explore/new/
