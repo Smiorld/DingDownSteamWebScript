@@ -4,7 +4,7 @@
 // @namespace    https://github.com/Smiorld
 // @version      0.9.5
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
-// @author       Smiorld
+// @author        Smiorld
 // @match        https://store.steampowered.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=atomicobject.com
 // @grant        GM_xmlhttpRequest
