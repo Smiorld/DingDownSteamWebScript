@@ -2,8 +2,7 @@
 
 这是一个用于检索游戏是否收录于叮当公共库的油猴脚本。
 
-使用方法：在油猴中复制粘贴该脚本，或直接在油猴-查找脚本-搜索用户脚本中检索链接：https://github.com/Smiorld/DingDownSteamWebScript/blob/main/DingDownSteamWebScript.js
-
+使用方法：在油猴中复制粘贴该脚本，或直接在油猴-查找脚本-搜索用户脚本中检索链接：https://github.com/Smiorld/DingDownSteamWebScript/blob/master/DingDownSteamWebScript.js
 # Implemented functionalities
 1. Send post quest to the DingDown api and get correct response.
 2. Display the storing state of a certain game on the title field of the steam detail page.
