@@ -12,7 +12,6 @@
 // @downloadURL  https://github.com/Smiorld/DingDownSteamWebScript/blob/main/DingDownSteamWebScript.js
 // ==/UserScript==
 
-'use strict';
 window.addEventListener("load",function(){
     if(window.location=='https://store.steampowered.com/'){
         let tab_newreleases_content = document.querySelector('#tab_newreleases_content');//the box for searching result. each child in it is an <a>.
