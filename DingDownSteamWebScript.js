@@ -2,10 +2,11 @@
 // @name         叮当公共库收录情况（测试）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      0.9.8
+// @version      0.9.9
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
+// @match        https://steamcommunity.com/profiles/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=atomicobject.com
 // @grant        GM_xmlhttpRequest
 // @connect      ddapi.133233.xyz
@@ -82,8 +83,166 @@ window.addEventListener("load", function () {
                 }
             });
         }
+    }
 
+    else if (window.location.pathname.split('/')[1] == 'wishlist'){
+        let wishlist_ctn = document.querySelector('#wishlist_ctn');
+        let children = wishlist_ctn.children;
+        let appid= [];
+        let childrenLength = children.length;
+        for (let i=0; i<childrenLength; i++){
+            let tmpchild=children[i];
+            if (tmpchild.children[2].children[0].href.split('/')[3] == 'app') {
+                let title = tmpchild.children[2].children[0];
+                if(!title.getAttribute("dingPost") && title.href.split('/')[3] == 'app'){
+                    title.setAttribute("dingPost", "dingPost");
+                    appid.push(tmpchild.getAttribute("id").slice(13));
+                }
+            }
+        }
+        if(appid.length!=0){
+            let data={"Ids":appid.join()};
+            GM_xmlhttpRequest({
+                method: "POST",
+                url: "https://ddapi.133233.xyz/CheckIds",
+                data: JSON.stringify(data),
+                timeout: 20000,
+                responseType: "json",
+                ontimeout: function () {
+                    console.log("post request time out");
+                },
+                onload: function (response) {
+                    console.log("got response for "+response.response.Data.Total+" appid" );
+                    //prefix all titles
+                    for (let i = 0; i < childrenLength;i++ ){
+                        let tmpchild=children[i];
+                        if (tmpchild.children[2].children[0].href.split('/')[3] == 'app') {
+                            let title = tmpchild.children[2].children[0];
+                            let thisid =tmpchild.children[2].children[0].href.split('/')[4];
+                            if( !title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && title.href.split('/')[3] == 'app' && appid.find(a=>a==thisid) ){
+                                if(response.response.Data.AppInfo[thisid]){
+                                    title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
+                                }
+                                else{
+                                    title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
+                                }
+                                appid.splice(appid.indexOf(thisid),1);
+                                title.setAttribute("dingPrefix","dingPrefix");
+                            }
+                        }
+                        else if (tmpchild.children[2].children[0].href.split('/')[3] == 'bundle') {
+                            let title = tmpchild.children[2].children[0];
+                            if (!title.getAttribute("dingPrefix")) {
+                                title.setAttribute("dingPrefix", "dingPrefix");
+                                title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
+                            }
+                        }
+                        else if (tmpchild.children[2].children[0].href.split('/')[3] == 'sub') {
+                            let title = tmpchild.children[2].children[0];
+                            if (!title.getAttribute("dingPrefix")) {
+                                title.setAttribute("dingPrefix", "dingPrefix");
+                                title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
+    }
+    else if (window.location.pathname.split('/')[1] == 'profiles' && window.location.pathname.split('/')[3] == 'games' ){
+        let games_list_rows = document.querySelector('#games_list_rows');
+        let children = games_list_rows.children;
+        let appid= [];
+        let childrenLength = children.length;
+        for (let i=0; i<childrenLength; i++){
+            let tmpchild=children[i];
+            let title = tmpchild.children[1].querySelector('.gameListRowItemTop').children[0].children[0];
+            if(!title.getAttribute("dingPost")){
+                title.setAttribute("dingPost", "dingPost");
+                appid.push(tmpchild.getAttribute('id').slice(5));
+            }
+        }
+        if(appid.length!=0){
+            let data={"Ids":appid.join()};
+            GM_xmlhttpRequest({
+                method: "POST",
+                url: "https://ddapi.133233.xyz/CheckIds",
+                data: JSON.stringify(data),
+                timeout: 20000,
+                responseType: "json",
+                ontimeout: function () {
+                    console.log("post request time out");
+                },
+                onload: function (response) {
+                    console.log("got response for "+response.response.Data.Total+" appid" );
+                    //prefix all titles
+                    for (let i = 0; i < childrenLength;i++ ){
+                        let tmpchild=children[i];
+                        let title = tmpchild.children[1].querySelector('.gameListRowItemTop').children[0].children[0];
+                        let thisid =tmpchild.getAttribute('id').slice(5);
+                        if( !title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && appid.find(a=>a==thisid) ){
+                            if(response.response.Data.AppInfo[thisid]){
+                                title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
+                            }
+                            else{
+                                title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
+                            }
+                            appid.splice(appid.indexOf(thisid),1);
+                            title.setAttribute("dingPrefix","dingPrefix");
+                        }
+                    }
+                }
+            });
+        }
+
+    }
+
+    else if (window.location.pathname.split('/')[1] == 'profiles' && window.location.pathname.split('/')[3] == 'followedgames' ){
+        let games_list_rows = document.querySelector('.games_list_rows');
+        let children = games_list_rows.children;
+        let appid= [];
+        let childrenLength = children.length;
+        for (let i=0; i<childrenLength; i++){
+            let tmpchild=children[i];
+            let title = tmpchild.children[1].children[0].children[0];
+            if(!title.getAttribute("dingPost")){
+                title.setAttribute("dingPost", "dingPost");
+                appid.push(tmpchild.getAttribute('data-appid'));
+            }
+        }
+        if(appid.length!=0){
+            let data={"Ids":appid.join()};
+            GM_xmlhttpRequest({
+                method: "POST",
+                url: "https://ddapi.133233.xyz/CheckIds",
+                data: JSON.stringify(data),
+                timeout: 20000,
+                responseType: "json",
+                ontimeout: function () {
+                    console.log("post request time out");
+                },
+                onload: function (response) {
+                    console.log("got response for "+response.response.Data.Total+" appid" );
+                    //prefix all titles
+                    for (let i = 0; i < childrenLength;i++ ){
+                        let tmpchild=children[i];
+                        let title = tmpchild.children[1].children[0].children[0];
+                        let thisid =tmpchild.getAttribute('data-appid');
+                        if( !title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && appid.find(a=>a==thisid) ){
+                            if(response.response.Data.AppInfo[thisid]){
+                                title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
+                            }
+                            else{
+                                title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
+                            }
+                            appid.splice(appid.indexOf(thisid),1);
+                            title.setAttribute("dingPrefix","dingPrefix");
+                        }
+                    }
+                }
+            });
+        }
 
     }
 
@@ -349,6 +508,87 @@ else if (window.location.pathname.split('/')[1] == 'search') {
     const observer = new MutationObserver(callback);
 
     observer.observe(targetNode, config);
+}
+
+//愿望单
+else if (window.location.pathname.split('/')[1] == 'wishlist') {
+    let targetNode1 = document.querySelector('#filters_container');
+    let config = {
+        subtree: true,
+        attributes: true,
+        childList: true,
+        characterData: true
+    };
+
+    let callback1 = mutations => {
+        let wishlist = document.querySelector('#wishlist_ctn')
+        let children = wishlist.children;
+        //restore all appid
+        let appid= [];
+        let childrenLength = children.length;
+        for (let i=0; i<childrenLength; i++){
+            let tmpchild=children[i];
+            if (tmpchild.children[2].children[0].href.split('/')[3] == 'app') {
+                let title = tmpchild.children[2].children[0];
+                if(!title.getAttribute("dingPost") && title.href.split('/')[3] == 'app'){
+                    title.setAttribute("dingPost", "dingPost");
+                    appid.push(tmpchild.getAttribute("id").slice(13));
+                }
+            }
+        }
+        if(appid.length!=0){
+            let data={"Ids":appid.join()};
+            GM_xmlhttpRequest({
+                method: "POST",
+                url: "https://ddapi.133233.xyz/CheckIds",
+                data: JSON.stringify(data),
+                timeout: 20000,
+                responseType: "json",
+                ontimeout: function () {
+                    console.log("post request time out");
+                },
+                onload: function (response) {
+                    console.log("got response for "+response.response.Data.Total+" appid" );
+                    //prefix all titles
+                    for (let i = 0; i < childrenLength;i++ ){
+                        let tmpchild=children[i];
+                        if (tmpchild.children[2].children[0].href.split('/')[3] == 'app') {
+                            let title = tmpchild.children[2].children[0];
+                            let thisid =tmpchild.children[2].children[0].href.split('/')[4];
+                            if( !title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && title.href.split('/')[3] == 'app' && appid.find(a=>a==thisid) ){
+                                if(response.response.Data.AppInfo[thisid]){
+                                    title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
+                                }
+                                else{
+                                    title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
+                                }
+                                appid.splice(appid.indexOf(thisid),1);
+                                title.setAttribute("dingPrefix","dingPrefix");
+                            }
+                        }
+                        else if (tmpchild.children[2].children[0].href.split('/')[3] == 'bundle') {
+                            let title = tmpchild.children[2].children[0];
+                            if (!title.getAttribute("dingPrefix")) {
+                                title.setAttribute("dingPrefix", "dingPrefix");
+                                title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
+                            }
+                        }
+                        else if (tmpchild.children[2].children[0].href.split('/')[3] == 'sub') {
+                            let title = tmpchild.children[2].children[0];
+                            if (!title.getAttribute("dingPrefix")) {
+                                title.setAttribute("dingPrefix", "dingPrefix");
+                                title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+    }
+
+    const observer1 = new MutationObserver(callback1);
+    observer1.observe(targetNode1, config);
 }
 
 //全局。目前主要是global_hover_content.
