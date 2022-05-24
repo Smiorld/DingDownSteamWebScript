@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（测试）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.2
+// @version      1.0.3
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -609,31 +609,47 @@ let callback0 = mutations => {
             let children = global_hover_content.children;
             for (let i = 0; i < children.length; i++) {
                 let child = children[i];
-                let data = {
-                    Id: child.id.slice(10)
-                };
-                if (!child.getAttribute("dingPost")) {
-                    child.setAttribute("dingPost", "dingPost");
-                    GM_xmlhttpRequest({
-                        method: "POST",
-                        url: "https://ddapi.133233.xyz/CheckId",
-                        data: JSON.stringify(data),
-                        timeout: 20000,
-                        responseType: "json",
-                        ontimeout: function () {
-                            console.log("post request time out");
-                        },
-                        onload: function (response) {
-                            console.log("got response");
-                            if (response.response.Data.Id == "0") {
-                                child.children[1].innerHTML = "<span style='color:red;'>（未收录）</span>" + child.children[1].innerHTML;
+                if(child.id.slice(6,9)=="app"){
+                    let data = {
+                        Id: child.id.slice(10)
+                    };
+                    if (!child.getAttribute("dingPost")) {
+                        child.setAttribute("dingPost", "dingPost");
+                        GM_xmlhttpRequest({
+                            method: "POST",
+                            url: "https://ddapi.133233.xyz/CheckId",
+                            data: JSON.stringify(data),
+                            timeout: 20000,
+                            responseType: "json",
+                            ontimeout: function () {
+                                console.log("post request time out");
+                            },
+                            onload: function (response) {
+                                console.log("got response");
+                                if (response.response.Data.Id == "0") {
+                                    child.children[1].innerHTML = "<span style='color:red;'>（未收录）</span>" + child.children[1].innerHTML;
+                                }
+                                else {
+                                    child.children[1].innerHTML = "<span style='color:green;'>（已收录）</span>" + child.children[1].innerHTML;
+                                }
+                                child.setAttribute("dingPrefix","dingPrefix");
                             }
-                            else {
-                                child.children[1].innerHTML = "<span style='color:green;'>（已收录）</span>" + child.children[1].innerHTML;
-                            }
-                            child.setAttribute("dingPrefix","dingPrefix");
-                        }
-                    });
+                        });
+                    }
+                }
+                else if (child.id.slice(6,12)=="bundle"){
+                    if(!child.getAttribute("dingPost")){
+                        child.setAttribute("dingPost", "dingPost");
+                        child.children[1].innerHTML = "<span style='color:orange;'>（合集）</span>" + child.children[1].innerHTML;
+                        child.setAttribute("dingPrefix","dingPrefix");
+                    }
+                }
+                else if (child.id.slice(6,9)=="sub"){
+                    if(!child.getAttribute("dingPost")){
+                        child.setAttribute("dingPost", "dingPost");
+                        child.children[1].innerHTML = "<span style='color:orange;'>（礼包）</span>" + child.children[1].innerHTML;
+                        child.setAttribute("dingPrefix","dingPrefix");
+                    }
                 }
             }
         }
