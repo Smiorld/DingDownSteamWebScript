@@ -2,11 +2,12 @@
 // @name         叮当公共库收录情况（测试）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.0
+// @version      1.0.1
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
 // @match        https://steamcommunity.com/profiles/*
+// @match        https://steamcommunity.com/id/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=atomicobject.com
 // @grant        GM_xmlhttpRequest
 // @connect      ddapi.133233.xyz
@@ -150,7 +151,7 @@ window.addEventListener("load", function () {
         }
 
     }
-    else if (window.location.pathname.split('/')[1] == 'profiles' && window.location.pathname.split('/')[3] == 'games' ){
+    else if ( (window.location.pathname.split('/')[1] == 'profiles' || window.location.pathname.split('/')[1] == 'id') && window.location.pathname.split('/')[3] == 'games' ){
         let games_list_rows = document.querySelector('#games_list_rows');
         let children = games_list_rows.children;
         let appid= [];
@@ -198,7 +199,7 @@ window.addEventListener("load", function () {
 
     }
 
-    else if (window.location.pathname.split('/')[1] == 'profiles' && window.location.pathname.split('/')[3] == 'followedgames' ){
+    else if ( (window.location.pathname.split('/')[1] == 'profiles' || window.location.pathname.split('/')[1] == 'id') && window.location.pathname.split('/')[3] == 'followedgames' ){
         let games_list_rows = document.querySelector('.games_list_rows');
         let children = games_list_rows.children;
         let appid= [];
