@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（测试）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.1
+// @version      1.0.2
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -93,7 +93,7 @@ window.addEventListener("load", function () {
         let childrenLength = children.length;
         for (let i=0; i<childrenLength; i++){
             let tmpchild=children[i];
-            if (tmpchild.children[2].children[0].href.split('/')[3] == 'app') {
+            if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'app') {
                 let title = tmpchild.children[2].children[0];
                 if(!title.getAttribute("dingPost") && title.href.split('/')[3] == 'app'){
                     title.setAttribute("dingPost", "dingPost");
@@ -117,9 +117,9 @@ window.addEventListener("load", function () {
                     //prefix all titles
                     for (let i = 0; i < childrenLength;i++ ){
                         let tmpchild=children[i];
-                        if (tmpchild.children[2].children[0].href.split('/')[3] == 'app') {
-                            let title = tmpchild.children[2].children[0];
-                            let thisid =tmpchild.children[2].children[0].href.split('/')[4];
+                        if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'app') {
+                            let title = tmpchild.querySelector('.content').children[0];
+                            let thisid =tmpchild.querySelector('.content').children[0].href.split('/')[4];
                             if( !title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && title.href.split('/')[3] == 'app' && appid.find(a=>a==thisid) ){
                                 if(response.response.Data.AppInfo[thisid]){
                                     title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
@@ -131,15 +131,15 @@ window.addEventListener("load", function () {
                                 title.setAttribute("dingPrefix","dingPrefix");
                             }
                         }
-                        else if (tmpchild.children[2].children[0].href.split('/')[3] == 'bundle') {
-                            let title = tmpchild.children[2].children[0];
+                        else if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'bundle') {
+                            let title = tmpchild.querySelector('.content').children[0];
                             if (!title.getAttribute("dingPrefix")) {
                                 title.setAttribute("dingPrefix", "dingPrefix");
                                 title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
                             }
                         }
-                        else if (tmpchild.children[2].children[0].href.split('/')[3] == 'sub') {
-                            let title = tmpchild.children[2].children[0];
+                        else if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'sub') {
+                            let title = tmpchild.querySelector('.content').children[0];
                             if (!title.getAttribute("dingPrefix")) {
                                 title.setAttribute("dingPrefix", "dingPrefix");
                                 title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
@@ -530,8 +530,8 @@ else if (window.location.pathname.split('/')[1] == 'wishlist') {
         let childrenLength = children.length;
         for (let i=0; i<childrenLength; i++){
             let tmpchild=children[i];
-            if (tmpchild.children[2].children[0].href.split('/')[3] == 'app') {
-                let title = tmpchild.children[2].children[0];
+            if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'app') {
+                let title = tmpchild.querySelector('.content').children[0];
                 if(!title.getAttribute("dingPost") && title.href.split('/')[3] == 'app'){
                     title.setAttribute("dingPost", "dingPost");
                     appid.push(tmpchild.getAttribute("id").slice(13));
@@ -554,9 +554,9 @@ else if (window.location.pathname.split('/')[1] == 'wishlist') {
                     //prefix all titles
                     for (let i = 0; i < childrenLength;i++ ){
                         let tmpchild=children[i];
-                        if (tmpchild.children[2].children[0].href.split('/')[3] == 'app') {
-                            let title = tmpchild.children[2].children[0];
-                            let thisid =tmpchild.children[2].children[0].href.split('/')[4];
+                        if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'app') {
+                            let title = tmpchild.querySelector('.content').children[0];
+                            let thisid =tmpchild.querySelector('.content').children[0].href.split('/')[4];
                             if( !title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && title.href.split('/')[3] == 'app' && appid.find(a=>a==thisid) ){
                                 if(response.response.Data.AppInfo[thisid]){
                                     title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
@@ -568,15 +568,15 @@ else if (window.location.pathname.split('/')[1] == 'wishlist') {
                                 title.setAttribute("dingPrefix","dingPrefix");
                             }
                         }
-                        else if (tmpchild.children[2].children[0].href.split('/')[3] == 'bundle') {
-                            let title = tmpchild.children[2].children[0];
+                        else if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'bundle') {
+                            let title = tmpchild.querySelector('.content').children[0];
                             if (!title.getAttribute("dingPrefix")) {
                                 title.setAttribute("dingPrefix", "dingPrefix");
                                 title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
                             }
                         }
-                        else if (tmpchild.children[2].children[0].href.split('/')[3] == 'sub') {
-                            let title = tmpchild.children[2].children[0];
+                        else if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'sub') {
+                            let title = tmpchild.querySelector('.content').children[0];
                             if (!title.getAttribute("dingPrefix")) {
                                 title.setAttribute("dingPrefix", "dingPrefix");
                                 title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
