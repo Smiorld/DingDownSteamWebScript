@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（测试）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      0.9.9
+// @version      1.0.0
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -513,6 +513,7 @@ else if (window.location.pathname.split('/')[1] == 'search') {
 //愿望单
 else if (window.location.pathname.split('/')[1] == 'wishlist') {
     let targetNode1 = document.querySelector('#filters_container');
+    let targetNode2 = document.querySelector('#wishlist_ctn')
     let config = {
         subtree: true,
         attributes: true,
@@ -589,6 +590,7 @@ else if (window.location.pathname.split('/')[1] == 'wishlist') {
 
     const observer1 = new MutationObserver(callback1);
     observer1.observe(targetNode1, config);
+    observer1.observe(targetNode2, config);
 }
 
 //全局。目前主要是global_hover_content.
