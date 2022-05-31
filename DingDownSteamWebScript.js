@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.4
+// @version      1.0.5
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -14,6 +14,7 @@
 // @connect      ddapi.133233.xyz
 // @updateURL    https://github.com/Smiorld/DingDownSteamWebScript/blob/main/DingDownSteamWebScript.js
 // @downloadURL  https://github.com/Smiorld/DingDownSteamWebScript/blob/main/DingDownSteamWebScript.js
+// @require      https://cdn.jsdelivr.net/npm/sweetalert2@11
 // @license MIT
 // ==/UserScript==
 
@@ -75,8 +76,259 @@ function T2Post(url, data, onload) {
     });
 }
 
+function DingDownLoginForm(){
+    Swal.fire({
+        html: '<div class="swal2-html-container" id="swal2-html-container" style="display: block;">叮当登录</div>'+
+            '<input id="swal-input1" class="swal2-input" autocomplete="off" placeholder="用户名...">' +
+            '<input id="swal-input2" class="swal2-input" autocomplete="new-password" placeholder="密码..." type="password">',
+        showCancelButton: true,
+        confirmButtonText: '登录',
+        cancelButtonText: '取消',
+        preConfirm: function () {
+            return new Promise(function (resolve) {
+                // Validate input
+                let username=document.getElementById("swal-input1").value;
+                let password=document.getElementById("swal-input2").value;
+                if (username == '' || password == '') {
+                    swal.showValidationMessage("请输入有效的用户名和密码"); // Show error when validation fails.
+                    swal.enableButtons(); // Enable the confirm button again.
+                } else {
+                    swal.resetValidationMessage(); // Reset the validation message.
+                    resolve([
+                        username,
+                        password
+                    ]);
+                }
+            })
+        },
+        didOpen: function () {
+            document.getElementById("swal-input1").focus();
+        }
+      })
+      .then(function (result) {
+          // If validation fails, the value is undefined. Break out here.
+          if(typeof(result.value)=='undefined'){
+            return false;
+          }
+          else{
+            T2LoginPost(result.value[0],result.value[1]);
+          }
+      });
+}
+
+function DingDownLogout(){
+    Swal.fire({
+        title: '确定要退出叮当吗？',
+        text: "确定要退出叮当账号吗？",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: '退出'
+      }).then((result) => {
+        if (result.value) {
+            setCookie('SessionId','',-1);
+            setCookie('NickName','',-1);
+            window.location.reload();
+        }
+      })
+}
+function getMonth() {
+    return new Date(new Date().getTime()+(parseInt(new Date().getTimezoneOffset()/60) + 8)*3600*1000).getMonth()+1;
+}
+
+//get a hex string.   e.g. digestMessage(text).then(result=>{console.log(result)})
+async function digestMessage(data,sname,message) {
+    const msgUint8 = new TextEncoder().encode(message);                         // encode as (utf-8) Uint8Array
+    const hashBuffer = await crypto.subtle.digest('SHA-1', msgUint8);         // hash the message
+    const hashArray = Array.from(new Uint8Array(hashBuffer));                     // convert buffer to byte array
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
+    data[sname]=hashHex;
+    return hashHex;
+  }
+
+
+
+async function T2LoginPost(username,password){
+    //prepare post data
+    var UserAgent=window.navigator.userAgent;
+    var data = {"Username":username,"Salt":undefined,"Hash":undefined};
+
+    await digestMessage(data,"Salt",''+UserAgent+getMonth());
+    await digestMessage(data,"Hash",''+password+data['Salt']);
+    Swal.fire({
+        title: '登录中...',
+        text: '登陆中...(至多等待20秒)',
+        timer: 20000,
+        icon: 'info',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        allowEnterKey: false,
+        showConfirmButton: false
+    })
+    .then(function () {
+        Swal.fire({
+            title:'登录超时，请检查网络后重试',
+            icon:'error',
+            text:'登录超时，请检查网络后重试',
+            confirmButtonText: '确定'
+        })
+    });
+    T2Post(
+       'https://ddapi.133233.xyz/AjaxLogin',
+        data,
+        function (response) {
+            if (response.response.Data.Status === 0) {
+                //login success
+                console.log(response);
+                setCookie('SessionId',response.response.Data.SessionId,30);
+                setCookie('NickName',response.response.Data.NickName,30);
+                Swal.fire({
+                    title: '登录成功',
+                    text: '登录成功(2s后自动刷新)',
+                    icon: 'success',
+                    confirmButtonText: '确定',
+                    timer: 2000,
+                }).then(function(){window.location.reload();});
+                
+            }
+            else if(response.response.Data.Status === -3){
+                //login failed
+                Swal.fire({
+                    title: '登录失败',
+                    text: '用户名或密码错误',
+                    icon: 'error',
+                    confirmButtonText: '确定'
+                }).then(result=>{DingDownLoginForm();});
+            }
+            else{
+                //other failure
+                Swal.fire({
+                    title: '登录失败',
+                    text: response.response.Data.Message,
+                    icon: 'error',
+                    confirmButtonText: '确定'
+                }).then(result=>{DingDownLoginForm();});
+            }
+        }
+    );
+}
+
+function setCookie(cname, cvalue, exdays) {
+    const d = new Date();
+    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    let expires = "expires=" + d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
+
+if (document.readyState == "complete" || document.readyState == "loaded" || document.readyState == "interactive") {
+    //console.log("Already Loaded");
+} else {
+    document.addEventListener("DOMContentLoaded", function(event) {
+        //console.log("Just Loaded");
+        let head = document.getElementsByTagName("head")[0];
+        let inject_js_link = head.insertAdjacentHTML("beforeend", '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>');
+        let SessionId = getCookie('SessionId');
+        if (SessionId === "") {
+            let cart_status_data = document.querySelector("#cart_status_data");
+            let dingdown_login_a = document.getElementById("dingdown_login_a");
+            if (cart_status_data && !dingdown_login_a) {
+                cart_status_data.insertAdjacentHTML("beforeend",
+                    '<div class="store_header_btn_green store_header_btn" id="dingdown_login">' +
+                    '<div class="store_header_btn_caps store_header_btn_leftcap"></div>' +
+                    '<div class="store_header_btn_caps store_header_btn_rightcap"></div>' +
+                    '<a id="dingdown_login_a" class="store_header_btn_content">' +
+                    '叮当登录' +
+                    '</a>' +
+                    '</div>'
+                );
+            }
+            var dingdown_login = document.getElementById("dingdown_login");
+            if (dingdown_login) {
+                dingdown_login.addEventListener("click", DingDownLoginForm);
+            }
+        }
+        else {
+            let cart_status_data = document.querySelector("#cart_status_data");
+            let dingdown_logout_a = document.getElementById("dingdown_logout_a");
+            if (cart_status_data && !dingdown_logout_a) {
+                cart_status_data.insertAdjacentHTML("beforeend",
+                    '<div class="store_header_btn_green store_header_btn" id="dingdown_logout">' +
+                    '<div class="store_header_btn_caps store_header_btn_leftcap"></div>' +
+                    '<div class="store_header_btn_caps store_header_btn_rightcap"></div>' +
+                    '<a id="dingdown_login_out_a" class="store_header_btn_content">' +
+                    '叮当退出（当前用户：' + getCookie("NickName") + '）' +
+                    '</a>' +
+                    '</div>'
+                );
+            }
+            var dingdown_logout = document.getElementById("dingdown_logout");
+            if (dingdown_logout) {
+                dingdown_logout.addEventListener("click", DingDownLogout);
+            }
+        }
+    });
+}
 
 window.addEventListener("load", function () {
+    //login entry inject 
+    let SessionId = getCookie('SessionId');
+    if (SessionId === "") {
+        let cart_status_data = document.querySelector("#cart_status_data");
+        let dingdown_login_a = document.getElementById("dingdown_login_a");
+        if (cart_status_data && !dingdown_login_a) {
+            cart_status_data.insertAdjacentHTML("beforeend",
+                '<div class="store_header_btn_green store_header_btn" id="dingdown_login">' +
+                '<div class="store_header_btn_caps store_header_btn_leftcap"></div>' +
+                '<div class="store_header_btn_caps store_header_btn_rightcap"></div>' +
+                '<a id="dingdown_login_a" class="store_header_btn_content">' +
+                '叮当登录' +
+                '</a>' +
+                '</div>'
+            );
+        }
+        var dingdown_login = document.getElementById("dingdown_login");
+        if (dingdown_login) {
+            dingdown_login.addEventListener("click", DingDownLoginForm);
+        }
+    }
+    else {
+        let cart_status_data = document.querySelector("#cart_status_data");
+        let dingdown_logout_a = document.getElementById("dingdown_logout_a");
+        if (cart_status_data && !dingdown_logout_a) {
+            cart_status_data.insertAdjacentHTML("beforeend",
+                '<div class="store_header_btn_green store_header_btn" id="dingdown_logout">' +
+                '<div class="store_header_btn_caps store_header_btn_leftcap"></div>' +
+                '<div class="store_header_btn_caps store_header_btn_rightcap"></div>' +
+                '<a id="dingdown_login_out_a" class="store_header_btn_content">' +
+                '叮当退出（当前用户：' + getCookie("NickName") + '）' +
+                '</a>' +
+                '</div>'
+            );
+        }
+        var dingdown_logout = document.getElementById("dingdown_logout");
+        if (dingdown_logout) {
+            dingdown_logout.addEventListener("click", DingDownLogout);
+        }
+    }
+    //page initial post
     if (window.location == 'https://store.steampowered.com/') {
         let tab_newreleases_content = document.querySelector('#tab_newreleases_content'); //the box for searching result. each child in it is an <a>.
         let children = tab_newreleases_content.children;
@@ -278,8 +530,12 @@ window.addEventListener("load", function () {
         }
 
     } else if (window.location.pathname.split('/')[1] == 'app') {
+        //add a button for DingDownload
+        let queueBtnFollow = document.querySelector('#queueBtnFollow');
+        let appid=window.location.pathname.split('/')[2];
+        let DingDownloadBtn = queueBtnFollow.insertAdjacentHTML('beforeend','<div id="dingdown_subscribe" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_blue_hoverfade btn_medium queue_btn_inactive" href="ding://install/'+ appid +'" data-tooltip-text="使用叮当订阅此游戏"><span style="color:orange;font-weight: bold;">叮当订阅</span></a></div>');
         let data = {
-            Id: window.location.pathname.split('/')[2]
+            Id: appid
         };
         let title = document.getElementById("appHubAppName");
         if (!title.getAttribute("dingPost")) {
