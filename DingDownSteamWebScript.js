@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.5
+// @version      1.0.6
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -12,9 +12,9 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_info
 // @connect      ddapi.133233.xyz
-// @updateURL    https://github.com/Smiorld/DingDownSteamWebScript/blob/main/DingDownSteamWebScript.js
-// @downloadURL  https://github.com/Smiorld/DingDownSteamWebScript/blob/main/DingDownSteamWebScript.js
-// @require      https://cdn.jsdelivr.net/npm/sweetalert2@11
+// @updateURL    https://ddapi.133233.xyz/gh/Smiorld/DingDownSteamWebScript/DingDownSteamWebScript.js
+// @downloadURL  https://ddapi.133233.xyz/gh/Smiorld/DingDownSteamWebScript/DingDownSteamWebScript.js
+// @require      https://ddapi.133233.xyz/npm/sweetalert2@11.4.11/dist/sweetalert2.all.min.js
 // @license MIT
 // ==/UserScript==
 
@@ -30,7 +30,7 @@ function DD_xmlhttpRequest(option) {
     xhr.onerror = option.onerror;
     xhr.ontimeout = option.ontimeout;
     xhr.open(option.method, option.url, true);
-    xhr.setRequestHeader('requestType', 'xhr');
+    xhr.setRequestHeader('dd_org', window.location.origin);
     if (option.headers) {
         Object.keys(option.headers).forEach(function (key) {
             try {
@@ -42,7 +42,7 @@ function DD_xmlhttpRequest(option) {
         xhr.setRequestHeader('Content-Type', 'application/json; charset=' + document.charset)
     }
     xhr.onload = (e) => {
-        console.log(e)
+        //console.log(e)
         if (option.onload && typeof option.onload === 'function') {
             option.onload(e.target)
         }
@@ -79,9 +79,10 @@ function T2Post(url, data, onload) {
 function DingDownLoginForm(){
     Swal.fire({
         html: '<div class="swal2-html-container" id="swal2-html-container" style="display: block;">叮当登录</div>'+
-            '<input id="swal-input1" class="swal2-input" autocomplete="off" placeholder="用户名...">' +
-            '<input id="swal-input2" class="swal2-input" autocomplete="new-password" placeholder="密码..." type="password">',
+            '<input id="swal-input1" class="swal2-input" autocomplete="off" placeholder="叮当账号..." maxlength="16">' +
+            '<input id="swal-input2" class="swal2-input" autocomplete="new-password" readonly onfocus="this.removeAttribute(\'readonly\');this.setAttribute(\'type\',\'password\');" onblur="this.readOnly=true;" placeholder="叮当密码..." type="text" maxlength="32">',
         showCancelButton: true,
+        showCloseButton: true,
         confirmButtonText: '登录',
         cancelButtonText: '取消',
         preConfirm: function () {
@@ -89,7 +90,7 @@ function DingDownLoginForm(){
                 // Validate input
                 let username=document.getElementById("swal-input1").value;
                 let password=document.getElementById("swal-input2").value;
-                if (username == '' || password == '') {
+                if (username == '' || password == '' || username.length >16 || password.length >32) {
                     swal.showValidationMessage("请输入有效的用户名和密码"); // Show error when validation fails.
                     swal.enableButtons(); // Enable the confirm button again.
                 } else {
@@ -103,6 +104,13 @@ function DingDownLoginForm(){
         },
         didOpen: function () {
             document.getElementById("swal-input1").focus();
+            const node = document.getElementById("swal-input2"); //enter key
+            node.addEventListener("keyup", function(event) {
+                if (event.keyCode === 13 || event.key === "Enter") {
+                    swal.clickConfirm();
+                }
+            });
+
         }
       })
       .then(function (result) {
@@ -118,13 +126,14 @@ function DingDownLoginForm(){
 
 function DingDownLogout(){
     Swal.fire({
-        title: '确定要退出叮当吗？',
-        text: "确定要退出叮当账号吗？",
+        title: '确定要注销账户吗？',
+        text: "确定要注销叮当账户吗？",
         type: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: '退出'
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: '注销',
+        cancelButtonText: '取消'
       }).then((result) => {
         if (result.value) {
             setCookie('SessionId','',-1);
@@ -133,6 +142,7 @@ function DingDownLogout(){
         }
       })
 }
+
 function getMonth() {
     return new Date(new Date().getTime()+(parseInt(new Date().getTimezoneOffset()/60) + 8)*3600*1000).getMonth()+1;
 }
@@ -190,7 +200,7 @@ async function T2LoginPost(username,password){
                     confirmButtonText: '确定',
                     timer: 2000,
                 }).then(function(){window.location.reload();});
-                
+
             }
             else if(response.response.Data.Status === -3){
                 //login failed
@@ -244,7 +254,7 @@ if (document.readyState == "complete" || document.readyState == "loaded" || docu
     document.addEventListener("DOMContentLoaded", function(event) {
         //console.log("Just Loaded");
         let head = document.getElementsByTagName("head")[0];
-        let inject_js_link = head.insertAdjacentHTML("beforeend", '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>');
+        let inject_js_link = head.insertAdjacentHTML("beforeend", '<script src="https://ddapi.133233.xyz/npm/sweetalert2@11.4.11/dist/sweetalert2.all.min.js"></script>');
         let SessionId = getCookie('SessionId');
         if (SessionId === "") {
             let cart_status_data = document.querySelector("#cart_status_data");
@@ -254,7 +264,7 @@ if (document.readyState == "complete" || document.readyState == "loaded" || docu
                     '<div class="store_header_btn_green store_header_btn" id="dingdown_login">' +
                     '<div class="store_header_btn_caps store_header_btn_leftcap"></div>' +
                     '<div class="store_header_btn_caps store_header_btn_rightcap"></div>' +
-                    '<a id="dingdown_login_a" class="store_header_btn_content">' +
+                    '<a id="dingdown_login_a" class="store_header_btn_content" href="javascript:void(0);">' +
                     '叮当登录' +
                     '</a>' +
                     '</div>'
@@ -273,8 +283,8 @@ if (document.readyState == "complete" || document.readyState == "loaded" || docu
                     '<div class="store_header_btn_green store_header_btn" id="dingdown_logout">' +
                     '<div class="store_header_btn_caps store_header_btn_leftcap"></div>' +
                     '<div class="store_header_btn_caps store_header_btn_rightcap"></div>' +
-                    '<a id="dingdown_login_out_a" class="store_header_btn_content">' +
-                    '叮当退出（当前用户：' + getCookie("NickName") + '）' +
+                    '<a id="dingdown_logout_a" class="store_header_btn_content" href="javascript:void(0);">' +
+                    '注销（叮当昵称：' + getCookie("NickName") + '）' +
                     '</a>' +
                     '</div>'
                 );
@@ -288,7 +298,7 @@ if (document.readyState == "complete" || document.readyState == "loaded" || docu
 }
 
 window.addEventListener("load", function () {
-    //login entry inject 
+    //login entry inject
     let SessionId = getCookie('SessionId');
     if (SessionId === "") {
         let cart_status_data = document.querySelector("#cart_status_data");
@@ -298,7 +308,7 @@ window.addEventListener("load", function () {
                 '<div class="store_header_btn_green store_header_btn" id="dingdown_login">' +
                 '<div class="store_header_btn_caps store_header_btn_leftcap"></div>' +
                 '<div class="store_header_btn_caps store_header_btn_rightcap"></div>' +
-                '<a id="dingdown_login_a" class="store_header_btn_content">' +
+                '<a id="dingdown_login_a" class="store_header_btn_content" href="javascript:void(0);">' +
                 '叮当登录' +
                 '</a>' +
                 '</div>'
@@ -317,8 +327,8 @@ window.addEventListener("load", function () {
                 '<div class="store_header_btn_green store_header_btn" id="dingdown_logout">' +
                 '<div class="store_header_btn_caps store_header_btn_leftcap"></div>' +
                 '<div class="store_header_btn_caps store_header_btn_rightcap"></div>' +
-                '<a id="dingdown_login_out_a" class="store_header_btn_content">' +
-                '叮当退出（当前用户：' + getCookie("NickName") + '）' +
+                '<a id="dingdown_login_out_a" class="store_header_btn_content" href="javascript:void(0);">' +
+                '注销（叮当昵称：' + getCookie("NickName") + '）' +
                 '</a>' +
                 '</div>'
             );
@@ -533,7 +543,10 @@ window.addEventListener("load", function () {
         //add a button for DingDownload
         let queueBtnFollow = document.querySelector('#queueBtnFollow');
         let appid=window.location.pathname.split('/')[2];
-        let DingDownloadBtn = queueBtnFollow.insertAdjacentHTML('beforeend','<div id="dingdown_subscribe" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_blue_hoverfade btn_medium queue_btn_inactive" href="ding://install/'+ appid +'" data-tooltip-text="使用叮当订阅此游戏"><span style="color:orange;font-weight: bold;">叮当订阅</span></a></div>');
+        //未登录未空
+        if (queueBtnFollow !== null)
+            queueBtnFollow.insertAdjacentHTML('beforeend','<div id="dingdown_subscribe" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_blue_hoverfade btn_medium queue_btn_inactive" href="ding://install/'+ appid +'" data-tooltip-text="使用叮当订阅此游戏"><span style="color:orange;font-weight: bold;">叮当订阅</span></a></div>');
+
         let data = {
             Id: appid
         };
