@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.11
+// @version      1.0.12
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -419,7 +419,7 @@ window.addEventListener("load", function () {
                         let title = tmpchild.children[2].children[0];
                         let thisid = tmpchild.href.split('/')[4];
                         if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app' && appid.find(a => a == thisid)) {
-                            if (response.response.Data.AppInfo[thisid]) {
+                            if (response.response.Data.AppInfo.find(a=>a==thisid)) {
                                 title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
                             } else {
                                 title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
@@ -479,7 +479,7 @@ window.addEventListener("load", function () {
                             let title = tmpchild.querySelector('.content').children[0];
                             let thisid = tmpchild.querySelector('.content').children[0].href.split('/')[4];
                             if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && title.href.split('/')[3] == 'app' && appid.find(a => a == thisid)) {
-                                if (response.response.Data.AppInfo[thisid]) {
+                                if (response.response.Data.AppInfo.find(a=>a==thisid)) {
                                     title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
                                 } else {
                                     title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
@@ -533,7 +533,7 @@ window.addEventListener("load", function () {
                         let title = tmpchild.children[1].querySelector('.gameListRowItemTop').children[0].children[0];
                         let thisid = tmpchild.getAttribute('id').slice(5);
                         if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && appid.find(a => a == thisid)) {
-                            if (response.response.Data.AppInfo[thisid]) {
+                            if (response.response.Data.AppInfo.find(a=>a==thisid)) {
                                 title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
                             } else {
                                 title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
@@ -574,7 +574,7 @@ window.addEventListener("load", function () {
                         let title = tmpchild.children[1].children[0].children[0];
                         let thisid = tmpchild.getAttribute('data-appid');
                         if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && appid.find(a => a == thisid)) {
-                            if (response.response.Data.AppInfo[thisid]) {
+                            if (response.response.Data.AppInfo.find(a=>a==thisid)) {
                                 title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
                             } else {
                                 title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
@@ -774,7 +774,7 @@ window.addEventListener("load", function () {
                                 let title = tmpchild.children[1].children[0].children[0];
                                 let thisid = tmpchild.href.split('/')[4];
                                 if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app' && appid.find(a => a == thisid)) {
-                                    if (response.response.Data.AppInfo[thisid]) {
+                                    if (response.response.Data.AppInfo.find(a=>a==thisid)) {
                                         title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
                                     } else {
                                         title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
@@ -851,7 +851,7 @@ if (window.location == 'https://store.steampowered.com/') {
                             let title = tmpchild.children[2].children[0];
                             let thisid = tmpchild.href.split('/')[4];
                             if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app' && appid.find(a => a == thisid)) {
-                                if (response.response.Data.AppInfo[thisid]) {
+                                if (response.response.Data.AppInfo.find(a=>a==thisid)) {
                                     title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
                                 } else {
                                     title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
@@ -990,7 +990,7 @@ else if (window.location.pathname.split('/')[1] == 'wishlist') {
                             let title = tmpchild.querySelector('.content').children[0];
                             let thisid = tmpchild.querySelector('.content').children[0].href.split('/')[4];
                             if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && title.href.split('/')[3] == 'app' && appid.find(a => a == thisid)) {
-                                if (response.response.Data.AppInfo[thisid]) {
+                                if (response.response.Data.AppInfo.find(a=>a==thisid)) {
                                     title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
                                 } else {
                                     title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
