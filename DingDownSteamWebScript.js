@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.10
+// @version      1.0.11
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -603,7 +603,11 @@ window.addEventListener("load", function () {
                     if (response.response.Data.Id == "0") {
                         title.innerHTML += " ----- 公共库未收录";
                     } else {
-                        title.innerHTML += " <br> 已收录，提交者：" + response.response.Data.NickName + "，入库时间：" + response.response.Data.Date;
+                        let NickName=response.response.Data.NickName;
+                        if (!NickName || NickName.length === 0 || NickName === ""){
+                            NickName = "系统/匿名";
+                        }
+                        title.innerHTML += " <br> 已收录，提交者：" + NickName + "，入库时间：" + response.response.Data.Date;
                         let DingDownSubscribeBtn = document.getElementById("dingdown_subscribe");
                     }
                     title.setAttribute("dingPrefix", "dingPrefix");
