@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.7
+// @version      1.0.8
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -107,6 +107,11 @@ function DingDownLoginForm(){
             const node = document.getElementById("swal-input2"); //enter key
             node.addEventListener("keyup", function(event) {
                 if (event.keyCode === 13 || event.key === "Enter") {
+                    swal.clickConfirm();
+                }
+            });
+            node.addEventListener("keydown", function(event) {
+                if (event.keyCode === 9 || event.key === "Tab") {
                     swal.clickConfirm();
                 }
             });
