@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.14
+// @version      1.0.15
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -387,6 +387,19 @@ if (document.readyState == "complete" || document.readyState == "loaded" || docu
         }
     });
 }
+
+//is script running on a third-party web browser or steam client?
+function isWebBrowser(){
+    let logo=document.querySelector("#logo_holder");
+    if(logo){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+
 
 window.addEventListener("load", function () {
     //login entry inject 
@@ -780,7 +793,15 @@ window.addEventListener("load", function () {
                                         else if (response.response.Data.Status === -20 || response.response.Data.Status === -30 || response.response.Data.Status === -100) {
                                             //-20 the user is the sharer. -30 the user has subscribed. -100 the game is free or recorded by anonymous users. All means the user do not need to pay credit for this game.
                                             queueBtnFollow.insertAdjacentHTML('beforeend', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_blue_hoverfade btn_medium queue_btn_inactive"  data-tooltip-text="使用叮当下载此游戏"><span style="color:orange;font-weight: bold;">叮当下载</span></a></div>');
-                                            //TODO add event lisentener to this button
+                                            const dingdown_download = document.getElementById("dingdown_download");
+                                            dingdown_download.addEventListener("click", function () {
+                                                if (isWebBrowser()) {
+                                                    window.open("dingdown://install/" + appid);
+                                                }
+                                                else {
+                                                    window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid);
+                                                }
+                                            });
                                         }
                                         else if (response.response.Data.Status === -2) {
                                             //if not logged in
@@ -812,7 +833,15 @@ window.addEventListener("load", function () {
                             else if(CheckIdResponse.sharer===getCookie("NickName") || freeGameBtn || CheckIdResponse.sharer==="系统/匿名"){
                                 //user can download this game
                                 queueBtnFollow.insertAdjacentHTML('beforeend', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_blue_hoverfade btn_medium queue_btn_inactive"  data-tooltip-text="使用叮当下载此游戏"><span style="color:orange;font-weight: bold;">叮当下载</span></a></div>');
-                                //TODO add event lisentener to this button
+                                const dingdown_download = document.getElementById("dingdown_download");
+                                dingdown_download.addEventListener("click", function () {
+                                    if (isWebBrowser()) {
+                                        window.open("dingdown://install/" + appid);
+                                    }
+                                    else {
+                                        window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid);
+                                    }
+                                });
                             }
                         }
 
