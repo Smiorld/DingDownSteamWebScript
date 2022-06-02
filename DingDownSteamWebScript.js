@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.13
+// @version      1.0.12
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -76,12 +76,11 @@ function T2Post(url, data, onload) {
     });
 }
 
-function DingDownLoginForm(callback,username,password){
-    //如果网络问题重试,则无需再次输入账号密码. @Ding
+function DingDownLoginForm(){
     Swal.fire({
         html: '<div class="swal2-html-container" id="swal2-html-container" style="display: block;">叮当登录</div>'+
-            '<input id="swal-input1" class="swal2-input" autocomplete="off" placeholder="叮当账号..." maxlength="16" value="'+ (typeof username !== 'undefined' ? username : '') +'">' +
-            '<input id="swal-input2" class="swal2-input" autocomplete="new-password" readonly onfocus="this.removeAttribute(\'readonly\');this.setAttribute(\'type\',\'password\');" onblur="this.readOnly=true;" placeholder="叮当密码..." maxlength="32" value="'+ (typeof password !== 'undefined' ? password+' "type="password"' : '" type="text"') +'>',
+            '<input id="swal-input1" class="swal2-input" autocomplete="off" placeholder="叮当账号..." maxlength="16">' +
+            '<input id="swal-input2" class="swal2-input" autocomplete="new-password" readonly onfocus="this.removeAttribute(\'readonly\');this.setAttribute(\'type\',\'password\');" onblur="this.readOnly=true;" placeholder="叮当密码..." type="text" maxlength="32">',
         showCancelButton: true,
         showCloseButton: true,
         confirmButtonText: '登录',
@@ -89,12 +88,8 @@ function DingDownLoginForm(callback,username,password){
         preConfirm: function () {
             return new Promise(function (resolve) {
                 // Validate input
-                if (!username && typeof username === 'undefined'){
-                    username=document.getElementById("swal-input1").value;
-                }
-                if (!password && typeof password === 'undefined'){
-                    password=document.getElementById("swal-input2").value;
-                }
+                let username=document.getElementById("swal-input1").value;
+                let password=document.getElementById("swal-input2").value;
                 if (username == '' || password == '' || username.length >16 || password.length >32) {
                     swal.showValidationMessage("请输入有效的用户名和密码"); // Show error when validation fails.
                     swal.enableButtons(); // Enable the confirm button again.
@@ -116,8 +111,7 @@ function DingDownLoginForm(callback,username,password){
                 }
             });
             node.addEventListener("keydown", function(event) {
-                let CkVal  = document.getElementById("swal-input2").value;
-                if (CkVal && CkVal !== "" && (event.keyCode === 9 || event.key === "Tab")) {
+                if (event.keyCode === 9 || event.key === "Tab") {
                     swal.clickConfirm();
                 }
             });
@@ -136,7 +130,6 @@ function DingDownLoginForm(callback,username,password){
 }
 
 function DingDownLogout(){
-    let timerInterval
     Swal.fire({
         title: '确定要注销账户吗？',
         text: "确定要注销叮当账户吗？",
@@ -150,35 +143,13 @@ function DingDownLogout(){
         if (result.value) {
             Swal.fire({
                 title: '退出中...',
-                //text: '退出中...(至多等待10s)',
-                html: '尝试注销中,等待倒计时 <b></b> 毫秒.',
-                icon: 'question',
+                text: '退出中...(至多等待10s)',
+                icon: 'info',
                 timer: 10000,
-                timerProgressBar: true,
                 allowOutsideClick: false,
                 allowEscapeKey: false,
                 allowEnterKey: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                Swal.showLoading()
-                const b = Swal.getHtmlContainer().querySelector('b')
-                timerInterval = setInterval(() => {
-                  b.textContent = Swal.getTimerLeft()
-                }, 100)
-              },
-              willClose: () => {
-                clearInterval(timerInterval);
-              }
-            })
-            .then((result) => {
-                if (result.dismiss === Swal.DismissReason.timer) {
-                    Swal.fire({
-                        title:'注销超时，请检查网络后重试',
-                        icon:'error',
-                        text:'注销超时，请检查网络后重试',
-                        confirmButtonText: '确定'
-                    });
-                }
+                showConfirmButton: false
             });
             T2LogoutPost();
         }
@@ -204,40 +175,26 @@ async function T2LoginPost(username,password){
     //prepare post data
     var UserAgent=window.navigator.userAgent;
     var data = {"Username":username,"Salt":undefined,"Hash":undefined};
+
     await digestMessage(data,"Salt",''+UserAgent+getMonth());
     await digestMessage(data,"Hash",''+password+data['Salt']);
-    //增加倒计时 @Ding
-    let timerInterval
     Swal.fire({
         title: '登录中...',
-        html: '尝试登陆中,等待倒计时 <b></b> 毫秒.',
-        timer: 1111,
-        icon: 'question',
-        timerProgressBar: true,
+        text: '登陆中...(至多等待10秒)',
+        timer: 10000,
+        icon: 'info',
         allowOutsideClick: false,
         allowEscapeKey: false,
         allowEnterKey: false,
-        showConfirmButton: false,
-        didOpen: () => {
-            Swal.showLoading()
-            const b = Swal.getHtmlContainer().querySelector('b')
-            timerInterval = setInterval(() => {
-              b.textContent = Swal.getTimerLeft()
-            }, 100)
-          },
-          willClose: () => {
-            clearInterval(timerInterval);
-          }
+        showConfirmButton: false
     })
-    .then((result) => {
-        if (result.dismiss === Swal.DismissReason.timer) {
-            Swal.fire({
-                title:'登录超时，请检查网络后重试',
-                icon:'error',
-                text:'登录超时，请检查网络后重试',
-                confirmButtonText: '确定'
-            }).then(result=>{DingDownLoginForm(result,username,password);});
-        }
+    .then(function () {
+        Swal.fire({
+            title:'登录超时，请检查网络后重试',
+            icon:'error',
+            text:'登录超时，请检查网络后重试',
+            confirmButtonText: '确定'
+        })
     });
     T2Post(
        'https://ddapi.133233.xyz/AjaxLogin',
