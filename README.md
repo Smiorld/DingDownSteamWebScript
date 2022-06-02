@@ -12,9 +12,12 @@ This is a tampermonkey script for checking whether a game on steam belongs to on
 3. Display all games storing state on searching page.
 4. Search page full support with infinite scroll
 5. Home page full support
+6. User Account System (Login/Logout)
+7. Subscribe game
 
 # TODO list: 
-1. Add English language output
-2. Add time zone support (currently the time represented is GMT +8)
-3. https://store.steampowered.com/specials
-4. https://store.steampowered.com/explore/new/
+1. Download game
+2. Add English language output
+3. Add time zone support (currently the time represented is GMT +8)
+4. https://store.steampowered.com/specials
+5. https://store.steampowered.com/explore/new/

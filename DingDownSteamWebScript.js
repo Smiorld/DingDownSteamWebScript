@@ -659,8 +659,8 @@ window.addEventListener("load", function () {
                 }
             );
         }
-        //自己提交的(判断CheckId返回的昵称?)/免费的/未收录的,不再请求CheckSub
-        //未收录的判断网页内容是否有启动steam,有的话证明可入库.
+        //自己提交的(判断CheckId返回的昵称?)/免费的/未收录的,不再请求CheckSub TODO
+        //未收录的判断网页内容是否有启动steam,有的话证明可入库. TODO
         //add a button for DingDownloadcost_credit
         if (getCookie("SessionId")) {
             //if logged in
