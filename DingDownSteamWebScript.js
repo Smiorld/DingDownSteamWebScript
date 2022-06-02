@@ -803,7 +803,11 @@ window.addEventListener("load", function () {
                             }
                             else if(CheckIdResponse.is_recorded ===false ){
                                 //not recorded, 
-                                //未收录的判断网页内容是否有启动steam,有的话证明可入库. TODO  
+                                //未收录的判断网页内容是否有启动steam,有的话证明可入库.
+                                const game_area_already_owned = document.getElementsByClassName("game_area_already_owned");
+                                if (game_area_already_owned) {
+                                    //add a share button TODO
+                                }
                             }
                             else if(CheckIdResponse.sharer===getCookie("NickName") || freeGameBtn || CheckIdResponse.sharer==="系统/匿名"){
                                 //user can download this game
