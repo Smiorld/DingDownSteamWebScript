@@ -643,142 +643,180 @@ window.addEventListener("load", function () {
                 data,
                 function (response) {
                     console.log("got response");
+                    var CheckIdResponse = {'is_recorded':null,'sharer':null};
                     if (response.response.Data.Id == "0") {
+                        CheckIdResponse = {'is_recorded':false,'sharer':null};
                         title.innerHTML += " ----- 公共库未收录";
                     } else {
                         let NickName=response.response.Data.NickName;
                         if (!NickName || NickName.length === 0 || NickName === ""){
                             NickName = "系统/匿名";
                         }
+                        CheckIdResponse = {'is_recorded':true,'sharer':NickName};
                         title.innerHTML += " <br> 已收录，提交者：" + NickName + "，入库时间：" + response.response.Data.Date;
-                        let DingDownSubscribeBtn = document.getElementById("dingdown_subscribe");
                     }
                     title.setAttribute("dingPrefix", "dingPrefix");
+                    //only if the response is received, then add subscribe/download button.
+
+                    //自己提交的(判断CheckId返回的昵称?)/免费游戏/分享者为“系统/匿名”/未收录的,不再请求CheckSub 
+                    //add a button for DingDownloadcost_credit
+                    if (getCookie("SessionId")) {
+                        //if logged in
+                        console.log(CheckIdResponse);
+                        let queueBtnFollow = document.querySelector('#queueBtnFollow');
+                        let checkSubData = { "SessionId": getCookie("SessionId"), "AppId": appid };
+
+                        if (queueBtnFollow) {
+                            // if this page is an app instead of dlc
+                            const freeGameBtn = document.querySelector('#freeGameBtn');// is this a free game?
+                            if (CheckIdResponse.is_recorded ===true && CheckIdResponse.sharer!==getCookie("NickName") && !freeGameBtn && CheckIdResponse.sharer!=="系统/匿名") {
+                                //only if the game is recorded 
+                                //and the sharer is not the current user 
+                                //and the game is not free.
+                                //and teh sharer is not "系统/匿名"
+                                T2Post(
+                                    "https://ddapi.133233.xyz/AjaxCheckSub",
+                                    checkSubData,
+                                    function (response) {
+                                        if (response.response.Data.Credit) {
+                                            setCookie("Credit", response.response.Data.Credit, 30);
+                                        }
+                                        if (response.response.Data.Status > 0) {
+                                            //if not subscribed
+                                            let cost_credit = response.response.Data.Status;
+                                            queueBtnFollow.insertAdjacentHTML('beforeend', '<div id="dingdown_subscribe" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_blue_hoverfade btn_medium queue_btn_inactive"  data-tooltip-text="使用叮当订阅此游戏"><span style="color:orange;font-weight: bold;">叮当订阅：-' + cost_credit + '分</span></a></div>');
+                                            let dingdown_subscribe = document.getElementById("dingdown_subscribe");
+                                            dingdown_subscribe.addEventListener("click", function () {
+                                                let subData = { "SessionId": getCookie("SessionId"), "AppId": appid };
+                                                Swal.fire({
+                                                    title: '确认订阅？',
+                                                    text: '订阅后将会消耗' + cost_credit + '分，确认订阅吗？',
+                                                    type: 'warning',
+                                                    showCancelButton: true,
+                                                    confirmButtonText: '确认订阅',
+                                                    cancelButtonText: '取消',
+                                                })
+                                                    .then(
+                                                        function (result) {
+                                                            if (result.value) {
+                                                                Swal.fire({
+                                                                    title: '订阅中...',
+                                                                    html: '尝试订阅中,等待倒计时 <b></b> 毫秒.',
+                                                                    icon: 'question',
+                                                                    timer: 10000,
+                                                                    timerProgressBar: true,
+                                                                    allowOutsideClick: false,
+                                                                    allowEscapeKey: false,
+                                                                    allowEnterKey: false,
+                                                                    showConfirmButton: false,
+                                                                    didOpen: () => {
+                                                                    Swal.showLoading()
+                                                                    const b = Swal.getHtmlContainer().querySelector('b')
+                                                                    timerInterval = setInterval(() => {
+                                                                    b.textContent = Swal.getTimerLeft()
+                                                                    }, 100)
+                                                                },
+                                                                willClose: () => {
+                                                                    clearInterval(timerInterval);
+                                                                }
+                                                                })
+                                                                .then((result) => {
+                                                                    if (result.dismiss === Swal.DismissReason.timer) {
+                                                                        Swal.fire({
+                                                                            title:'订阅超时，请检查网络后重试',
+                                                                            icon:'error',
+                                                                            text:'订阅超时，请检查网络后重试',
+                                                                            confirmButtonText: '确定'
+                                                                        });
+                                                                    }
+                                                                });
+                                                                T2Post(
+                                                                    "https://ddapi.133233.xyz/AjaxSubApp",
+                                                                    subData,
+                                                                    function (response) {
+                                                                        if (response.response.Data.Status === 0) {
+                                                                            setCookie("Credit", response.response.Data.Credit, 30);
+                                                                            Swal.fire({
+                                                                                title: '订阅成功',
+                                                                                text: '订阅成功，剩余' + getCookie('Credit') + '分',
+                                                                                type: 'success',
+                                                                                confirmButtonText: '确定',
+
+                                                                            }).then(function () { window.location.reload(); });
+                                                                        }
+                                                                        else if (response.response.Data.Status === -2) {
+                                                                            setCookie("SessionId", "", -1);
+                                                                            setCookie("Credit", "", -1);
+                                                                            setCookie("NickName", "", -1);
+                                                                            Swal.fire({
+                                                                                title: '订阅失败',
+                                                                                text: response.response.Data.Message,
+                                                                                type: 'error',
+                                                                                confirmButtonText: '确定',
+
+                                                                            }).then(function () { window.location.reload(); });
+                                                                        }
+                                                                        else {
+                                                                            Swal.fire({
+                                                                                title: '订阅失败',
+                                                                                text: '订阅失败，' + response.response.Data.Message,
+                                                                                type: 'error',
+                                                                                confirmButtonText: '确定',
+
+                                                                            }).then(function () { window.location.reload(); });
+                                                                        }
+                                                                    }
+                                                                );
+                                                            }
+                                                        }
+                                                    );
+
+                                            });
+                                        }
+                                        else if (response.response.Data.Status === 0 || response.response.Data.Status === -200) {
+                                            //0 this game hasn't been recorded yet, -200 this is not game but dlc
+                                            //do nothing so far
+                                        }
+                                        else if (response.response.Data.Status === -20 || response.response.Data.Status === -30 || response.response.Data.Status === -100) {
+                                            //-20 the user is the sharer. -30 the user has subscribed. -100 the game is free or recorded by anonymous users. All means the user do not need to pay credit for this game.
+                                            queueBtnFollow.insertAdjacentHTML('beforeend', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_blue_hoverfade btn_medium queue_btn_inactive"  data-tooltip-text="使用叮当下载此游戏"><span style="color:orange;font-weight: bold;">叮当下载</span></a></div>');
+                                            //TODO add event lisentener to this button
+                                        }
+                                        else if (response.response.Data.Status === -2) {
+                                            //if not logged in
+                                            setCookie("SessionId", "", -1);
+                                            setCookie("Credit", "", -1);
+                                            setCookie("NickName", "", -1);
+                                            Swal.fire({
+                                                title: '您还没有登录，请先登录',
+                                                text: response.response.Data.Message,
+                                                icon: 'error',
+                                                confirmButtonText: '确定',
+                                                timer: 2000,
+                                            }).then(function () { window.location.reload(); });
+                                        }
+                                        else {
+                                            console.log("error" + response.response.Data.Status + ',' + response.response.Data.Message);
+                                        }
+                                    }
+                                );
+                            }
+                            else if(CheckIdResponse.is_recorded ===false ){
+                                //not recorded, 
+                                //未收录的判断网页内容是否有启动steam,有的话证明可入库. TODO  
+                            }
+                            else if(CheckIdResponse.sharer===getCookie("NickName") || freeGameBtn || CheckIdResponse.sharer==="系统/匿名"){
+                                //user can download this game
+                                queueBtnFollow.insertAdjacentHTML('beforeend', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_blue_hoverfade btn_medium queue_btn_inactive"  data-tooltip-text="使用叮当下载此游戏"><span style="color:orange;font-weight: bold;">叮当下载</span></a></div>');
+                                //TODO add event lisentener to this button
+                            }
+                        }
+
+                    }
 
 
                 }
             );
-        }
-        //自己提交的(判断CheckId返回的昵称?)/免费的/未收录的,不再请求CheckSub TODO
-        //未收录的判断网页内容是否有启动steam,有的话证明可入库. TODO
-        //add a button for DingDownloadcost_credit
-        if (getCookie("SessionId")) {
-            //if logged in
-
-            let queueBtnFollow = document.querySelector('#queueBtnFollow');
-            let checkSubData = { "SessionId": getCookie("SessionId"), "AppId": appid };
-
-            if (queueBtnFollow ) {
-                // if this page is an app instead of dlc
-                T2Post(
-                    "https://ddapi.133233.xyz/AjaxCheckSub",
-                    checkSubData,
-                    function (response) {
-                        if(response.response.Data.Credit){
-                            setCookie("Credit", response.response.Data.Credit, 30);
-                        }
-                        if (response.response.Data.Status > 0 ){
-                            //if not subscribed
-                            let cost_credit = response.response.Data.Status;
-                            queueBtnFollow.insertAdjacentHTML('beforeend', '<div id="dingdown_subscribe" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_blue_hoverfade btn_medium queue_btn_inactive"  data-tooltip-text="使用叮当订阅此游戏"><span style="color:orange;font-weight: bold;">叮当订阅：-' + cost_credit + '分</span></a></div>');
-                            let dingdown_subscribe = document.getElementById("dingdown_subscribe");
-                            dingdown_subscribe.addEventListener("click", function () {
-                                let subData = { "SessionId": getCookie("SessionId"), "AppId": appid };
-                                Swal.fire({
-                                    title: '确认订阅？',
-                                    text: '订阅后将会消耗' + cost_credit + '分，确认订阅吗？',
-                                    type: 'warning',
-                                    showCancelButton: true,
-                                    confirmButtonText: '确认订阅',
-                                    cancelButtonText: '取消',
-                                })
-                                    .then(
-                                        function (result) {
-                                            if (result.value) {
-                                                Swal.fire({
-                                                    title: '订阅中',
-                                                    text: '正在订阅中，请稍后...(至多等待10s)',
-                                                    icon: 'info',
-                                                    timer: 10000,
-                                                    type: 'info',
-                                                    allowOutsideClick: false,
-                                                    allowEscapeKey: false,
-                                                    allowEnterKey: false,
-                                                    showConfirmButton: false
-
-                                                });
-                                                T2Post(
-                                                    "https://ddapi.133233.xyz/AjaxSubApp",
-                                                    subData,
-                                                    function (response) {
-                                                        if (response.response.Data.Status === 0) {
-                                                            setCookie("Credit", response.response.Data.Credit, 30);
-                                                            Swal.fire({
-                                                                title: '订阅成功',
-                                                                text: '订阅成功，剩余' + getCookie('Credit') + '分',
-                                                                type: 'success',
-                                                                confirmButtonText: '确定',
-
-                                                            }).then(function () { window.location.reload(); });
-                                                        }
-                                                        else if (response.response.Data.Status === -2) {
-                                                            setCookie("SessionId", "", -1);
-                                                            setCookie("Credit", "", -1);
-                                                            setCookie("NickName", "", -1);
-                                                            Swal.fire({
-                                                                title: '订阅失败',
-                                                                text: response.response.Data.Message,
-                                                                type: 'error',
-                                                                confirmButtonText: '确定',
-
-                                                            }).then(function () { window.location.reload(); });
-                                                        }
-                                                        else {
-                                                            Swal.fire({
-                                                                title: '订阅失败',
-                                                                text: '订阅失败，' + response.response.Data.Message,
-                                                                type: 'error',
-                                                                confirmButtonText: '确定',
-
-                                                            }).then(function () { window.location.reload(); });
-                                                        }
-                                                    }
-                                                );
-                                            }
-                                        }
-                                    );
-
-                            });
-                        }
-                        else if(response.response.Data.Status === 0 || response.response.Data.Status === -200){
-                            //0 this game hasn't been recorded yet, -200 this is not game but dlc
-                            //do nothing so far
-                        }
-                        else if(response.response.Data.Status === -20 || response.response.Data.Status === -30 || response.response.Data.Status === -100){
-                            //-20 the user is the sharer. -30 the user has subscribed. -100 the game is free or recorded by anonymous users. All means the user do not need to pay credit for this game.
-                            queueBtnFollow.insertAdjacentHTML('beforeend', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_blue_hoverfade btn_medium queue_btn_inactive"  data-tooltip-text="使用叮当下载此游戏"><span style="color:orange;font-weight: bold;">叮当下载</span></a></div>');
-                            //TODO add event lisentener to this button
-                        }
-                        else if (response.response.Data.Status === -2) {
-                            //if not logged in
-                            setCookie("SessionId", "", -1);
-                            setCookie("Credit", "", -1);
-                            setCookie("NickName", "", -1);
-                            Swal.fire({
-                                title: '您还没有登录，请先登录',
-                                text: response.response.Data.Message,
-                                icon: 'error',
-                                confirmButtonText: '确定',
-                                timer: 2000,
-                            }).then(function () { window.location.reload(); });
-                        }
-                        else {
-                            console.log("error"+response.response.Data.Status+','+response.response.Data.Message);
-                        }
-                    }
-                );
-            }
-
         }
 
     } else if (window.location.pathname.split('/')[1] == 'search') {
