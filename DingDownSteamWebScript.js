@@ -211,7 +211,7 @@ async function T2LoginPost(username,password){
     Swal.fire({
         title: '登录中...',
         html: '尝试登陆中,等待倒计时 <b></b> 毫秒.',
-        timer: 1111,
+        timer: 10000,
         icon: 'question',
         timerProgressBar: true,
         allowOutsideClick: false,
@@ -659,6 +659,8 @@ window.addEventListener("load", function () {
                 }
             );
         }
+        //自己提交的(判断CheckId返回的昵称?)/免费的/未收录的,不再请求CheckSub
+        //未收录的判断网页内容是否有启动steam,有的话证明可入库.
         //add a button for DingDownloadcost_credit
         if (getCookie("SessionId")) {
             //if logged in
