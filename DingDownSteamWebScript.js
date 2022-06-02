@@ -796,7 +796,7 @@ window.addEventListener("load", function () {
                                             const dingdown_download = document.getElementById("dingdown_download");
                                             dingdown_download.addEventListener("click", function () {
                                                 if (isWebBrowser()) {
-                                                    window.open("dingdown://install/" + appid);
+                                                    window.open("ding://install/" + appid);
                                                 }
                                                 else {
                                                     window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid);
@@ -836,7 +836,7 @@ window.addEventListener("load", function () {
                                 const dingdown_download = document.getElementById("dingdown_download");
                                 dingdown_download.addEventListener("click", function () {
                                     if (isWebBrowser()) {
-                                        window.open("dingdown://install/" + appid);
+                                        window.open("ding://install/" + appid);
                                     }
                                     else {
                                         window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid);
