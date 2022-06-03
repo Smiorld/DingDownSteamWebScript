@@ -857,70 +857,72 @@ window.addEventListener("load", function () {
                             if (game_area_dlc_bubble) {
                                 game_appid = game_area_dlc_bubble.children[0].children[1].children[0].href.split('/')[4];
                             }
-
+                            //if this dlc is not recorded: do nothing
+                            if(CheckIdResponse.is_recorded===true){
                             //check parent game
-                            T2Post(
-                                "https://ddapi.133233.xyz/AjaxCheckSub",
-                                {"SessionId":getCookie("SessionId"),"AppId": game_appid},
-                                function (response) {
-                                    if (response.response.Data.Credit) {
-                                        setCookie("Credit", response.response.Data.Credit, 30);
-                                    }
-                                    if (response.response.Data.Status > 0) {
-                                        //if not subscribed
-                                        //请先叮当订阅游戏本体
-                                        const ignoreBtn = document.querySelector("#ignoreBtn");
-                                        if (ignoreBtn) {
-                                            ignoreBtn.insertAdjacentHTML("beforebegin",'<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_need_game_subscribed" class="queue_control_button" style="flex-grow: 0;"><a href="http://store.steampowered.com/app/'+game_appid+'" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="请在使用叮当订阅dlc前先订阅游戏本体"><span>请先叮当订阅本体（点击跳转本体）</span></a></div></div>')
+                                T2Post(
+                                    "https://ddapi.133233.xyz/AjaxCheckSub",
+                                    {"SessionId":getCookie("SessionId"),"AppId": game_appid},
+                                    function (response) {
+                                        if (response.response.Data.Credit) {
+                                            setCookie("Credit", response.response.Data.Credit, 30);
+                                        }
+                                        if (response.response.Data.Status > 0) {
+                                            //if not subscribed
+                                            //请先叮当订阅游戏本体
+                                            const ignoreBtn = document.querySelector("#ignoreBtn");
+                                            if (ignoreBtn) {
+                                                ignoreBtn.insertAdjacentHTML("beforebegin",'<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_need_game_subscribed" class="queue_control_button" style="flex-grow: 0;"><a href="http://store.steampowered.com/app/'+game_appid+'" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="请在使用叮当订阅dlc前先订阅游戏本体"><span>请先叮当订阅本体（点击跳转本体）</span></a></div></div>')
+                                            }
+                                        }
+                                        else if (response.response.Data.Status === 0) {
+                                            //0 this game hasn't been recorded yet
+                                            const ignoreBtn = document.querySelector("#ignoreBtn");
+                                            if (ignoreBtn) {
+                                                ignoreBtn.insertAdjacentHTML("beforebegin",'<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_need_game_recorded" class="queue_control_button" style="flex-grow: 0;"><a href="http://store.steampowered.com/app/'+game_appid+'" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="本地未收录，无法订阅本dlc"><span>叮当尚未收录本体（点击跳转本体）</span></a></div></div>')
+                                            }
+                                        }
+                                        else if(response.response.Data.Status === -200){
+                                            //-200 this is a dlc and is recorded.
+                                            //this condition is not needed. no dlc's parent is another dlc.
+                                        }
+                                        else if (response.response.Data.Status === -20 || response.response.Data.Status === -30 || response.response.Data.Status === -100) {
+                                            //-20 the user is the sharer. -30 the user has subscribed. -100 the game is free or recorded by anonymous users. All means the user do not need to pay credit for this game.
+                                            const ignoreBtn = document.querySelector("#ignoreBtn");
+                                            console.log(ignoreBtn);
+                                            if (ignoreBtn) {
+                                                ignoreBtn.insertAdjacentHTML("beforebegin",'<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a href="javascript:void(0);" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载本dlc"><span>叮当试玩</span></a></div></div>')
+                                                const dingdown_download = document.getElementById("dingdown_download");
+                                                dingdown_download.addEventListener("click", function () {
+                                                    if (isWebBrowser()) {
+                                                        window.open("ding://install/" + appid);
+                                                    }
+                                                    else {
+                                                        window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid);
+                                                    }
+                                                });
+                                            }
+                                
+                                        }
+                                        else if (response.response.Data.Status === -2) {
+                                            //if not logged in
+                                            setCookie("SessionId", "", -1);
+                                            setCookie("Credit", "", -1);
+                                            setCookie("NickName", "", -1);
+                                            Swal.fire({
+                                                title: '您还没有登录，请先登录',
+                                                text: response.response.Data.Message,
+                                                icon: 'error',
+                                                confirmButtonText: '确定',
+                                                timer: 2000,
+                                            }).then(function () { window.location.reload(); });
+                                        }
+                                        else {
+                                            console.log("error" + response.response.Data.Status + ',' + response.response.Data.Message);
                                         }
                                     }
-                                    else if (response.response.Data.Status === 0) {
-                                        //0 this game hasn't been recorded yet
-                                        const ignoreBtn = document.querySelector("#ignoreBtn");
-                                        if (ignoreBtn) {
-                                            ignoreBtn.insertAdjacentHTML("beforebegin",'<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_need_game_recorded" class="queue_control_button" style="flex-grow: 0;"><a href="http://store.steampowered.com/app/'+game_appid+'" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="本地未收录，无法订阅本dlc"><span>叮当尚未收录本体（点击跳转本体）</span></a></div></div>')
-                                        }
-                                    }
-                                    else if(response.response.Data.Status === -200){
-                                        //-200 this is a dlc and is recorded.
-                                        //this condition is not needed. no dlc's parent is another dlc.
-                                    }
-                                    else if (response.response.Data.Status === -20 || response.response.Data.Status === -30 || response.response.Data.Status === -100) {
-                                        //-20 the user is the sharer. -30 the user has subscribed. -100 the game is free or recorded by anonymous users. All means the user do not need to pay credit for this game.
-                                        const ignoreBtn = document.querySelector("#ignoreBtn");
-                                        console.log(ignoreBtn);
-                                        if (ignoreBtn) {
-                                            ignoreBtn.insertAdjacentHTML("beforebegin",'<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a href="javascript:void(0);" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载本dlc"><span>叮当试玩</span></a></div></div>')
-                                            const dingdown_download = document.getElementById("dingdown_download");
-                                            dingdown_download.addEventListener("click", function () {
-                                                if (isWebBrowser()) {
-                                                    window.open("ding://install/" + appid);
-                                                }
-                                                else {
-                                                    window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid);
-                                                }
-                                            });
-                                        }
-                            
-                                    }
-                                    else if (response.response.Data.Status === -2) {
-                                        //if not logged in
-                                        setCookie("SessionId", "", -1);
-                                        setCookie("Credit", "", -1);
-                                        setCookie("NickName", "", -1);
-                                        Swal.fire({
-                                            title: '您还没有登录，请先登录',
-                                            text: response.response.Data.Message,
-                                            icon: 'error',
-                                            confirmButtonText: '确定',
-                                            timer: 2000,
-                                        }).then(function () { window.location.reload(); });
-                                    }
-                                    else {
-                                        console.log("error" + response.response.Data.Status + ',' + response.response.Data.Message);
-                                    }
-                                }
-                            )
+                                )
+                            }
                         }
 
                     }
