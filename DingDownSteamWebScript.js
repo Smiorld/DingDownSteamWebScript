@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.17
+// @version      1.0.18
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -751,7 +751,9 @@ window.addEventListener("load", function () {
                                                                     subData,
                                                                     function (response) {
                                                                         if (response.response.Data.Status === 0) {
-                                                                            setCookie("Credit", response.response.Data.Credit, 30);
+                                                                            if (response.response.Data.Credit !== 2147483647) {
+                                                                                setCookie("Credit", response.response.Data.Credit, 30);                                                                             
+                                                                            }
                                                                             Swal.fire({
                                                                                 title: '订阅成功',
                                                                                 text: '订阅成功，剩余' + getCookie('Credit') + '分',
@@ -759,6 +761,7 @@ window.addEventListener("load", function () {
                                                                                 confirmButtonText: '确定',
 
                                                                             }).then(function () { window.location.reload(); });
+                                                                            
                                                                         }
                                                                         else if (response.response.Data.Status === -2) {
                                                                             setCookie("SessionId", "", -1);
