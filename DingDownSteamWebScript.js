@@ -11,9 +11,9 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_info
 // @connect      ddapi.133233.xyz
-// @updateURL   https://gcore.jsdelivr.net/gh/Smiorld/DingDownSteamWebScript/DingDownSteamWebScript.js
-// @downloadURL https://gcore.jsdelivr.net/gh/Smiorld/DingDownSteamWebScript/DingDownSteamWebScript.js
-// @require     https://gcore.jsdelivr.net/npm/sweetalert2@11.4.33/dist/sweetalert2.all.min.js
+// @updateURL    https://ddapi.133233.xyz/gh/Smiorld/DingDownSteamWebScript/DingDownSteamWebScript.js
+// @downloadURL  https://ddapi.133233.xyz/gh/Smiorld/DingDownSteamWebScript/DingDownSteamWebScript.js
+// @require      https://ddapi.133233.xyz/npm/sweetalert2@11.4.11/dist/sweetalert2.all.min.js
 // @license MIT
 // ==/UserScript==
 
@@ -48,6 +48,14 @@ function DD_xmlhttpRequest(option) {
     };
     xhr.withCredentials = true;
     xhr.send(option.method === 'POST' ? option.data : null)
+}
+
+function b64EncodeUnicode(str) {
+  return btoa(encodeURIComponent(str));
+}
+
+function UnicodeDecodeB64(str) {
+  return decodeURIComponent(atob(str));
 }
 
 function T2_xmlhttpRequest(option) {
@@ -244,9 +252,9 @@ async function T2LoginPost(username,password){
         function (response) {
             if (response.response.Data.Status === 0) {
                 //login success
-                setCookie('SessionId',response.response.Data.SessionId,30);
-                setCookie('NickName',response.response.Data.NickName,30);
-                setCookie("Credit",response.response.Data.Credit,30);
+                setCookie('Ding_SessionId',response.response.Data.SessionId,30);
+                setCookie('Ding_NickName',b64EncodeUnicode(response.response.Data.NickName),30);
+                setCookie('Ding_Credit',response.response.Data.Credit,30);
                 Swal.fire({
                     title: '登录成功',
                     text: '登录成功(2s后自动刷新)',
@@ -279,16 +287,16 @@ async function T2LoginPost(username,password){
 }
 
 function T2LogoutPost(){
-    var data = {"SessionId":getCookie('SessionId')};
+    var data = {"SessionId":getCookie('Ding_SessionId')};
     T2Post(
         'https://ddapi.133233.xyz/AjaxLogOut',
         data,
         function (response) {
             if (response.response.Data.Status === 0) {
                 //logout success
-                setCookie('SessionId','',-1);
-                setCookie('NickName','',-1);
-                setCookie("Credit",'',-1);
+                setCookie('Ding_SessionId','',-1);
+                setCookie('Ding_NickName','',-1);
+                setCookie('Ding_Credit','',-1);
                 Swal.fire({
                     title: '退出成功',
                     text: '退出成功(2s后自动刷新)',
@@ -299,9 +307,9 @@ function T2LogoutPost(){
             }
             else{
                 //other failure
-                setCookie('SessionId','',-1);
-                setCookie('NickName','',-1);
-                setCookie("Credit",'',-1);
+                setCookie('Ding_SessionId','',-1);
+                setCookie('Ding_NickName','',-1);
+                setCookie('Ding_Credit','',-1);
                 Swal.fire({
                     title: '退出失败',
                     text: response.response.Data.Message,
@@ -345,7 +353,7 @@ if (document.readyState == "complete" || document.readyState == "loaded" || docu
         //console.log("Just Loaded");
         let head = document.getElementsByTagName("head")[0];
         head.insertAdjacentHTML("beforeend", '<script src="https://ddapi.133233.xyz/npm/sweetalert2@11.4.11/dist/sweetalert2.all.min.js"></script>');
-        let SessionId = getCookie('SessionId');
+        let SessionId = getCookie('Ding_SessionId');
         if (SessionId === "") {
             let cart_status_data = document.querySelector("#cart_status_data");
             let dingdown_login_a = document.getElementById("dingdown_login_a");
@@ -374,7 +382,7 @@ if (document.readyState == "complete" || document.readyState == "loaded" || docu
                     '<div class="store_header_btn_caps store_header_btn_leftcap"></div>' +
                     '<div class="store_header_btn_caps store_header_btn_rightcap"></div>' +
                     '<a id="dingdown_logout_a" class="store_header_btn_content" href="javascript:void(0);">' +
-                    '注销（叮当昵称：' + getCookie("NickName") + ', 积分：' + getCookie("Credit") + '）' +
+                    '注销（叮当昵称：' + UnicodeDecodeB64(getCookie('Ding_NickName')) + ', 积分：' + getCookie('Ding_Credit') + '）' +
                     '</a>' +
                     '</div>'
                 );
@@ -406,7 +414,7 @@ function addStyle(styleString) {
 
 window.addEventListener("load", function () {
     //login entry inject 
-    let SessionId = getCookie('SessionId');
+    let SessionId = getCookie('Ding_SessionId');
     if (SessionId === "") {
         let cart_status_data = document.querySelector("#cart_status_data");
         let dingdown_login_a = document.getElementById("dingdown_login_a");
@@ -435,7 +443,7 @@ window.addEventListener("load", function () {
                 '<div class="store_header_btn_caps store_header_btn_leftcap"></div>' +
                 '<div class="store_header_btn_caps store_header_btn_rightcap"></div>' +
                 '<a id="dingdown_login_out_a" class="store_header_btn_content" href="javascript:void(0);">' +
-                '注销（叮当昵称：' + getCookie("NickName") + ', 积分：' + getCookie("Credit") + '）' +
+                '注销（叮当昵称：' + UnicodeDecodeB64(getCookie('Ding_NickName')) + ', 积分：' + getCookie('Ding_Credit') + '）' +
                 '</a>' +
                 '</div>'
             );
@@ -685,7 +693,7 @@ window.addEventListener("load", function () {
                         if (queueBtnFollow) {
                             // if this page is an app instead of dlc
                             const freeGameBtn = document.querySelector('#freeGameBtn');// is this a free game?
-                            if (CheckIdResponse.is_recorded ===true && CheckIdResponse.sharer!==getCookie("NickName") && !freeGameBtn && CheckIdResponse.sharer!=="系统/匿名") {
+                            if (CheckIdResponse.is_recorded ===true && CheckIdResponse.sharer!==UnicodeDecodeB64(getCookie('Ding_NickName')) && !freeGameBtn && CheckIdResponse.sharer!=="系统/匿名") {
                                 //only if the game is recorded 
                                 //and the sharer is not the current user 
                                 //and the game is not free.
@@ -695,7 +703,7 @@ window.addEventListener("load", function () {
                                     checkSubData,
                                     function (response) {
                                         if (response.response.Data.Credit) {
-                                            setCookie("Credit", response.response.Data.Credit, 30);
+                                            setCookie('Ding_Credit', response.response.Data.Credit, 30);
                                         }
                                         if (response.response.Data.Status > 0) {
                                             //if not subscribed
@@ -752,11 +760,11 @@ window.addEventListener("load", function () {
                                                                     function (response) {
                                                                         if (response.response.Data.Status === 0) {
                                                                             if (response.response.Data.Credit !== 2147483647) {
-                                                                                setCookie("Credit", response.response.Data.Credit, 30);                                                                             
+                                                                                setCookie('Ding_Credit', response.response.Data.Credit, 30);                                                                             
                                                                             }
                                                                             Swal.fire({
                                                                                 title: '订阅成功',
-                                                                                text: '订阅成功，剩余' + getCookie('Credit') + '分',
+                                                                                text: '订阅成功，剩余' + getCookie('Ding_Credit') + '分',
                                                                                 type: 'success',
                                                                                 confirmButtonText: '确定',
 
@@ -765,8 +773,8 @@ window.addEventListener("load", function () {
                                                                         }
                                                                         else if (response.response.Data.Status === -2) {
                                                                             setCookie("SessionId", "", -1);
-                                                                            setCookie("Credit", "", -1);
-                                                                            setCookie("NickName", "", -1);
+                                                                            setCookie('Ding_Credit', "", -1);
+                                                                            setCookie('Ding_NickName', "", -1);
                                                                             Swal.fire({
                                                                                 title: '订阅失败',
                                                                                 text: response.response.Data.Message,
@@ -816,8 +824,8 @@ window.addEventListener("load", function () {
                                         else if (response.response.Data.Status === -2) {
                                             //if not logged in
                                             setCookie("SessionId", "", -1);
-                                            setCookie("Credit", "", -1);
-                                            setCookie("NickName", "", -1);
+                                            setCookie('Ding_Credit', "", -1);
+                                            setCookie('Ding_NickName', "", -1);
                                             Swal.fire({
                                                 title: '您还没有登录，请先登录',
                                                 text: response.response.Data.Message,
@@ -840,7 +848,7 @@ window.addEventListener("load", function () {
                                     //add a share button TODO
                                 }
                             }
-                            else if(CheckIdResponse.sharer===getCookie("NickName") || freeGameBtn || CheckIdResponse.sharer==="系统/匿名"){
+                            else if(CheckIdResponse.sharer===UnicodeDecodeB64(getCookie('Ding_NickName')) || freeGameBtn || CheckIdResponse.sharer==="系统/匿名"){
                                 //user can download this game
                                 queueBtnFollow.insertAdjacentHTML('beforeend', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载&启动游戏"><span>叮当试玩</span></a></div>');
                                 const dingdown_download = document.getElementById("dingdown_download");
@@ -868,7 +876,7 @@ window.addEventListener("load", function () {
                                     {"SessionId":getCookie("SessionId"),"AppId": game_appid},
                                     function (response) {
                                         if (response.response.Data.Credit) {
-                                            setCookie("Credit", response.response.Data.Credit, 30);
+                                            setCookie('Ding_Credit', response.response.Data.Credit, 30);
                                         }
                                         if (response.response.Data.Status > 0) {
                                             //if not subscribed
@@ -910,8 +918,8 @@ window.addEventListener("load", function () {
                                         else if (response.response.Data.Status === -2) {
                                             //if not logged in
                                             setCookie("SessionId", "", -1);
-                                            setCookie("Credit", "", -1);
-                                            setCookie("NickName", "", -1);
+                                            setCookie('Ding_Credit', "", -1);
+                                            setCookie('Ding_NickName', "", -1);
                                             Swal.fire({
                                                 title: '您还没有登录，请先登录',
                                                 text: response.response.Data.Message,
@@ -1032,7 +1040,7 @@ window.addEventListener("load", function () {
                         let checkSubData = { "SessionId": getCookie("SessionId"), "AppId": appid };
 
                         const freeGameBtn = document.querySelector('#freeGameBtn');// is this a free game?
-                        if (CheckIdResponse.is_recorded === true && CheckIdResponse.sharer !== getCookie("NickName") && !freeGameBtn && CheckIdResponse.sharer !== "系统/匿名") {
+                        if (CheckIdResponse.is_recorded === true && CheckIdResponse.sharer !== UnicodeDecodeB64(getCookie('Ding_NickName')) && !freeGameBtn && CheckIdResponse.sharer !== "系统/匿名") {
                             //if the game is recorded 
                             //and the sharer is not the current user 
                             //and the game is not free.
@@ -1042,7 +1050,7 @@ window.addEventListener("load", function () {
                                 checkSubData,
                                 function (response) {
                                     if (response.response.Data.Credit) {
-                                        setCookie("Credit", response.response.Data.Credit, 30);
+                                        setCookie('Ding_Credit', response.response.Data.Credit, 30);
                                     }
                                     if (response.response.Data.Status > 0) {
                                         //if not subscribed
@@ -1085,8 +1093,8 @@ window.addEventListener("load", function () {
                                     else if (response.response.Data.Status === -2) {
                                         //if not logged in
                                         setCookie("SessionId", "", -1);
-                                        setCookie("Credit", "", -1);
-                                        setCookie("NickName", "", -1);
+                                        setCookie('Ding_Credit', "", -1);
+                                        setCookie('Ding_NickName', "", -1);
                                         Swal.fire({
                                             title: '您还没有登录，请先登录',
                                             text: response.response.Data.Message,
@@ -1105,7 +1113,7 @@ window.addEventListener("load", function () {
                             //not recorded, 
                             //do nothing
                         }
-                        else if (CheckIdResponse.sharer === getCookie("NickName") || freeGameBtn || CheckIdResponse.sharer === "系统/匿名") {
+                        else if (CheckIdResponse.sharer === UnicodeDecodeB64(getCookie('Ding_NickName')) || freeGameBtn || CheckIdResponse.sharer === "系统/匿名") {
                             //user can download this game
                             SubscribeItemBtn.parentElement.insertAdjacentHTML('beforeend',
                                 '<a id="DingDownSubscribeModBtn" style="position: relative;" class="btnv6_lightblue_blue btn_border_2px btn_medium ">' +
