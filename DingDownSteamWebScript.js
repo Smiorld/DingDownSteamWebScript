@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.18
+// @version      1.0.19
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -11,9 +11,9 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_info
 // @connect      ddapi.133233.xyz
-// @updateURL    https://ddapi.133233.xyz/gh/Smiorld/DingDownSteamWebScript/DingDownSteamWebScript.js
-// @downloadURL  https://ddapi.133233.xyz/gh/Smiorld/DingDownSteamWebScript/DingDownSteamWebScript.js
-// @require      https://ddapi.133233.xyz/npm/sweetalert2@11.4.11/dist/sweetalert2.all.min.js
+// @updateURL   https://gcore.jsdelivr.net/gh/Smiorld/DingDownSteamWebScript/DingDownSteamWebScript.js
+// @downloadURL https://gcore.jsdelivr.net/gh/Smiorld/DingDownSteamWebScript/DingDownSteamWebScript.js
+// @require     https://gcore.jsdelivr.net/npm/sweetalert2@11.4.33/dist/sweetalert2.all.min.js
 // @license MIT
 // ==/UserScript==
 
