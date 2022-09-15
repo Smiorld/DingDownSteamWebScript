@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.19
+// @version      1.0.20
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -13,7 +13,7 @@
 // @connect      ddapi.133233.xyz
 // @updateURL    https://ddapi.133233.xyz/gh/Smiorld/DingDownSteamWebScript/DingDownSteamWebScript.js
 // @downloadURL  https://ddapi.133233.xyz/gh/Smiorld/DingDownSteamWebScript/DingDownSteamWebScript.js
-// @require      https://ddapi.133233.xyz/npm/sweetalert2@11.4.11/dist/sweetalert2.all.min.js
+// @require      https://ddapi.133233.xyz/npm/sweetalert2@11.4.33/dist/sweetalert2.all.min.js
 // @license MIT
 // ==/UserScript==
 
@@ -287,7 +287,7 @@ async function T2LoginPost(username,password){
 }
 
 function T2LogoutPost(){
-    var data = {"SessionId":getCookie('Ding_SessionId')};
+    var data = {'SessionId':getCookie('Ding_SessionId')};
     T2Post(
         'https://ddapi.133233.xyz/AjaxLogOut',
         data,
@@ -685,10 +685,10 @@ window.addEventListener("load", function () {
 
                     //自己提交的(判断CheckId返回的昵称?)/免费游戏/分享者为“系统/匿名”/未收录的,不再请求CheckSub 
                     //add a button for DingDownloadcost_credit
-                    if (getCookie("SessionId")) {
+                    if (getCookie('Ding_SessionId')) {
                         //if logged in
                         let queueBtnFollow = document.querySelector('#queueBtnFollow');
-                        let checkSubData = { "SessionId": getCookie("SessionId"), "AppId": appid };
+                        let checkSubData = { 'SessionId': getCookie('Ding_SessionId'), "AppId": appid };
 
                         if (queueBtnFollow) {
                             // if this page is an app instead of dlc
@@ -711,7 +711,7 @@ window.addEventListener("load", function () {
                                             queueBtnFollow.insertAdjacentHTML('beforeend', '<div id="dingdown_subscribe" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当订阅此游戏"><span>叮当订阅：-' + cost_credit + '分</span></a></div>');
                                             let dingdown_subscribe = document.getElementById("dingdown_subscribe");
                                             dingdown_subscribe.addEventListener("click", function () {
-                                                let subData = { "SessionId": getCookie("SessionId"), "AppId": appid };
+                                                let subData = { 'SessionId': getCookie('Ding_SessionId'), "AppId": appid };
                                                 Swal.fire({
                                                     title: '确认订阅？',
                                                     text: '订阅后将会消耗' + cost_credit + '分，确认订阅吗？',
@@ -772,7 +772,7 @@ window.addEventListener("load", function () {
                                                                             
                                                                         }
                                                                         else if (response.response.Data.Status === -2) {
-                                                                            setCookie("SessionId", "", -1);
+                                                                            setCookie('Ding_SessionId', "", -1);
                                                                             setCookie('Ding_Credit', "", -1);
                                                                             setCookie('Ding_NickName', "", -1);
                                                                             Swal.fire({
@@ -823,7 +823,7 @@ window.addEventListener("load", function () {
                                         }
                                         else if (response.response.Data.Status === -2) {
                                             //if not logged in
-                                            setCookie("SessionId", "", -1);
+                                            setCookie('Ding_SessionId', "", -1);
                                             setCookie('Ding_Credit', "", -1);
                                             setCookie('Ding_NickName', "", -1);
                                             Swal.fire({
@@ -873,7 +873,7 @@ window.addEventListener("load", function () {
                             //check parent game
                                 T2Post(
                                     "https://ddapi.133233.xyz/AjaxCheckSub",
-                                    {"SessionId":getCookie("SessionId"),"AppId": game_appid},
+                                    {'SessionId':getCookie('Ding_SessionId'),"AppId": game_appid},
                                     function (response) {
                                         if (response.response.Data.Credit) {
                                             setCookie('Ding_Credit', response.response.Data.Credit, 30);
@@ -917,7 +917,7 @@ window.addEventListener("load", function () {
                                         }
                                         else if (response.response.Data.Status === -2) {
                                             //if not logged in
-                                            setCookie("SessionId", "", -1);
+                                            setCookie('Ding_SessionId', "", -1);
                                             setCookie('Ding_Credit', "", -1);
                                             setCookie('Ding_NickName', "", -1);
                                             Swal.fire({
@@ -1017,7 +1017,7 @@ window.addEventListener("load", function () {
             let appid = document.querySelector('[name="appid"]').value;
 
             //same logic as showing dingdownload button
-            if(getCookie("SessionId")){
+            if(getCookie('Ding_SessionId')){
                 T2Post(
                     "https://ddapi.133233.xyz/CheckId",
                     {"Id" : appid},
@@ -1037,7 +1037,7 @@ window.addEventListener("load", function () {
                         //无需请求的情况下,不再请求CheckSub 
                         //可以叮当下载的前提下，显示叮当订阅按钮，否则显示未订阅游戏信息
                         let queueBtnFollow = document.querySelector('#queueBtnFollow');
-                        let checkSubData = { "SessionId": getCookie("SessionId"), "AppId": appid };
+                        let checkSubData = { 'SessionId': getCookie('Ding_SessionId'), "AppId": appid };
 
                         const freeGameBtn = document.querySelector('#freeGameBtn');// is this a free game?
                         if (CheckIdResponse.is_recorded === true && CheckIdResponse.sharer !== UnicodeDecodeB64(getCookie('Ding_NickName')) && !freeGameBtn && CheckIdResponse.sharer !== "系统/匿名") {
@@ -1092,7 +1092,7 @@ window.addEventListener("load", function () {
                                     }
                                     else if (response.response.Data.Status === -2) {
                                         //if not logged in
-                                        setCookie("SessionId", "", -1);
+                                        setCookie('Ding_SessionId', "", -1);
                                         setCookie('Ding_Credit', "", -1);
                                         setCookie('Ding_NickName', "", -1);
                                         Swal.fire({
