@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.20
+// @version      1.0.21
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -262,7 +262,7 @@ async function T2LoginPost(username,password){
                     confirmButtonText: '确定',
                     timer: 2000,
                 }).then(function(){window.location.reload();});
-                
+
             }
             else if(response.response.Data.Status === -3){
                 //login failed
@@ -413,7 +413,7 @@ function addStyle(styleString) {
 }
 
 window.addEventListener("load", function () {
-    //login entry inject 
+    //login entry inject
     let SessionId = getCookie('Ding_SessionId');
     if (SessionId === "") {
         let cart_status_data = document.querySelector("#cart_status_data");
@@ -683,7 +683,7 @@ window.addEventListener("load", function () {
                     title.setAttribute("dingPrefix", "dingPrefix");
                     //only if the response is received, then add subscribe/download button.
 
-                    //自己提交的(判断CheckId返回的昵称?)/免费游戏/分享者为“系统/匿名”/未收录的,不再请求CheckSub 
+                    //自己提交的(判断CheckId返回的昵称?)/免费游戏/分享者为“系统/匿名”/未收录的,不再请求CheckSub
                     //add a button for DingDownloadcost_credit
                     if (getCookie('Ding_SessionId')) {
                         //if logged in
@@ -694,8 +694,8 @@ window.addEventListener("load", function () {
                             // if this page is an app instead of dlc
                             const freeGameBtn = document.querySelector('#freeGameBtn');// is this a free game?
                             if (CheckIdResponse.is_recorded ===true && CheckIdResponse.sharer!==UnicodeDecodeB64(getCookie('Ding_NickName')) && !freeGameBtn && CheckIdResponse.sharer!=="系统/匿名") {
-                                //only if the game is recorded 
-                                //and the sharer is not the current user 
+                                //only if the game is recorded
+                                //and the sharer is not the current user
                                 //and the game is not free.
                                 //and the sharer is not "系统/匿名"
                                 T2Post(
@@ -760,7 +760,7 @@ window.addEventListener("load", function () {
                                                                     function (response) {
                                                                         if (response.response.Data.Status === 0) {
                                                                             if (response.response.Data.Credit !== 2147483647) {
-                                                                                setCookie('Ding_Credit', response.response.Data.Credit, 30);                                                                             
+                                                                                setCookie('Ding_Credit', response.response.Data.Credit, 30);
                                                                             }
                                                                             Swal.fire({
                                                                                 title: '订阅成功',
@@ -769,7 +769,7 @@ window.addEventListener("load", function () {
                                                                                 confirmButtonText: '确定',
 
                                                                             }).then(function () { window.location.reload(); });
-                                                                            
+
                                                                         }
                                                                         else if (response.response.Data.Status === -2) {
                                                                             setCookie('Ding_SessionId', "", -1);
@@ -841,7 +841,7 @@ window.addEventListener("load", function () {
                                 );
                             }
                             else if(CheckIdResponse.is_recorded ===false ){
-                                //not recorded, 
+                                //not recorded,
                                 //未收录的判断网页内容是否有启动steam,有的话证明可入库.
                                 const game_area_already_owned = document.getElementsByClassName("game_area_already_owned");
                                 if (game_area_already_owned) {
@@ -913,7 +913,7 @@ window.addEventListener("load", function () {
                                                     }
                                                 });
                                             }
-                                
+
                                         }
                                         else if (response.response.Data.Status === -2) {
                                             //if not logged in
@@ -1033,16 +1033,16 @@ window.addEventListener("load", function () {
                             }
                             CheckIdResponse = {'is_recorded':true,'sharer':NickName};
                         }
-    
-                        //无需请求的情况下,不再请求CheckSub 
+
+                        //无需请求的情况下,不再请求CheckSub
                         //可以叮当下载的前提下，显示叮当订阅按钮，否则显示未订阅游戏信息
                         let queueBtnFollow = document.querySelector('#queueBtnFollow');
                         let checkSubData = { 'SessionId': getCookie('Ding_SessionId'), "AppId": appid };
 
                         const freeGameBtn = document.querySelector('#freeGameBtn');// is this a free game?
                         if (CheckIdResponse.is_recorded === true && CheckIdResponse.sharer !== UnicodeDecodeB64(getCookie('Ding_NickName')) && !freeGameBtn && CheckIdResponse.sharer !== "系统/匿名") {
-                            //if the game is recorded 
-                            //and the sharer is not the current user 
+                            //if the game is recorded
+                            //and the sharer is not the current user
                             //and the game is not free.
                             //and the sharer is not "系统/匿名"
                             T2Post(
@@ -1070,7 +1070,7 @@ window.addEventListener("load", function () {
                                         //do nothing so far
                                     }
                                     else if (response.response.Data.Status === -20 || response.response.Data.Status === -30 || response.response.Data.Status === -100) {
-                                        //-20 the user is the sharer. -30 the user has subscribed. -100 the game is free or recorded by anonymous users. 
+                                        //-20 the user is the sharer. -30 the user has subscribed. -100 the game is free or recorded by anonymous users.
                                         //All means the user do not need to pay credit for this game.
                                         SubscribeItemBtn.parentElement.insertAdjacentHTML('beforeend',
                                             '<a id="DingDownSubscribeModBtn" style="position: relative;" class="btnv6_lightblue_blue btn_border_2px btn_medium ">' +
@@ -1110,7 +1110,7 @@ window.addEventListener("load", function () {
                             );
                         }
                         else if (CheckIdResponse.is_recorded === false) {
-                            //not recorded, 
+                            //not recorded,
                             //do nothing
                         }
                         else if (CheckIdResponse.sharer === UnicodeDecodeB64(getCookie('Ding_NickName')) || freeGameBtn || CheckIdResponse.sharer === "系统/匿名") {
@@ -1133,9 +1133,9 @@ window.addEventListener("load", function () {
                                 }
                             });
                         }
-    
-    
-    
+
+
+
                     }
                 );
             } else {
@@ -1154,7 +1154,7 @@ window.addEventListener("load", function () {
                 }
             }
 
-            
+
 
         }
         else{
@@ -1179,11 +1179,21 @@ if (window.location == 'https://store.steampowered.com/') {
     let callback1 = mutations => {
         let tags = targetNode1.getAttribute("value");
         let display = document.querySelector('#' + tags); //the box for searching result. each child in it is an <a>.
-        let children = display.children;
+        // tab_topsellers_content 热销商品标签 is different from others
+        let children;
+        let i;
+        if (tags == "tab_topsellers_content"){
+            children = display.children[2].children;
+            i=0;
+        }
+        else{
+            children = display.children;
+            i=1;
+        }
         //restore all appid
-        let appid = [];
+        let appid=[];
         let childrenLength = children.length;
-        for (let i = 1; i < childrenLength; i++) {
+        for (; i < childrenLength; i++) {
             let tmpchild = children[i];
             if (tmpchild.href.split('/')[3] == 'app') {
                 let title = tmpchild.children[2].children[0];
@@ -1193,6 +1203,9 @@ if (window.location == 'https://store.steampowered.com/') {
                 }
             }
         }
+
+
+
 
         //send post request to server
         if (appid.length != 0) {
