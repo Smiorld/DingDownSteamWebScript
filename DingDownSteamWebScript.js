@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.22
+// @version      1.0.23
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -702,7 +702,7 @@ window.addEventListener("load", function () {
                                     "https://ddapi.133233.xyz/AjaxCheckSub",
                                     checkSubData,
                                     function (response) {
-                                        if (response.response.Data.Credit) {
+                                        if (response.response.Data.Credit && response.response.Data.Credit !== 2147483647) {
                                             setCookie('Ding_Credit', response.response.Data.Credit, 30);
                                         }
                                         if (response.response.Data.Status > 0) {
@@ -759,7 +759,7 @@ window.addEventListener("load", function () {
                                                                     subData,
                                                                     function (response) {
                                                                         if (response.response.Data.Status === 0) {
-                                                                            if (response.response.Data.Credit !== 2147483647) {
+                                                                            if (response.response.Data.Credit && response.response.Data.Credit !== 2147483647) {
                                                                                 setCookie('Ding_Credit', response.response.Data.Credit, 30);
                                                                             }
                                                                             Swal.fire({
@@ -875,7 +875,7 @@ window.addEventListener("load", function () {
                                     "https://ddapi.133233.xyz/AjaxCheckSub",
                                     {'SessionId':getCookie('Ding_SessionId'),"AppId": game_appid},
                                     function (response) {
-                                        if (response.response.Data.Credit) {
+                                        if (response.response.Data.Credit && response.response.Data.Credit !== 2147483647) {
                                             setCookie('Ding_Credit', response.response.Data.Credit, 30);
                                         }
                                         if (response.response.Data.Status > 0) {
@@ -1049,7 +1049,7 @@ window.addEventListener("load", function () {
                                 "https://ddapi.133233.xyz/AjaxCheckSub",
                                 checkSubData,
                                 function (response) {
-                                    if (response.response.Data.Credit) {
+                                    if (response.response.Data.Credit && response.response.Data.Credit !== 2147483647) {
                                         setCookie('Ding_Credit', response.response.Data.Credit, 30);
                                     }
                                     if (response.response.Data.Status > 0) {
