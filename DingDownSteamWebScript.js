@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.29
+// @version      1.0.30
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -1460,6 +1460,8 @@ let targetNode0 = document.querySelector('body');
 let config = {
     subtree: true,
     attributes: true,
+    childList: true,
+    characterData: true,
     attributeFilter: ['style']
 };
 let callback0 = mutations => {
@@ -1589,6 +1591,82 @@ let callback0 = mutations => {
                                         alink.children[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + alink.children[0].innerHTML;
                                         child.setAttribute("dingPrefix", "dingPrefix");
                                     }
+                                }
+                            }
+                        }
+                    }else{
+                        let facetedbrowse_FacetedBrowseItems = document.querySelector("#application_root");
+                        if (facetedbrowse_FacetedBrowseItems) {
+                            let children = facetedbrowse_FacetedBrowseItems.children;
+                            for (let i = 0; i < children.length; i++) {
+                                let child = children[i];
+                                let alink = child.getElementsByTagName('a');
+                                if (alink) {
+                                    for(var k = 0; k < alink.length; k++){
+                                        let klink = alink[k];
+                                        if (klink.getAttribute("dingPrefix"))
+                                            continue;
+                                        let ahref = klink.getAttribute("href").split('/');
+                                        if (ahref.length > 3 && ahref[3] == 'app') {
+                                            let data = {
+                                                Id: ahref[4]
+                                            };
+                                            if (!klink.getAttribute("dingPost")) {
+                                                klink.setAttribute("dingPost", "dingPost");
+                                                T2Post(
+                                                    "https://ddapi.133233.xyz/CheckId",
+                                                    data,
+                                                    function(response) {
+                                                        console.log("got response");
+                                                        let index;
+                                                        if (klink.childElementCount > 2){
+                                                            index = 2;
+                                                        }else if (klink.childElementCount > 1){
+                                                            index = 1;
+                                                        }else{
+                                                            index= 0;
+                                                        }
+
+                                                        if (response.response.Data.Id == "0") {
+                                                            klink.children[index].innerHTML = "<span style='color:red;'>（未收录）</span>" + klink.children[index].innerHTML;
+                                                        } else {
+                                                            klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
+                                                        }
+                                                        klink.setAttribute("dingPrefix", "dingPrefix");
+                                                    }
+                                                );
+                                            }
+                                        } else if (ahref.length > 3 && ahref[3] == "bundle") {
+                                            if (!klink.getAttribute("dingPost")) {
+                                                 let index;
+                                                if (klink.childElementCount > 2){
+                                                    index = 2;
+                                                }else if (klink.childElementCount > 1){
+                                                    index = 1;
+                                                }else{
+                                                    index= 0;
+                                                }
+                                                klink.setAttribute("dingPost", "dingPost");
+                                                klink.children[index].innerHTML = "<span style='color:orange;'>（合集）</span>" + klink.children[index].innerHTML;
+                                                klink.setAttribute("dingPrefix", "dingPrefix");
+                                            }
+                                        } else if (ahref.length > 2 && ahref[3] == "sub") {
+                                            if (!klink.getAttribute("dingPost")) {
+                                                 let index;
+                                                if (klink.childElementCount > 2){
+                                                    index = 2;
+                                                }else if (klink.childElementCount > 1){
+                                                    index = 1;
+                                                }else{
+                                                    index= 0;
+                                                }
+                                                klink.setAttribute("dingPost", "dingPost");
+                                                klink.children[index].innerHTML = "<span style='color:orange;'>（礼包）</span>" + klink.children[index].innerHTML;
+                                                klink.setAttribute("dingPrefix", "dingPrefix");
+                                            }
+                                        }
+                                    }
+                                   
                                 }
                             }
                         }
