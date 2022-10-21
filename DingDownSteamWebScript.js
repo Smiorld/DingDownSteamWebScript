@@ -352,7 +352,7 @@ if (document.readyState == "complete" || document.readyState == "loaded" || docu
     document.addEventListener("DOMContentLoaded", function(event) {
         //console.log("Just Loaded");
         let head = document.getElementsByTagName("head")[0];
-        head.insertAdjacentHTML("beforeend", '<script src="https://ddapi.133233.xyz/npm/sweetalert2@11.4.11/dist/sweetalert2.all.min.js"></script>');
+        head.insertAdjacentHTML("beforeend", '<script src="https://ddapi.133233.xyz/npm/sweetalert2@11.4.38/dist/sweetalert2.all.min.js"></script>');
         let SessionId = getCookie('Ding_SessionId');
         if (SessionId === "") {
             let cart_status_data = document.querySelector("#cart_status_data");
@@ -1169,6 +1169,9 @@ window.addEventListener("load", function () {
 //主页. xxx1是服务于类搜索结果的部分的.
 if (window.location == 'https://store.steampowered.com/') {
     let targetNode1 = document.querySelector('#last_tab');
+    let targetNode2 = document.querySelector('#tab_topsellers_content');
+    let targetNode3 = document.querySelector('#tab_topsellers_content_trigger');
+
     let config = {
         subtree: true,
         attributes: true,
@@ -1176,96 +1179,95 @@ if (window.location == 'https://store.steampowered.com/') {
         characterData: true
     };
 
-    let callback1 = mutations => {
+    var callback1 = mutations => {
         let tags = targetNode1.getAttribute("value");
-        if (strValue && strValue !== ""){
-        let display = document.querySelector('#' + tags.replace(/\$/g, '\\$')); //the box for searching result. each child in it is an <a>. //# syntax doesn't allow for an unescaped
-        // tab_topsellers_content 热销商品标签 is different from others
-        let children;
-        let i;
-        if (tags == "tab_topsellers_content"){
-            children = display.children[2].children;
-            i=0;
-        }
-        else{
-            children = display.children;
-            i=1;
-        }
-        //restore all appid
-        let appid=[];
-        let childrenLength = children.length;
-        for (; i < childrenLength; i++) {
-            let tmpchild = children[i];
-            if (tmpchild.href.split('/')[3] == 'app') {
-                let title = tmpchild.children[2].children[0];
-                if (!title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app') {
-                    title.setAttribute("dingPost", "dingPost");
-                    appid.push(tmpchild.href.split('/')[4]);
+        if (tags && tags !== ""){
+            let display = document.querySelector('#' + tags.replace(/\$/g, '\\$')); //the box for searching result. each child in it is an <a>. //# syntax doesn't allow for an unescaped
+            // tab_topsellers_content 热销商品标签 is different from others
+            let children;
+            let i;
+            if (tags == "tab_topsellers_content"){
+                children = display.children[2].children;
+                i=0;
+            }
+            else{
+                children = display.children;
+                i=1;
+            }
+            //restore all appid
+            let appid=[];
+            let childrenLength = children.length;
+            for (; i < childrenLength; i++) {
+                let tmpchild = children[i];
+                if (tmpchild.href.split('/')[3] == 'app') {
+                    let title = tmpchild.children[2].children[0];
+                    if (!title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app') {
+                        title.setAttribute("dingPost", "dingPost");
+                        appid.push(tmpchild.href.split('/')[4]);
+                    }
                 }
             }
-        }
-        }
-        
-
-
-
-
-        //send post request to server
-        if (appid.length != 0) {
-            let data = {
-                "Ids": appid.join()
-            };
-            T2Post(
-                "https://ddapi.133233.xyz/CheckIds",
-                data,
-                function (response) {
-                    console.log("got response for " + response.response.Data.Total + " appid");
-                    //prefix all titles
-                    let i;
-                    if (tags == "tab_topsellers_content"){
-                        i=0;
-                    }
-                    else{
-                        i=1;
-                    }
-                    for (; i < childrenLength; i++) {
-                        let tmpchild = children[i];
-                        if (tmpchild.href.split('/')[3] == 'app') {
-                            let title = tmpchild.children[2].children[0];
-                            let thisid = tmpchild.href.split('/')[4];
-                            if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app' && appid.find(a => a == thisid)) {
-                                if (response.response.Data.AppInfo.find(a=>a==thisid)) {
-                                    title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
-                                } else {
-                                    title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
+             //send post request to server
+            if (appid.length != 0) {
+                let data = {
+                    "Ids": appid.join()
+                };
+                T2Post(
+                    "https://ddapi.133233.xyz/CheckIds",
+                    data,
+                    function (response) {
+                        console.log("got response for " + response.response.Data.Total + " appid");
+                        //prefix all titles
+                        let i;
+                        if (tags == "tab_topsellers_content"){
+                            i=0;
+                        }
+                        else{
+                            i=1;
+                        }
+                        for (; i < childrenLength; i++) {
+                            let tmpchild = children[i];
+                            if (tmpchild.href.split('/')[3] == 'app') {
+                                let title = tmpchild.children[2].children[0];
+                                let thisid = tmpchild.href.split('/')[4];
+                                if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app' && appid.find(a => a == thisid)) {
+                                    if (response.response.Data.AppInfo.find(a=>a==thisid)) {
+                                        title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
+                                    } else {
+                                        title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
+                                    }
+                                    appid.splice(appid.indexOf(thisid), 1);
+                                    title.setAttribute("dingPrefix", "dingPrefix");
                                 }
-                                appid.splice(appid.indexOf(thisid), 1);
-                                title.setAttribute("dingPrefix", "dingPrefix");
-                            }
-                        } else if (tmpchild.href.split('/')[3] == 'bundle') {
-                            let title = tmpchild.children[2].children[0];
-                            if (!title.getAttribute("dingPrefix")) {
-                                title.setAttribute("dingPrefix", "dingPrefix");
-                                title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
-                            }
-                        } else if (tmpchild.href.split('/')[3] == 'sub') {
-                            let title = tmpchild.children[2].children[0];
-                            if (!title.getAttribute("dingPrefix")) {
-                                title.setAttribute("dingPrefix", "dingPrefix");
-                                title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
+                            } else if (tmpchild.href.split('/')[3] == 'bundle') {
+                                let title = tmpchild.children[2].children[0];
+                                if (!title.getAttribute("dingPrefix")) {
+                                    title.setAttribute("dingPrefix", "dingPrefix");
+                                    title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
+                                }
+                            } else if (tmpchild.href.split('/')[3] == 'sub') {
+                                let title = tmpchild.children[2].children[0];
+                                if (!title.getAttribute("dingPrefix")) {
+                                    title.setAttribute("dingPrefix", "dingPrefix");
+                                    title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
+                                }
                             }
                         }
                     }
-                }
-            );
-        }
+                );
+            }
 
+        }
     }
 
+    var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
     const observer1 = new MutationObserver(callback1);
+    setTimeout(function() {
     observer1.observe(targetNode1, config);
-    let targetNode2 = document.querySelector('#tab_topsellers_content');
     observer1.observe(targetNode2, config);
+    observer1.observe(targetNode3, config);
+    }, 233);
+    
 }
 
 //搜索页面
