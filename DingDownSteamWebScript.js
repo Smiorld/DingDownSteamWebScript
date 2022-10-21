@@ -13,7 +13,7 @@
 // @connect      ddapi.133233.xyz
 // @updateURL    https://ddapi.133233.xyz/gh/Smiorld/DingDownSteamWebScript/DingDownSteamWebScript.js
 // @downloadURL  https://ddapi.133233.xyz/gh/Smiorld/DingDownSteamWebScript/DingDownSteamWebScript.js
-// @require      https://ddapi.133233.xyz/npm/sweetalert2@11.4.33/dist/sweetalert2.all.min.js
+// @require      https://ddapi.133233.xyz/npm/sweetalert2@11.4.38/dist/sweetalert2.all.min.js
 // @license MIT
 // ==/UserScript==
 
