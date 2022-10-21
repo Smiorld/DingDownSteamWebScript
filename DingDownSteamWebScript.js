@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.24
+// @version      1.0.25
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -1177,8 +1177,9 @@ if (window.location == 'https://store.steampowered.com/') {
     };
 
     let callback1 = mutations => {
-        let tags = targetNode1.getAttribute("value").replace(/\$/g, '\\$');//# syntax doesn't allow for an unescaped
-        let display = document.querySelector('#' + tags); //the box for searching result. each child in it is an <a>.
+        let tags = targetNode1.getAttribute("value");
+        if (strValue && strValue !== ""){
+        let display = document.querySelector('#' + tags.replace(/\$/g, '\\$')); //the box for searching result. each child in it is an <a>. //# syntax doesn't allow for an unescaped
         // tab_topsellers_content 热销商品标签 is different from others
         let children;
         let i;
@@ -1203,6 +1204,8 @@ if (window.location == 'https://store.steampowered.com/') {
                 }
             }
         }
+        }
+        
 
 
 
