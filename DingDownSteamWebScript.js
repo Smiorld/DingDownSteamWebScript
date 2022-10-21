@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.25
+// @version      1.0.26
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -345,7 +345,7 @@ function getCookie(cname) {
     return "";
 }
 
-
+var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
 if (document.readyState == "complete" || document.readyState == "loaded" || document.readyState == "interactive") {
     //console.log("Already Loaded");
 } else {
@@ -1258,7 +1258,6 @@ if (window.location == 'https://store.steampowered.com/') {
         }
     }
 
-    var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
     const observer1 = new MutationObserver(callback1);
     observer1.observe(targetNode1, {attributes: true});
     observer1.observe(targetNode2, config);
@@ -1407,11 +1406,11 @@ else if (window.location.pathname.split('/')[1] == 'wishlist') {
 
 //全局。目前主要是global_hover_content.
 let targetNode0 = document.querySelector('body');
+
 let config = {
     subtree: true,
     attributes: true,
-    childList: true,
-    characterData: true
+    attributeFilter: ['style']
 };
 let callback0 = mutations => {
     mutations.forEach(mutation => {
@@ -1459,5 +1458,6 @@ let callback0 = mutations => {
         }
     })
 }
+
 const observer0 = new MutationObserver(callback0);
 observer0.observe(targetNode0, config);
