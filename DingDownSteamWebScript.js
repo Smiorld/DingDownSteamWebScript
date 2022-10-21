@@ -1171,14 +1171,10 @@ if (window.location == 'https://store.steampowered.com/') {
     let targetNode1 = document.querySelector('#last_tab');
     let targetNode2 = document.querySelector('#tab_topsellers_content');
 
-    let config1 = {
-        attributes: true
-    };
-    let config2 = {
+    let config = {
         subtree: true,
         childList: true,
-        characterData: true,
-        attributeFilter: ['style']
+        characterData: true
     };
 
     var callback1 = mutations => {
@@ -1264,8 +1260,8 @@ if (window.location == 'https://store.steampowered.com/') {
 
     var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
     const observer1 = new MutationObserver(callback1);
-    observer1.observe(targetNode1, config1);
-    observer1.observe(targetNode2, config2);
+    observer1.observe(targetNode1, {attributes: true});
+    observer1.observe(targetNode2, config);
     
 }
 
