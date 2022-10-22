@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.35
+// @version      1.0.36
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -1613,12 +1613,153 @@ if (base_url.hostname == 'store.steampowered.com') {
         subtree: true,
         attributes: true,
         childList: true,
-        characterData: true,
-        attributeFilter: ['style']
+        characterData: true
     };
     let callback0 = mutations => {
         mutations.forEach(mutation => {
             try {
+                 //banner
+                let ContentHubMainCarouselCapsule = document.getElementsByClassName("maincap");
+                if (ContentHubMainCarouselCapsule && ContentHubMainCarouselCapsule.length > 0) {
+                    let children = ContentHubMainCarouselCapsule;
+                    for (let i = 0; i < children.length; i++) {
+                        let alink = children[i].getElementsByTagName('a');
+                        if (alink) {
+                            for(var y = 0; y < alink.length; y++){
+                                let klink = alink[y];
+                                let ahref = klink.getAttribute("href").split('/');
+                                if (ahref.length > 3 && ahref[3] == 'app') {
+                                    let data = {
+                                        Id: ahref[4]
+                                    };
+                                    if (!klink.getAttribute("dingPost")) {
+                                        klink.setAttribute("dingPost", "dingPost");
+                                        T2Post(
+                                            "https://ddapi.133233.xyz/CheckId",
+                                            data,
+                                            function(response) {
+                                                console.log("got response");
+                                                let index;
+                                                if (klink.childElementCount > 1){
+                                                    index = 1;
+                                                }else{
+                                                    index= 0;
+                                                }
+
+                                                if (response.response.Data.Id == "0") {
+                                                    klink.children[index].innerHTML = "<span style='color:red;'><b>（未收录）</b></span>" + klink.children[index].innerHTML;
+                                                } else {
+                                                    klink.children[index].innerHTML = "<span style='color:green;'><b>（已收录）</b></span>" + klink.children[index].innerHTML;
+                                                }
+                                                klink.setAttribute("dingPrefix", "dingPrefix");
+                                            }
+                                        );
+                                    }
+                                } else if (ahref.length > 3 && ahref[3] == "bundle") {
+                                    if (!klink.getAttribute("dingPost")) {
+                                        let index;
+                                        if (klink.childElementCount > 1){
+                                            index = 1;
+                                        }else{
+                                            index= 0;
+                                        }
+                                        klink.setAttribute("dingPost", "dingPost");
+                                        klink.children[index].innerHTML = "<span style='color:orange;'><b>（合集）</b></span>" + klink.children[index].innerHTML;
+                                        klink.setAttribute("dingPrefix", "dingPrefix");
+                                    }
+                                } else if (ahref.length > 2 && ahref[3] == "sub") {
+                                    if (!klink.getAttribute("dingPost")) {
+                                        let index;
+                                        if (klink.childElementCount > 1){
+                                            index = 1;
+                                        }else{
+                                            index= 0;
+                                        }
+                                        klink.setAttribute("dingPost", "dingPost");
+                                        klink.children[index].innerHTML = "<span style='color:orange;'><b>（礼包）</b></span>" + klink.children[index].innerHTML;
+                                        klink.setAttribute("dingPrefix", "dingPrefix");
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+                else{
+                    let ContentHubMainCarouselCapsule = document.getElementsByClassName("ContentHubMainCarouselCapsule");
+                    if (ContentHubMainCarouselCapsule && ContentHubMainCarouselCapsule.length > 0) {
+                    let children = ContentHubMainCarouselCapsule;
+                    for (let i = 0; i < children.length; i++) {
+                        let alink = children[i].getElementsByTagName('a');
+                        if (alink) {
+                            for(var z = 0; z < alink.length; z++){
+                                let klink = alink[z];
+                                let ahref = klink.getAttribute("href").split('/');
+                                if (ahref.length > 3 && ahref[3] == 'app') {
+                                    let data = {
+                                        Id: ahref[4]
+                                    };
+                                    if (!klink.getAttribute("dingPost")) {
+                                        klink.setAttribute("dingPost", "dingPost");
+                                        T2Post(
+                                            "https://ddapi.133233.xyz/CheckId",
+                                            data,
+                                            function(response) {
+                                                console.log("got response");
+                                                let index;
+                                                if (klink.childElementCount > 2){
+                                                    index = 2;
+                                                }else if (klink.childElementCount > 1){
+                                                    index = 1;
+                                                }else{
+                                                    index= 0;
+                                                }
+
+                                                if (response.response.Data.Id == "0") {
+                                                    klink.children[index].innerHTML = "<span style='color:red;'>（未收录）</span>" + klink.children[index].innerHTML;
+                                                } else {
+                                                    klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
+                                                }
+                                                klink.setAttribute("dingPrefix", "dingPrefix");
+                                            }
+                                        );
+                                    }
+                                } else if (ahref.length > 3 && ahref[3] == "bundle") {
+                                    if (!klink.getAttribute("dingPost")) {
+                                        let index;
+                                        if (klink.childElementCount > 2){
+                                            index = 2;
+                                        }else if (klink.childElementCount > 1){
+                                            index = 1;
+                                        }else{
+                                            index= 0;
+                                        }
+                                        klink.setAttribute("dingPost", "dingPost");
+                                        klink.children[index].innerHTML = "<span style='color:orange;'>（合集）</span>" + klink.children[index].innerHTML;
+                                        klink.setAttribute("dingPrefix", "dingPrefix");
+                                    }
+                                } else if (ahref.length > 2 && ahref[3] == "sub") {
+                                    if (!klink.getAttribute("dingPost")) {
+                                        let index;
+                                        if (klink.childElementCount > 2){
+                                            index = 2;
+                                        }else if (klink.childElementCount > 1){
+                                            index = 1;
+                                        }else{
+                                            index= 0;
+                                        }
+                                        klink.setAttribute("dingPost", "dingPost");
+                                        klink.children[index].innerHTML = "<span style='color:orange;'>（礼包）</span>" + klink.children[index].innerHTML;
+                                        klink.setAttribute("dingPrefix", "dingPrefix");
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+
+                }
                 let global_hover_content = document.getElementById('global_hover_content');
                 if (global_hover_content) {
                     let children = global_hover_content.children;
