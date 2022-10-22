@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.34
+// @version      1.0.35
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -2178,5 +2178,109 @@ else if (window.location.hostname == "steamdb.info") {
         const observer1 = new MutationObserver(callback1);
         observer1.observe(targetNode1, config);
     }
-    //return;
+    //全局。目前主要是global_hover_content.
+    let targetNode0 = document.querySelector('body');
+    let config = {
+        subtree: true,
+        attributes: true,
+        childList: true,
+        characterData: true,
+        attributeFilter: ['style']
+    };
+    let callback0 = mutations => {
+        mutations.forEach(mutation => {
+            try {
+                let global_hover_content = document.getElementById('js-hover');
+                if (global_hover_content) {
+                    let global_hover_link = global_hover_content.getElementsByClassName('hover_title');
+                    if (global_hover_link && global_hover_link.length > 0) {
+                        let child = global_hover_link[0];
+                        let href_sp = new URL(child.href).pathname.split('/');
+                        if (href_sp[1] == "app") {
+                            let data = {
+                                Id: href_sp[2]
+                            };
+                            if (!child.getAttribute("dingPost")) {
+                                child.setAttribute("dingPost", "dingPost");
+                                T2Post(
+                                    "https://ddapi.133233.xyz/CheckId",
+                                    data,
+                                    function(response) {
+                                        console.log("got response");
+                                        if (response.response.Data.Id == "0") {
+                                            child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\">叮当: <span style='color:red;'><b>未收录</b></span></div>";
+                                        } else {
+                                            child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\">叮当: <span style='color:green;'><b>已收录</b></span></div>";
+                                        }
+                                        child.setAttribute("dingPrefix", "dingPrefix");
+                                    }
+                                );
+                            }
+                        } else if (child.id.slice(6, 12) == "bundle") {
+                            if (!child.getAttribute("dingPost")) {
+                                child.setAttribute("dingPost", "dingPost");
+                                child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\">叮当: <span style='color:orange;'><b>合集</b></span></div>";
+                                child.setAttribute("dingPrefix", "dingPrefix");
+                            }
+                        } else if (child.id.slice(6, 9) == "sub") {
+                            if (!child.getAttribute("dingPost")) {
+                                child.setAttribute("dingPost", "dingPost");
+                                child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\">叮当: <span style='color:orange;'><b>礼包</b></span></div>";
+                                child.setAttribute("dingPrefix", "dingPrefix");
+                            }
+                        }
+                    }
+                } else {
+                    let gamehover_BottomShelfOffScreen_Vseoa = document.querySelector(".gamehover_BottomShelfOffScreen_Vseoa");
+                    if (gamehover_BottomShelfOffScreen_Vseoa) {
+                        let children = gamehover_BottomShelfOffScreen_Vseoa.children;
+                        for (let i = 0; i < children.length; i++) {
+                            let alink = children[i].getElementsByTagName('a')[0];
+                            if (alink) {
+                                let ahref = alink.getAttribute("href").split('/');
+                                if (ahref.length > 3 && ahref[3] == 'app') {
+                                    let data = {
+                                        Id: ahref[4]
+                                    };
+                                    if (!alink.getAttribute("dingPost")) {
+                                        alink.setAttribute("dingPost", "dingPost");
+                                        T2Post(
+                                            "https://ddapi.133233.xyz/CheckId",
+                                            data,
+                                            function(response) {
+                                                console.log("got response");
+                                                if (response.response.Data.Id == "0") {
+                                                    alink.children[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + alink.children[0].innerHTML;
+                                                } else {
+                                                    alink.children[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + alink.children[0].innerHTML;
+                                                }
+                                                alink.setAttribute("dingPrefix", "dingPrefix");
+                                            }
+                                        );
+                                    }
+                                } else if (ahref.length > 3 && ahref[3] == "bundle") {
+                                    if (!alink.getAttribute("dingPost")) {
+                                        alink.setAttribute("dingPost", "dingPost");
+                                        alink.children[0].innerHTML = "<span style='color:orange;'>（合集）</span>" + alink.children[0].innerHTML;
+                                        alink.setAttribute("dingPrefix", "dingPrefix");
+                                    }
+                                } else if (ahref.length > 2 && ahref[3] == "sub") {
+                                    if (!alink.getAttribute("dingPost")) {
+                                        alink.setAttribute("dingPost", "dingPost");
+                                        alink.children[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + alink.children[0].innerHTML;
+                                        alink.setAttribute("dingPrefix", "dingPrefix");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                //exception handle;
+            }
+        })
+    }
+
+    const observer0 = new MutationObserver(callback0);
+    observer0.observe(targetNode0, config);
 }
