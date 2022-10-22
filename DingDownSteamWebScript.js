@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.39
+// @version      1.0.40
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -85,59 +85,59 @@ function T2Post(url, data, onload) {
 function DingDownLoginForm(callback, username, password) {
     //如果网络问题重试,则无需再次输入账号密码. @Ding
     Swal.fire({
-            html: '<div class="swal2-html-container" id="swal2-html-container" style="display: block;">叮当登录</div>' +
-                '<input id="swal-input1" class="swal2-input" autocomplete="off" placeholder="叮当账号..." maxlength="16" value="' + (typeof username !== 'undefined' ? username : '') + '">' +
-                '<input id="swal-input2" class="swal2-input" autocomplete="new-password" readonly onfocus="this.removeAttribute(\'readonly\');this.setAttribute(\'type\',\'password\');" onblur="this.readOnly=true;" placeholder="叮当密码..." maxlength="32" value="' + (typeof password !== 'undefined' ? password + ' "type="password"' : '" type="text"') + '>',
-            showCancelButton: true,
-            showCloseButton: true,
-            confirmButtonText: '登录',
-            cancelButtonText: '取消',
-            preConfirm: function() {
-                return new Promise(function(resolve) {
-                    // Validate input
-                    if (!username && typeof username === 'undefined') {
-                        username = document.getElementById("swal-input1").value;
-                    }
-                    if (!password && typeof password === 'undefined') {
-                        password = document.getElementById("swal-input2").value;
-                    }
-                    if (username == '' || password == '' || username.length > 16 || password.length > 32) {
-                        swal.showValidationMessage("请输入有效的用户名和密码"); // Show error when validation fails.
-                        swal.enableButtons(); // Enable the confirm button again.
-                    } else {
-                        swal.resetValidationMessage(); // Reset the validation message.
-                        resolve([
-                            username,
-                            password
-                        ]);
-                    }
-                })
-            },
-            didOpen: function() {
-                document.getElementById("swal-input1").focus();
-                const node = document.getElementById("swal-input2"); //enter key
-                node.addEventListener("keyup", function(event) {
-                    if (event.keyCode === 13 || event.key === "Enter") {
-                        swal.clickConfirm();
-                    }
-                });
-                node.addEventListener("keydown", function(event) {
-                    let CkVal = document.getElementById("swal-input2").value;
-                    if (CkVal && CkVal !== "" && (event.keyCode === 9 || event.key === "Tab")) {
-                        swal.clickConfirm();
-                    }
-                });
+        html: '<div class="swal2-html-container" id="swal2-html-container" style="display: block;">叮当登录</div>' +
+        '<input id="swal-input1" class="swal2-input" autocomplete="off" placeholder="叮当账号..." maxlength="16" value="' + (typeof username !== 'undefined' ? username : '') + '">' +
+        '<input id="swal-input2" class="swal2-input" autocomplete="new-password" readonly onfocus="this.removeAttribute(\'readonly\');this.setAttribute(\'type\',\'password\');" onblur="this.readOnly=true;" placeholder="叮当密码..." maxlength="32" value="' + (typeof password !== 'undefined' ? password + ' "type="password"' : '" type="text"') + '>',
+        showCancelButton: true,
+        showCloseButton: true,
+        confirmButtonText: '登录',
+        cancelButtonText: '取消',
+        preConfirm: function() {
+            return new Promise(function(resolve) {
+                // Validate input
+                if (!username && typeof username === 'undefined') {
+                    username = document.getElementById("swal-input1").value;
+                }
+                if (!password && typeof password === 'undefined') {
+                    password = document.getElementById("swal-input2").value;
+                }
+                if (username == '' || password == '' || username.length > 16 || password.length > 32) {
+                    swal.showValidationMessage("请输入有效的用户名和密码"); // Show error when validation fails.
+                    swal.enableButtons(); // Enable the confirm button again.
+                } else {
+                    swal.resetValidationMessage(); // Reset the validation message.
+                    resolve([
+                        username,
+                        password
+                    ]);
+                }
+            })
+        },
+        didOpen: function() {
+            document.getElementById("swal-input1").focus();
+            const node = document.getElementById("swal-input2"); //enter key
+            node.addEventListener("keyup", function(event) {
+                if (event.keyCode === 13 || event.key === "Enter") {
+                    swal.clickConfirm();
+                }
+            });
+            node.addEventListener("keydown", function(event) {
+                let CkVal = document.getElementById("swal-input2").value;
+                if (CkVal && CkVal !== "" && (event.keyCode === 9 || event.key === "Tab")) {
+                    swal.clickConfirm();
+                }
+            });
 
-            }
-        })
+        }
+    })
         .then(function(result) {
-            // If validation fails, the value is undefined. Break out here.
-            if (typeof(result.value) == 'undefined') {
-                return false;
-            } else {
-                T2LoginPost(result.value[0], result.value[1]);
-            }
-        });
+        // If validation fails, the value is undefined. Break out here.
+        if (typeof(result.value) == 'undefined') {
+            return false;
+        } else {
+            T2LoginPost(result.value[0], result.value[1]);
+        }
+    });
 }
 
 function DingDownLogout() {
@@ -154,37 +154,37 @@ function DingDownLogout() {
     }).then((result) => {
         if (result.value) {
             Swal.fire({
-                    title: '退出中...',
-                    //text: '退出中...(至多等待10s)',
-                    html: '尝试注销中,等待倒计时 <b></b> 毫秒.',
-                    icon: 'question',
-                    timer: 10000,
-                    timerProgressBar: true,
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    allowEnterKey: false,
-                    showConfirmButton: false,
-                    didOpen: () => {
-                        Swal.showLoading()
-                        const b = Swal.getHtmlContainer().querySelector('b')
-                        timerInterval = setInterval(() => {
-                            b.textContent = Swal.getTimerLeft()
-                        }, 100)
-                    },
-                    willClose: () => {
-                        clearInterval(timerInterval);
-                    }
-                })
+                title: '退出中...',
+                //text: '退出中...(至多等待10s)',
+                html: '尝试注销中,等待倒计时 <b></b> 毫秒.',
+                icon: 'question',
+                timer: 10000,
+                timerProgressBar: true,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading()
+                    const b = Swal.getHtmlContainer().querySelector('b')
+                    timerInterval = setInterval(() => {
+                        b.textContent = Swal.getTimerLeft()
+                    }, 100)
+                },
+                willClose: () => {
+                    clearInterval(timerInterval);
+                }
+            })
                 .then((result) => {
-                    if (result.dismiss === Swal.DismissReason.timer) {
-                        Swal.fire({
-                            title: '注销超时，请检查网络后重试',
-                            icon: 'error',
-                            text: '注销超时，请检查网络后重试',
-                            confirmButtonText: '确定'
-                        });
-                    }
-                });
+                if (result.dismiss === Swal.DismissReason.timer) {
+                    Swal.fire({
+                        title: '注销超时，请检查网络后重试',
+                        icon: 'error',
+                        text: '注销超时，请检查网络后重试',
+                        confirmButtonText: '确定'
+                    });
+                }
+            });
             T2LogoutPost();
         }
     })
@@ -217,38 +217,38 @@ async function T2LoginPost(username, password) {
     //增加倒计时 @Ding
     let timerInterval
     Swal.fire({
-            title: '登录中...',
-            html: '尝试登陆中,等待倒计时 <b></b> 毫秒.',
-            timer: 10000,
-            icon: 'question',
-            timerProgressBar: true,
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            allowEnterKey: false,
-            showConfirmButton: false,
-            didOpen: () => {
-                Swal.showLoading()
-                const b = Swal.getHtmlContainer().querySelector('b')
-                timerInterval = setInterval(() => {
-                    b.textContent = Swal.getTimerLeft()
-                }, 100)
-            },
-            willClose: () => {
-                clearInterval(timerInterval);
-            }
-        })
+        title: '登录中...',
+        html: '尝试登陆中,等待倒计时 <b></b> 毫秒.',
+        timer: 10000,
+        icon: 'question',
+        timerProgressBar: true,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        allowEnterKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading()
+            const b = Swal.getHtmlContainer().querySelector('b')
+            timerInterval = setInterval(() => {
+                b.textContent = Swal.getTimerLeft()
+            }, 100)
+        },
+        willClose: () => {
+            clearInterval(timerInterval);
+        }
+    })
         .then((result) => {
-            if (result.dismiss === Swal.DismissReason.timer) {
-                Swal.fire({
-                    title: '登录超时，请检查网络后重试',
-                    icon: 'error',
-                    text: '登录超时，请检查网络后重试',
-                    confirmButtonText: '确定'
-                }).then(result => {
-                    DingDownLoginForm(result, username, password);
-                });
-            }
-        });
+        if (result.dismiss === Swal.DismissReason.timer) {
+            Swal.fire({
+                title: '登录超时，请检查网络后重试',
+                icon: 'error',
+                text: '登录超时，请检查网络后重试',
+                confirmButtonText: '确定'
+            }).then(result => {
+                DingDownLoginForm(result, username, password);
+            });
+        }
+    });
     T2Post(
         'https://ddapi.133233.xyz/AjaxLogin',
         data,
@@ -370,14 +370,14 @@ if (document.readyState == "complete" || document.readyState == "loaded" || docu
             let dingdown_login_a = document.getElementById("dingdown_login_a");
             if (cart_status_data && !dingdown_login_a) {
                 cart_status_data.insertAdjacentHTML("beforeend",
-                    '<div class="store_header_btn_green store_header_btn" id="dingdown_login">' +
-                    '<div class="store_header_btn_caps store_header_btn_leftcap"></div>' +
-                    '<div class="store_header_btn_caps store_header_btn_rightcap"></div>' +
-                    '<a id="dingdown_login_a" class="store_header_btn_content" href="javascript:void(0);">' +
-                    '叮当登录' +
-                    '</a>' +
-                    '</div>'
-                );
+                                                    '<div class="store_header_btn_green store_header_btn" id="dingdown_login">' +
+                                                    '<div class="store_header_btn_caps store_header_btn_leftcap"></div>' +
+                                                    '<div class="store_header_btn_caps store_header_btn_rightcap"></div>' +
+                                                    '<a id="dingdown_login_a" class="store_header_btn_content" href="javascript:void(0);">' +
+                                                    '叮当登录' +
+                                                    '</a>' +
+                                                    '</div>'
+                                                   );
             }
             var dingdown_login = document.getElementById("dingdown_login");
             if (dingdown_login) {
@@ -388,14 +388,14 @@ if (document.readyState == "complete" || document.readyState == "loaded" || docu
             let dingdown_logout_a = document.getElementById("dingdown_logout_a");
             if (cart_status_data && !dingdown_logout_a) {
                 cart_status_data.insertAdjacentHTML("beforeend",
-                    '<div class="store_header_btn_green store_header_btn" id="dingdown_logout">' +
-                    '<div class="store_header_btn_caps store_header_btn_leftcap"></div>' +
-                    '<div class="store_header_btn_caps store_header_btn_rightcap"></div>' +
-                    '<a id="dingdown_logout_a" class="store_header_btn_content" href="javascript:void(0);">' +
-                    '注销（叮当昵称：' + UnicodeDecodeB64(getCookie('Ding_NickName')) + ', 积分：' + getCookie('Ding_Credit') + '）' +
-                    '</a>' +
-                    '</div>'
-                );
+                                                    '<div class="store_header_btn_green store_header_btn" id="dingdown_logout">' +
+                                                    '<div class="store_header_btn_caps store_header_btn_leftcap"></div>' +
+                                                    '<div class="store_header_btn_caps store_header_btn_rightcap"></div>' +
+                                                    '<a id="dingdown_logout_a" class="store_header_btn_content" href="javascript:void(0);">' +
+                                                    '注销（叮当昵称：' + UnicodeDecodeB64(getCookie('Ding_NickName')) + ', 积分：' + getCookie('Ding_Credit') + '）' +
+                                                    '</a>' +
+                                                    '</div>'
+                                                   );
             }
             var dingdown_logout = document.getElementById("dingdown_logout");
             if (dingdown_logout) {
@@ -433,14 +433,14 @@ window.addEventListener("load", function() {
         let dingdown_login_a = document.getElementById("dingdown_login_a");
         if (cart_status_data && !dingdown_login_a) {
             cart_status_data.insertAdjacentHTML("beforeend",
-                '<div class="store_header_btn_green store_header_btn" id="dingdown_login" >' +
-                '<div class="store_header_btn_caps store_header_btn_leftcap"></div>' +
-                '<div class="store_header_btn_caps store_header_btn_rightcap"></div>' +
-                '<a id="dingdown_login_a" class="store_header_btn_content" href="javascript:void(0);">' +
-                '叮当登录' +
-                '</a>' +
-                '</div>'
-            );
+                                                '<div class="store_header_btn_green store_header_btn" id="dingdown_login" >' +
+                                                '<div class="store_header_btn_caps store_header_btn_leftcap"></div>' +
+                                                '<div class="store_header_btn_caps store_header_btn_rightcap"></div>' +
+                                                '<a id="dingdown_login_a" class="store_header_btn_content" href="javascript:void(0);">' +
+                                                '叮当登录' +
+                                                '</a>' +
+                                                '</div>'
+                                               );
         }
         const dingdown_login = document.getElementById("dingdown_login");
         if (dingdown_login) {
@@ -451,14 +451,14 @@ window.addEventListener("load", function() {
         let dingdown_logout_a = document.getElementById("dingdown_logout_a");
         if (cart_status_data && !dingdown_logout_a) {
             cart_status_data.insertAdjacentHTML("beforeend",
-                '<div class="store_header_btn_green store_header_btn" id="dingdown_logout">' +
-                '<div class="store_header_btn_caps store_header_btn_leftcap"></div>' +
-                '<div class="store_header_btn_caps store_header_btn_rightcap"></div>' +
-                '<a id="dingdown_login_out_a" class="store_header_btn_content" href="javascript:void(0);">' +
-                '注销（叮当昵称：' + UnicodeDecodeB64(getCookie('Ding_NickName')) + ', 积分：' + getCookie('Ding_Credit') + '）' +
-                '</a>' +
-                '</div>'
-            );
+                                                '<div class="store_header_btn_green store_header_btn" id="dingdown_logout">' +
+                                                '<div class="store_header_btn_caps store_header_btn_leftcap"></div>' +
+                                                '<div class="store_header_btn_caps store_header_btn_rightcap"></div>' +
+                                                '<a id="dingdown_login_out_a" class="store_header_btn_content" href="javascript:void(0);">' +
+                                                '注销（叮当昵称：' + UnicodeDecodeB64(getCookie('Ding_NickName')) + ', 积分：' + getCookie('Ding_Credit') + '）' +
+                                                '</a>' +
+                                                '</div>'
+                                               );
         }
         const dingdown_logout = document.getElementById("dingdown_logout");
         if (dingdown_logout) {
@@ -1214,24 +1214,188 @@ window.addEventListener("load", function() {
     }
     //steamdb.info
     else if (base_url.hostname == "steamdb.info"){
-      let base_path = window.location.pathname.split('/');
-      //app page
-      if (base_path.length > 0 && base_path[1] === "app") {
-        let head_node = document.getElementsByClassName("pagehead");
-        if (head_node && head_node.length >0){
-            let appids = [];
-            let depots = [];
-        //base appid
-            let base_appid = base_path[2];
-            appids.push(base_appid);
+        let base_path = window.location.pathname.split('/');
+        //app page
+        if (base_path.length > 0 && base_path[1] === "app") {
+            let head_node = document.getElementsByClassName("pagehead");
+            if (head_node && head_node.length >0){
+                let appids = [];
+                let depots = [];
+                //base appid
+                let base_appid = base_path[2];
+                appids.push(base_appid);
 
-            //get the dlc table.
-            let dlc_node = document.querySelector("#dlc");
-            if (dlc_node)
-            {
-                //body
-                let children = dlc_node.getElementsByTagName("tbody");
-                //restore all appid
+                //get the dlc table.
+                let dlc_node = document.querySelector("#dlc");
+                if (dlc_node)
+                {
+                    //body
+                    let children = dlc_node.getElementsByTagName("tbody");
+                    //restore all appid
+                    let childrenLength = children.length;
+                    for (let i = 0; i < childrenLength; i++) {
+                        let tmpchild = children[i].getElementsByTagName("tr");
+                        let tmpchildLength = tmpchild.length;
+                        for (let k = 0; k < tmpchildLength; k++) {
+                            let appid = tmpchild[k].getAttribute("data-appid");
+                            if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                                appids.push(appid);
+                            }
+                        }
+                    }
+                }
+                let depot_node = document.querySelector("#depots");
+                if (depot_node && !depot_node.getAttribute("dingPost")){
+                    depot_node.setAttribute("dingPost", "dingPost")
+                    //body
+                    let children = depot_node.getElementsByTagName("tbody");
+                    //restore all appid
+                    let childrenLength = children.length;
+                    for (let i = 0; i < childrenLength; i++) {
+                        let tmpchild = children[i].getElementsByTagName("tr");
+                        let tmpchildLength = tmpchild.length;
+                        for (let k = 0; k < tmpchildLength; k++) {
+                            let depotnode = tmpchild[k].getElementsByTagName("a");
+                            if (depotnode && depotnode.length >0){
+                                let depotid = depotnode[0].innerText;
+                                if (depotid && depotid.length >1 && depotid.length < 10 && isInteger(depotid)){
+                                    depots.push(depotid);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (appids.length != 0) {
+                    let data = {
+                        "Ids": appids.join()
+                    };
+                    T2Post(
+                        "https://ddapi.133233.xyz/CheckIds",
+                        data,
+                        function (response) {
+                            console.log("got response for " + response.response.Data.Total + " appid");
+                            //body
+
+                            //prefix head name.
+                            let head_name = head_node[0].getElementsByTagName("h1");
+                            if (head_name && head_name.length >0){
+                                if (response.response.Data.AppInfo.find(a => a == base_appid)) {
+                                    head_name[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + head_name[0].innerHTML;
+                                } else {
+                                    head_name[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + head_name[0].innerHTML;
+                                }
+                            }
+                            if (dlc_node){
+                                let children = dlc_node.getElementsByTagName("tbody");
+                                //restore all appid
+                                let childrenLength = children.length;
+                                //prefix DLC table
+                                for (let i = 0; i < childrenLength; i++) {
+                                    let tmpchild = children[i].getElementsByTagName("tr");
+                                    let tmpchildLength = tmpchild.length;
+                                    for (let k = 0; k < tmpchildLength; k++) {
+                                        let tmpnode = tmpchild[k];
+                                        let appid = tmpnode.getAttribute("data-appid");
+                                        let tmptext = tmpnode.getElementsByTagName("td");
+                                        if (tmptext && tmptext.length >0) {
+                                            if (appids.find(a => a == appid)) {
+                                                if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                                    tmptext[1].innerHTML = "<span style='color:green;'>（已收录）</span>" + tmptext[1].innerHTML;
+                                                } else {
+                                                    tmptext[1].innerHTML = "<span style='color:red;'>（未收录）</span>" + tmptext[1].innerHTML;
+                                                }
+                                                appids.splice(appids.indexOf(appid), 1);
+                                            }
+
+                                        }
+
+                                    }
+
+                                }
+                            }
+                        }
+                    );
+                }
+                if (depots.length != 0) {
+                    let data = {
+                        "Ids": depots.join()
+                    };
+                    T2Post(
+                        "https://ddapi.133233.xyz/CheckDepots",
+                        data,
+                        function (response) {
+                            console.log("got response for " + response.response.Data.Total + " depots");
+                            //body
+                            if (depot_node){
+                                let children = depot_node.getElementsByTagName("tbody");
+                                //restore all appid
+                                let childrenLength = children.length;
+                                //prefix DLC table
+                                for (let i = 0; i < childrenLength; i++) {
+                                    let tmpchild = children[i].getElementsByTagName("tr");
+                                    let tmpchildLength = tmpchild.length;
+                                    for (let k = 0; k < tmpchildLength; k++) {
+                                        let depotnode = tmpchild[k].getElementsByTagName("a");
+                                        if (depotnode && depotnode.length >0){
+                                            let depotid = depotnode[0].innerText;
+                                            if (depotid && depotid.length >1 && depotid.length < 10){
+                                                if (depots.find(a => a == depotid)) {
+                                                    let tmptext = tmpchild[k].getElementsByTagName("td");
+                                                    if (tmptext && tmptext.length >0) {
+                                                        if (response.response.Data.AppInfo.find(a => a == depotid)) {
+                                                            tmptext[1].innerHTML = "<span style='color:green;font-style: normal;'>（已收录）</span>" + tmptext[1].innerHTML;
+                                                        } else {
+                                                            tmptext[1].innerHTML = "<span style='color:red;font-style: normal;'>（未收录）</span>" + tmptext[1].innerHTML;
+                                                        }
+                                                    }
+                                                    depots.splice(depots.indexOf(depotid), 1);
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                    );
+                }
+            }
+        }
+        else if (base_path.length > 0 && base_path[1] === "depot") {
+            let head_node = document.getElementsByClassName("pagehead");
+            if (head_node && head_node.length >0){
+                let base_depotid = base_path[2];
+                if (base_depotid && base_depotid.length >1 && base_depotid.length < 10 && isInteger(base_depotid)){
+                    let data = {
+                        Id: base_depotid
+                    };
+                    T2Post(
+                        "https://ddapi.133233.xyz/CheckDepot",
+                        data,
+                        function(response) {
+                            console.log("got response");
+                            let next_class = head_node[0].nextElementSibling;
+                            if(next_class){
+                                let tmpchild = next_class.children[0].getElementsByTagName("tr")[0];
+                                if (response.response.Data.Id == "0") {
+                                    tmpchild.children[1].innerHTML += "<span style='color:red;'>（未收录）</span>";
+                                } else {
+                                    tmpchild.children[1].innerHTML += "<span style='color:green;'>（已收录）</span>";
+                                }
+                            }
+                        }
+                    );
+                }
+            }
+        }
+        //old-search
+        else if (base_path.length > 0 && base_path[1] === "search") {
+            //body
+            let children = document.getElementsByTagName("tbody");
+            //restore all appid
+            if(children){
+                let appids = [];
                 let childrenLength = children.length;
                 for (let i = 0; i < childrenLength; i++) {
                     let tmpchild = children[i].getElementsByTagName("tr");
@@ -1243,213 +1407,110 @@ window.addEventListener("load", function() {
                         }
                     }
                 }
+
+                if (appids.length != 0) {
+                    let data = {
+                        "Ids": appids.join()
+                    };
+                    T2Post(
+                        "https://ddapi.133233.xyz/CheckIds",
+                        data,
+                        function (response) {
+                            console.log("got response for " + response.response.Data.Total + " appid");
+                            //body
+                            if (children){
+                                //restore all appid
+                                let childrenLength = children.length;
+                                //prefix DLC table
+                                for (let i = 0; i < childrenLength; i++) {
+                                    let tmpchild = children[i].getElementsByTagName("tr");
+                                    let tmpchildLength = tmpchild.length;
+                                    for (let k = 0; k < tmpchildLength; k++) {
+                                        let tmpnode = tmpchild[k];
+                                        let appid = tmpnode.getAttribute("data-appid");
+                                        let tmptext = tmpnode.getElementsByTagName("td");
+                                        if (tmptext && tmptext.length >0) {
+                                            if (appids.find(a => a == appid)) {
+                                                if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                                    tmptext[2].innerHTML = "<span style='color:green;'>（已收录）</span>" + tmptext[2].innerHTML;
+                                                } else {
+                                                    tmptext[2].innerHTML = "<span style='color:red;'>（未收录）</span>" + tmptext[2].innerHTML;
+                                                }
+                                                appids.splice(appids.indexOf(appid), 1);
+                                            }
+
+                                        }
+
+                                    }
+
+                                }
+                            }
+                        }
+                    );
+                }
             }
-            let depot_node = document.querySelector("#depots");
-            if (depot_node && !depot_node.getAttribute("dingPost")){
-                depot_node.setAttribute("dingPost", "dingPost")
-                //body
-                let children = depot_node.getElementsByTagName("tbody");
-                //restore all appid
+        }
+        //patchnotes
+        else if (base_path.length > 0 && base_path[1] === "patchnotes") {
+            //body
+            let children = document.getElementsByTagName("tbody");
+            //restore all appid
+            if(children){
+                let appids = [];
                 let childrenLength = children.length;
                 for (let i = 0; i < childrenLength; i++) {
                     let tmpchild = children[i].getElementsByTagName("tr");
                     let tmpchildLength = tmpchild.length;
                     for (let k = 0; k < tmpchildLength; k++) {
-                        let depotnode = tmpchild[k].getElementsByTagName("a");
-                        if (depotnode && depotnode.length >0){
-                            let depotid = depotnode[0].innerText;
-                            if (depotid && depotid.length >1 && depotid.length < 10 && isInteger(depotid)){
-                                depots.push(depotid);
-                            }
+                        let appid = tmpchild[k].getAttribute("data-appid");
+                        if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                            appids.push(appid);
                         }
                     }
                 }
-            }
 
-            if (appids.length != 0) {
-                let data = {
-                    "Ids": appids.join()
-                };
-                T2Post(
-                    "https://ddapi.133233.xyz/CheckIds",
-                    data,
-                    function (response) {
-                        console.log("got response for " + response.response.Data.Total + " appid");
-                          //body
-
-                        //prefix head name.
-                        let head_name = head_node[0].getElementsByTagName("h1");
-                        if (head_name && head_name.length >0){
-                                if (response.response.Data.AppInfo.find(a => a == base_appid)) {
-                                    head_name[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + head_name[0].innerHTML;
-                                } else {
-                                    head_name[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + head_name[0].innerHTML;
-                                }
-                        }
-                        if (dlc_node){
-                            let children = dlc_node.getElementsByTagName("tbody");
-                            //restore all appid
-                            let childrenLength = children.length;
-                            //prefix DLC table
-                            for (let i = 0; i < childrenLength; i++) {
-                                let tmpchild = children[i].getElementsByTagName("tr");
-                                let tmpchildLength = tmpchild.length;
-                                for (let k = 0; k < tmpchildLength; k++) {
-                                    let tmpnode = tmpchild[k];
-                                    let appid = tmpnode.getAttribute("data-appid");
-                                    let tmptext = tmpnode.getElementsByTagName("td");
-                                    if (tmptext && tmptext.length >0) {
-                                        if (appids.find(a => a == appid)) {
-                                            if (response.response.Data.AppInfo.find(a => a == appid)) {
-                                                tmptext[1].innerHTML = "<span style='color:green;'>（已收录）</span>" + tmptext[1].innerHTML;
-                                            } else {
-                                                tmptext[1].innerHTML = "<span style='color:red;'>（未收录）</span>" + tmptext[1].innerHTML;
-                                            }
-                                            appids.splice(appids.indexOf(appid), 1);
-                                        }
-
-                                        }
-
-                                    }
-
-                                }
-                         }
-                        }
-                );
-            }
-            if (depots.length != 0) {
-                let data = {
-                    "Ids": depots.join()
-                };
-                T2Post(
-                    "https://ddapi.133233.xyz/CheckDepots",
-                    data,
-                    function (response) {
-                        console.log("got response for " + response.response.Data.Total + " depots");
-                          //body
-                        if (depot_node){
-                            let children = depot_node.getElementsByTagName("tbody");
-                            //restore all appid
-                            let childrenLength = children.length;
-                            //prefix DLC table
-                            for (let i = 0; i < childrenLength; i++) {
-                                let tmpchild = children[i].getElementsByTagName("tr");
-                                let tmpchildLength = tmpchild.length;
-                                for (let k = 0; k < tmpchildLength; k++) {
-                                    let depotnode = tmpchild[k].getElementsByTagName("a");
-                                    if (depotnode && depotnode.length >0){
-                                        let depotid = depotnode[0].innerText;
-                                        if (depotid && depotid.length >1 && depotid.length < 10){
-                                            if (depots.find(a => a == depotid)) {
-                                                let tmptext = tmpchild[k].getElementsByTagName("td");
-                                                if (tmptext && tmptext.length >0) {
-                                                    if (response.response.Data.AppInfo.find(a => a == depotid)) {
-                                                        tmptext[1].innerHTML = "<span style='color:green;font-style: normal;'>（已收录）</span>" + tmptext[1].innerHTML;
-                                                    } else {
-                                                        tmptext[1].innerHTML = "<span style='color:red;font-style: normal;'>（未收录）</span>" + tmptext[1].innerHTML;
-                                                    }
+                if (appids.length != 0) {
+                    let data = {
+                        "Ids": appids.join()
+                    };
+                    T2Post(
+                        "https://ddapi.133233.xyz/CheckIds",
+                        data,
+                        function (response) {
+                            console.log("got response for " + response.response.Data.Total + " appid");
+                            //body
+                            if (children){
+                                //restore all appid
+                                let childrenLength = children.length;
+                                //prefix DLC table
+                                for (let i = 0; i < childrenLength; i++) {
+                                    let tmpchild = children[i].getElementsByTagName("tr");
+                                    let tmpchildLength = tmpchild.length;
+                                    for (let k = 0; k < tmpchildLength; k++) {
+                                        let tmpnode = tmpchild[k];
+                                        let appid = tmpnode.getAttribute("data-appid");
+                                        let tmptext = tmpnode.getElementsByTagName("td");
+                                        if (tmptext && tmptext.length >0) {
+                                            if (appids.find(a => a == appid)) {
+                                                if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                                    tmptext[2].innerHTML = "<span style='color:green;'>（已收录）</span>" + tmptext[2].innerHTML;
+                                                } else {
+                                                    tmptext[2].innerHTML = "<span style='color:red;'>（未收录）</span>" + tmptext[2].innerHTML;
                                                 }
-                                                depots.splice(depots.indexOf(depotid), 1);
-                                             }
+                                                appids.splice(appids.indexOf(appid), 1);
+                                            }
+
                                         }
-                                    }
+
                                     }
 
                                 }
-                         }
-                        }
-                );
-            }
-        }
-    }
-      else if (base_path.length > 0 && base_path[1] === "depot") {
-        let head_node = document.getElementsByClassName("pagehead");
-        if (head_node && head_node.length >0){
-           let base_depotid = base_path[2];
-            if (base_depotid && base_depotid.length >1 && base_depotid.length < 10 && isInteger(base_depotid)){
-                let data = {
-                Id: base_depotid
-                };
-                T2Post(
-                    "https://ddapi.133233.xyz/CheckDepot",
-                    data,
-                    function(response) {
-                        console.log("got response");
-                        let next_class = head_node[0].nextElementSibling;
-                        if(next_class){
-                            let tmpchild = next_class.children[0].getElementsByTagName("tr")[0];
-                            if (response.response.Data.Id == "0") {
-                                tmpchild.children[1].innerHTML += "<span style='color:red;'>（未收录）</span>";
-                            } else {
-                                tmpchild.children[1].innerHTML += "<span style='color:green;'>（已收录）</span>";
                             }
                         }
-                    }
-                );
+                    );
+                }
             }
         }
-    }
-      //old-search
-      else if (base_path.length > 0 && base_path[1] === "search") {
-           //body
-          let children = document.getElementsByTagName("tbody");
-          //restore all appid
-          if(children){
-              let appids = [];
-              let childrenLength = children.length;
-              for (let i = 0; i < childrenLength; i++) {
-                  let tmpchild = children[i].getElementsByTagName("tr");
-                  let tmpchildLength = tmpchild.length;
-                  for (let k = 0; k < tmpchildLength; k++) {
-                      let appid = tmpchild[k].getAttribute("data-appid");
-                      if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
-                          appids.push(appid);
-                      }
-                  }
-              }
-
-          if (appids.length != 0) {
-              let data = {
-                  "Ids": appids.join()
-              };
-              T2Post(
-                  "https://ddapi.133233.xyz/CheckIds",
-                  data,
-                  function (response) {
-                      console.log("got response for " + response.response.Data.Total + " appid");
-                      //body
-                      if (children){
-                          //restore all appid
-                          let childrenLength = children.length;
-                          //prefix DLC table
-                          for (let i = 0; i < childrenLength; i++) {
-                              let tmpchild = children[i].getElementsByTagName("tr");
-                              let tmpchildLength = tmpchild.length;
-                              for (let k = 0; k < tmpchildLength; k++) {
-                                  let tmpnode = tmpchild[k];
-                                  let appid = tmpnode.getAttribute("data-appid");
-                                  let tmptext = tmpnode.getElementsByTagName("td");
-                                  if (tmptext && tmptext.length >0) {
-                                      if (appids.find(a => a == appid)) {
-                                          if (response.response.Data.AppInfo.find(a => a == appid)) {
-                                              tmptext[2].innerHTML = "<span style='color:green;'>（已收录）</span>" + tmptext[2].innerHTML;
-                                          } else {
-                                              tmptext[2].innerHTML = "<span style='color:red;'>（未收录）</span>" + tmptext[2].innerHTML;
-                                          }
-                                          appids.splice(appids.indexOf(appid), 1);
-                                      }
-
-                                  }
-
-                              }
-
-                          }
-                      }
-                  }
-              );
-          }
-          }
-      }
     }
 });
 
@@ -1710,7 +1771,7 @@ if (base_url.hostname == 'store.steampowered.com') {
     let callback0 = mutations => {
         mutations.forEach(mutation => {
             try {
-                 //banner
+                //banner
                 let ContentHubMainCarouselCapsule = document.getElementsByClassName("maincap");
                 if (ContentHubMainCarouselCapsule && ContentHubMainCarouselCapsule.length > 0) {
                     let children = ContentHubMainCarouselCapsule;
@@ -1780,76 +1841,76 @@ if (base_url.hostname == 'store.steampowered.com') {
                 else{
                     let ContentHubMainCarouselCapsule = document.getElementsByClassName("ContentHubMainCarouselCapsule");
                     if (ContentHubMainCarouselCapsule && ContentHubMainCarouselCapsule.length > 0) {
-                    let children = ContentHubMainCarouselCapsule;
-                    for (let i = 0; i < children.length; i++) {
-                        let alink = children[i].getElementsByTagName('a');
-                        if (alink) {
-                            for(var z = 0; z < alink.length; z++){
-                                let klink = alink[z];
-                                let ahref = klink.getAttribute("href").split('/');
-                                if (ahref.length > 3 && ahref[3] == 'app') {
-                                    let data = {
-                                        Id: ahref[4]
-                                    };
-                                    if (!klink.getAttribute("dingPost")) {
-                                        klink.setAttribute("dingPost", "dingPost");
-                                        T2Post(
-                                            "https://ddapi.133233.xyz/CheckId",
-                                            data,
-                                            function(response) {
-                                                console.log("got response");
-                                                let index;
-                                                if (klink.childElementCount > 2){
-                                                    index = 2;
-                                                }else if (klink.childElementCount > 1){
-                                                    index = 1;
-                                                }else{
-                                                    index= 0;
-                                                }
+                        let children = ContentHubMainCarouselCapsule;
+                        for (let i = 0; i < children.length; i++) {
+                            let alink = children[i].getElementsByTagName('a');
+                            if (alink) {
+                                for(var z = 0; z < alink.length; z++){
+                                    let klink = alink[z];
+                                    let ahref = klink.getAttribute("href").split('/');
+                                    if (ahref.length > 3 && ahref[3] == 'app') {
+                                        let data = {
+                                            Id: ahref[4]
+                                        };
+                                        if (!klink.getAttribute("dingPost")) {
+                                            klink.setAttribute("dingPost", "dingPost");
+                                            T2Post(
+                                                "https://ddapi.133233.xyz/CheckId",
+                                                data,
+                                                function(response) {
+                                                    console.log("got response");
+                                                    let index;
+                                                    if (klink.childElementCount > 2){
+                                                        index = 2;
+                                                    }else if (klink.childElementCount > 1){
+                                                        index = 1;
+                                                    }else{
+                                                        index= 0;
+                                                    }
 
-                                                if (response.response.Data.Id == "0") {
-                                                    klink.children[index].innerHTML = "<span style='color:red;'>（未收录）</span>" + klink.children[index].innerHTML;
-                                                } else {
-                                                    klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
+                                                    if (response.response.Data.Id == "0") {
+                                                        klink.children[index].innerHTML = "<span style='color:red;'>（未收录）</span>" + klink.children[index].innerHTML;
+                                                    } else {
+                                                        klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
+                                                    }
+                                                    klink.setAttribute("dingPrefix", "dingPrefix");
                                                 }
-                                                klink.setAttribute("dingPrefix", "dingPrefix");
+                                            );
+                                        }
+                                    } else if (ahref.length > 3 && ahref[3] == "bundle") {
+                                        if (!klink.getAttribute("dingPost")) {
+                                            let index;
+                                            if (klink.childElementCount > 2){
+                                                index = 2;
+                                            }else if (klink.childElementCount > 1){
+                                                index = 1;
+                                            }else{
+                                                index= 0;
                                             }
-                                        );
-                                    }
-                                } else if (ahref.length > 3 && ahref[3] == "bundle") {
-                                    if (!klink.getAttribute("dingPost")) {
-                                        let index;
-                                        if (klink.childElementCount > 2){
-                                            index = 2;
-                                        }else if (klink.childElementCount > 1){
-                                            index = 1;
-                                        }else{
-                                            index= 0;
+                                            klink.setAttribute("dingPost", "dingPost");
+                                            klink.children[index].innerHTML = "<span style='color:orange;'>（合集）</span>" + klink.children[index].innerHTML;
+                                            klink.setAttribute("dingPrefix", "dingPrefix");
                                         }
-                                        klink.setAttribute("dingPost", "dingPost");
-                                        klink.children[index].innerHTML = "<span style='color:orange;'>（合集）</span>" + klink.children[index].innerHTML;
-                                        klink.setAttribute("dingPrefix", "dingPrefix");
-                                    }
-                                } else if (ahref.length > 2 && ahref[3] == "sub") {
-                                    if (!klink.getAttribute("dingPost")) {
-                                        let index;
-                                        if (klink.childElementCount > 2){
-                                            index = 2;
-                                        }else if (klink.childElementCount > 1){
-                                            index = 1;
-                                        }else{
-                                            index= 0;
+                                    } else if (ahref.length > 2 && ahref[3] == "sub") {
+                                        if (!klink.getAttribute("dingPost")) {
+                                            let index;
+                                            if (klink.childElementCount > 2){
+                                                index = 2;
+                                            }else if (klink.childElementCount > 1){
+                                                index = 1;
+                                            }else{
+                                                index= 0;
+                                            }
+                                            klink.setAttribute("dingPost", "dingPost");
+                                            klink.children[index].innerHTML = "<span style='color:orange;'>（礼包）</span>" + klink.children[index].innerHTML;
+                                            klink.setAttribute("dingPrefix", "dingPrefix");
                                         }
-                                        klink.setAttribute("dingPost", "dingPost");
-                                        klink.children[index].innerHTML = "<span style='color:orange;'>（礼包）</span>" + klink.children[index].innerHTML;
-                                        klink.setAttribute("dingPrefix", "dingPrefix");
                                     }
                                 }
-                            }
 
+                            }
                         }
                     }
-                }
 
                 }
                 let global_hover_content = document.getElementById('global_hover_content');
@@ -2090,18 +2151,18 @@ else if (window.location.hostname == "steamdb.info") {
             for (let i = 0; i < childrenLength; i++) {
                 let tmpchild = children[i].getElementsByTagName("tr");
                 let tmpchildLength = tmpchild.length;
-                 for (let k = 0; k < tmpchildLength; k++) {
-                     let tmpnode = tmpchild[k];
-                     let tmptext = tmpnode.getElementsByClassName("css-truncate");
-                     if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPost")) {
-                         tmptext[0].setAttribute("dingPost", "dingPost");
-                         let appid = tmpnode.getAttribute("data-appid");
-                         if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
-                             appids.push(appid);
-                         }
-                     }
+                for (let k = 0; k < tmpchildLength; k++) {
+                    let tmpnode = tmpchild[k];
+                    let tmptext = tmpnode.getElementsByClassName("css-truncate");
+                    if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPost")) {
+                        tmptext[0].setAttribute("dingPost", "dingPost");
+                        let appid = tmpnode.getAttribute("data-appid");
+                        if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                            appids.push(appid);
+                        }
+                    }
 
-                 }
+                }
             }
 
 
@@ -2122,39 +2183,39 @@ else if (window.location.hostname == "steamdb.info") {
                                 let tmpnode = tmpchild[k];
                                 let appid = tmpnode.getAttribute("data-appid");
                                 let tmptext = tmpnode.getElementsByClassName("css-truncate");
-                                 if (tmptext && tmptext.length >0) {
-                                     let tmp_href = new URL(tmptext[0].href);
-                                     if (tmp_href.host == 'steamdb.info'){
-                                         let path_sp = tmp_href.pathname.split('/');
-                                         if (path_sp[1] == 'app') {
-                                          if (appids.find(a => a == appid)) {
-                                              if (response.response.Data.AppInfo.find(a => a == appid)) {
-                                                  tmptext[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + tmptext[0].innerHTML;
-                                              } else {
-                                                  tmptext[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + tmptext[0].innerHTML;
-                                              }
-                                              appids.splice(appids.indexOf(appid), 1);
-                                              tmptext[0].setAttribute("dingPrefix", "dingPrefix");
-                                          }
-                                         } else if (path_sp[1] == 'bundle') {
-                                             let tmptext = tmpnode.getElementsByClassName("subinfo");
-                                             if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPrefix")) {
-                                                 tmptext[0].setAttribute("dingPrefix", "dingPrefix");
-                                                 tmptext[0].innerHTML = "<span style='color:orange;'>（合集）</span>" + tmptext[0].innerHTML;
-                                             }
-                                         } else if (path_sp[1] == 'sub') {
-                                             let tmptext = tmpnode.getElementsByClassName("subinfo");
-                                             if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPrefix")) {
-                                                 tmptext[0].setAttribute("dingPrefix", "dingPrefix");
-                                                 tmptext[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + tmptext[0].innerHTML;
-                                             }
-                                         }
+                                if (tmptext && tmptext.length >0) {
+                                    let tmp_href = new URL(tmptext[0].href);
+                                    if (tmp_href.host == 'steamdb.info'){
+                                        let path_sp = tmp_href.pathname.split('/');
+                                        if (path_sp[1] == 'app') {
+                                            if (appids.find(a => a == appid)) {
+                                                if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                                    tmptext[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + tmptext[0].innerHTML;
+                                                } else {
+                                                    tmptext[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + tmptext[0].innerHTML;
+                                                }
+                                                appids.splice(appids.indexOf(appid), 1);
+                                                tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+                                            }
+                                        } else if (path_sp[1] == 'bundle') {
+                                            let tmptext = tmpnode.getElementsByClassName("subinfo");
+                                            if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPrefix")) {
+                                                tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+                                                tmptext[0].innerHTML = "<span style='color:orange;'>（合集）</span>" + tmptext[0].innerHTML;
+                                            }
+                                        } else if (path_sp[1] == 'sub') {
+                                            let tmptext = tmpnode.getElementsByClassName("subinfo");
+                                            if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPrefix")) {
+                                                tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+                                                tmptext[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + tmptext[0].innerHTML;
+                                            }
+                                        }
 
-                                     }
+                                    }
 
-                                 }
+                                }
 
-                          }
+                            }
                         }
                     }
                 );
@@ -2184,18 +2245,18 @@ else if (window.location.hostname == "steamdb.info") {
             for (let i = 0; i < childrenLength; i++) {
                 let tmpchild = children[i].getElementsByTagName("tr");
                 let tmpchildLength = tmpchild.length;
-                 for (let k = 0; k < tmpchildLength; k++) {
-                     let tmpnode = tmpchild[k];
-                     let tmptext = tmpnode.getElementsByClassName("applogo");
-                     if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPost")) {
-                         tmptext[0].setAttribute("dingPost", "dingPost");
-                         let appid = tmpnode.getAttribute("data-appid");
-                         if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
-                             appids.push(appid);
-                         }
-                     }
+                for (let k = 0; k < tmpchildLength; k++) {
+                    let tmpnode = tmpchild[k];
+                    let tmptext = tmpnode.getElementsByClassName("applogo");
+                    if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPost")) {
+                        tmptext[0].setAttribute("dingPost", "dingPost");
+                        let appid = tmpnode.getAttribute("data-appid");
+                        if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                            appids.push(appid);
+                        }
+                    }
 
-                 }
+                }
             }
 
             if (appids.length != 0) {
@@ -2216,43 +2277,43 @@ else if (window.location.hostname == "steamdb.info") {
                                 let appid = tmpnode.getAttribute("data-appid");
                                 let tmplink = tmpnode.getElementsByTagName("a");
                                 let tmplinkLength = tmplink.length;
-                                 for (let y = 0; y < tmplinkLength;y++) {
-                                     let tmp_href = new URL(tmplink[y].href);
-                                     if (tmp_href.host == 'store.steampowered.com'){
-                                         let path_sp = tmp_href.pathname.split('/');
-                                         if (path_sp[1] == 'app') {
-                                          let tmptext = tmpnode.getElementsByClassName("applogo");
-                                          if (tmptext && tmptext.length >0 && appids.find(a => a == appid)) {
-                                              let next_class = tmptext[0].nextElementSibling;
-                                              if (response.response.Data.AppInfo.find(a => a == appid)) {
-                                                  next_class.children[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + next_class.children[0].innerHTML;
-                                              } else {
-                                                  next_class.children[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + next_class.children[0].innerHTML;
-                                              }
-                                              appids.splice(appids.indexOf(appid), 1);
-                                              tmptext[0].setAttribute("dingPrefix", "dingPrefix");
-                                          }
-                                         } else if (path_sp[1] == 'bundle') {
-                                             let tmptext = tmpnode.getElementsByClassName("applogo");
-                                             let next_class = tmptext[0].nextElementSibling;
-                                             if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPrefix")) {
-                                                 tmptext[0].setAttribute("dingPrefix", "dingPrefix");
-                                                 next_class.children[0].innerHTML = "<span style='color:orange;'>（合集）</span>" + next_class.children[0].innerHTML;
-                                             }
-                                         } else if (path_sp[1] == 'sub') {
-                                             let tmptext = tmpnode.getElementsByClassName("applogo");
-                                             let next_class = tmptext[0].nextElementSibling;
-                                             if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPrefix")) {
-                                                 tmptext[0].setAttribute("dingPrefix", "dingPrefix");
-                                                 next_class.children[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + next_class.children[0].innerHTML;
-                                             }
-                                         }
+                                for (let y = 0; y < tmplinkLength;y++) {
+                                    let tmp_href = new URL(tmplink[y].href);
+                                    if (tmp_href.host == 'store.steampowered.com'){
+                                        let path_sp = tmp_href.pathname.split('/');
+                                        if (path_sp[1] == 'app') {
+                                            let tmptext = tmpnode.getElementsByClassName("applogo");
+                                            if (tmptext && tmptext.length >0 && appids.find(a => a == appid)) {
+                                                let next_class = tmptext[0].nextElementSibling;
+                                                if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                                    next_class.children[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + next_class.children[0].innerHTML;
+                                                } else {
+                                                    next_class.children[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + next_class.children[0].innerHTML;
+                                                }
+                                                appids.splice(appids.indexOf(appid), 1);
+                                                tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+                                            }
+                                        } else if (path_sp[1] == 'bundle') {
+                                            let tmptext = tmpnode.getElementsByClassName("applogo");
+                                            let next_class = tmptext[0].nextElementSibling;
+                                            if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPrefix")) {
+                                                tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+                                                next_class.children[0].innerHTML = "<span style='color:orange;'>（合集）</span>" + next_class.children[0].innerHTML;
+                                            }
+                                        } else if (path_sp[1] == 'sub') {
+                                            let tmptext = tmpnode.getElementsByClassName("applogo");
+                                            let next_class = tmptext[0].nextElementSibling;
+                                            if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPrefix")) {
+                                                tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+                                                next_class.children[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + next_class.children[0].innerHTML;
+                                            }
+                                        }
 
-                                     }
+                                    }
 
-                                 }
+                                }
 
-                          }
+                            }
                         }
                     }
                 );
@@ -2282,18 +2343,18 @@ else if (window.location.hostname == "steamdb.info") {
             for (let i = 0; i < childrenLength; i++) {
                 let tmpchild = children[i].getElementsByTagName("tr");
                 let tmpchildLength = tmpchild.length;
-                 for (let k = 0; k < tmpchildLength; k++) {
-                     let tmpnode = tmpchild[k];
-                     let tmptext = tmpnode.getElementsByClassName("applogo");
-                     if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPost")) {
-                         tmptext[0].setAttribute("dingPost", "dingPost");
-                         let appid = tmpnode.getAttribute("data-appid");
-                         if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
-                             appids.push(appid);
-                         }
-                     }
+                for (let k = 0; k < tmpchildLength; k++) {
+                    let tmpnode = tmpchild[k];
+                    let tmptext = tmpnode.getElementsByClassName("applogo");
+                    if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPost")) {
+                        tmptext[0].setAttribute("dingPost", "dingPost");
+                        let appid = tmpnode.getAttribute("data-appid");
+                        if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                            appids.push(appid);
+                        }
+                    }
 
-                 }
+                }
             }
 
             if (appids.length != 0) {
@@ -2325,7 +2386,7 @@ else if (window.location.hostname == "steamdb.info") {
                                         tmptext[0].setAttribute("dingPrefix", "dingPrefix");
                                     }
                                 }
-                          }
+                            }
                         }
                     }
                 );
@@ -2355,18 +2416,18 @@ else if (window.location.hostname == "steamdb.info") {
             for (let i = 0; i < childrenLength; i++) {
                 let tmpchild = children[i].getElementsByTagName("li");
                 let tmpchildLength = tmpchild.length;
-                 for (let k = 0; k < tmpchildLength; k++) {
-                     let tmpnode = tmpchild[k];
-                     let tmptext = tmpnode.getElementsByTagName("a");
-                     if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPost")) {
-                         tmptext[0].setAttribute("dingPost", "dingPost");
-                         let appid = tmptext[0].getAttribute("data-appid");
-                         if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
-                             appids.push(appid);
-                         }
-                     }
+                for (let k = 0; k < tmpchildLength; k++) {
+                    let tmpnode = tmpchild[k];
+                    let tmptext = tmpnode.getElementsByTagName("a");
+                    if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPost")) {
+                        tmptext[0].setAttribute("dingPost", "dingPost");
+                        let appid = tmptext[0].getAttribute("data-appid");
+                        if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                            appids.push(appid);
+                        }
+                    }
 
-                 }
+                }
             }
 
             if (appids.length != 0) {
@@ -2400,7 +2461,7 @@ else if (window.location.hostname == "steamdb.info") {
                                         }
                                     }
                                 }
-                          }
+                            }
                         }
                     }
                 );
@@ -2544,45 +2605,45 @@ else if (window.location.hostname == "steamdb.info") {
                             }
                         }
                     }
-                     if (depots.length != 0) {
-                         let data = {
-                             "Ids": depots.join()
-                         };
-                         T2Post(
-                             "https://ddapi.133233.xyz/CheckDepots",
-                             data,
-                             function (response) {
-                                 console.log("got response for " + response.response.Data.Total + " depots");
-                                 let children = depot_node.getElementsByTagName("tbody");
-                                 //restore all appid
-                                 let childrenLength = children.length;
-                                 //prefix DLC table
-                                 for (let i = 0; i < childrenLength; i++) {
-                                     let tmpchild = children[i].getElementsByTagName("tr");
-                                     let tmpchildLength = tmpchild.length;
-                                     for (let k = 0; k < tmpchildLength; k++) {
-                                         let depotnode = tmpchild[k].getElementsByTagName("a");
-                                         if (depotnode && depotnode.length >0){
-                                             let depotid = depotnode[0].innerText;
-                                             if (depotid && depotid.length >1 && depotid.length < 10){
-                                                 if (depots.find(a => a == depotid)) {
-                                                     let tmptext = tmpchild[k].getElementsByTagName("td");
-                                                     if (tmptext && tmptext.length >0) {
-                                                         if (response.response.Data.AppInfo.find(a => a == depotid)) {
-                                                             tmptext[1].innerHTML = "<span style='color:green;font-style: normal;'>（已收录）</span>" + tmptext[1].innerHTML;
-                                                         } else {
-                                                             tmptext[1].innerHTML = "<span style='color:red;font-style: normal;'>（未收录）</span>" + tmptext[1].innerHTML;
-                                                         }
-                                                     }
-                                                     depots.splice(depots.indexOf(depotid), 1);
-                                                 }
-                                             }
-                                         }
-                                     }
-                                 }
-                             }
-                         );
-                     }
+                    if (depots.length != 0) {
+                        let data = {
+                            "Ids": depots.join()
+                        };
+                        T2Post(
+                            "https://ddapi.133233.xyz/CheckDepots",
+                            data,
+                            function (response) {
+                                console.log("got response for " + response.response.Data.Total + " depots");
+                                let children = depot_node.getElementsByTagName("tbody");
+                                //restore all appid
+                                let childrenLength = children.length;
+                                //prefix DLC table
+                                for (let i = 0; i < childrenLength; i++) {
+                                    let tmpchild = children[i].getElementsByTagName("tr");
+                                    let tmpchildLength = tmpchild.length;
+                                    for (let k = 0; k < tmpchildLength; k++) {
+                                        let depotnode = tmpchild[k].getElementsByTagName("a");
+                                        if (depotnode && depotnode.length >0){
+                                            let depotid = depotnode[0].innerText;
+                                            if (depotid && depotid.length >1 && depotid.length < 10){
+                                                if (depots.find(a => a == depotid)) {
+                                                    let tmptext = tmpchild[k].getElementsByTagName("td");
+                                                    if (tmptext && tmptext.length >0) {
+                                                        if (response.response.Data.AppInfo.find(a => a == depotid)) {
+                                                            tmptext[1].innerHTML = "<span style='color:green;font-style: normal;'>（已收录）</span>" + tmptext[1].innerHTML;
+                                                        } else {
+                                                            tmptext[1].innerHTML = "<span style='color:red;font-style: normal;'>（未收录）</span>" + tmptext[1].innerHTML;
+                                                        }
+                                                    }
+                                                    depots.splice(depots.indexOf(depotid), 1);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        );
+                    }
                 }
             } catch (e) {
                 //exception handle;
