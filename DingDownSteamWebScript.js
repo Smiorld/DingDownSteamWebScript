@@ -2,12 +2,13 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.31
+// @version      1.0.32
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
+// @match        https://steamdb.info/*
 // @match        https://steamcommunity.com/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=atomicobject.com
+// @icon         https://ddapi.133233.xyz/gh/Smiorld/DingDownSteamWebScript/Project.ico
 // @grant        GM_xmlhttpRequest
 // @grant        GM_info
 // @connect      ddapi.133233.xyz
@@ -358,7 +359,6 @@ function getCookie(cname) {
     return "";
 }
 
-var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
 if (document.readyState == "complete" || document.readyState == "loaded" || document.readyState == "interactive") {
     //console.log("Already Loaded");
 } else {
@@ -423,7 +423,11 @@ function addStyle(styleString) {
     document.head.append(style);
 }
 
+const isInteger = num => /^-?[0-9]+$/.test(num+'');
+let base_url = window.location;
+
 window.addEventListener("load", function() {
+    var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
     //login entry inject
     let SessionId = getCookie('Ding_SessionId');
     if (SessionId === "") {
@@ -464,113 +468,53 @@ window.addEventListener("load", function() {
         }
     }
 
-    //page initial post
-    if (window.location == 'https://store.steampowered.com/' || window.location.pathname.split('/')[1] == 'explore') {
-        let x;
-        let tab_newreleases_content = document.querySelector('#tab_newreleases_content'); //the box for searching result. each child in it is an <a>.
-        if (!tab_newreleases_content) {
-            tab_newreleases_content = document.querySelector('#tab_popular_comingsoon_content');
+
+    //store
+    if (base_url.hostname == "store.steampowered.com"){
+        //page initial post
+        let base_path_sp = base_url.pathname.split('/');
+        if (base_url.pathname === "/" || (base_path_sp.length > 0 && base_path_sp[1] == 'explore') ) {
+            let x;
+            let tab_newreleases_content = document.querySelector('#tab_newreleases_content'); //the box for searching result. each child in it is an <a>.
             if (!tab_newreleases_content) {
-                return;
-            } else {
-                x = 3;
-            }
-        } else {
-            x = 2;
-        }
-
-
-        let children = tab_newreleases_content.children;
-
-        //restore all appid
-        let appid = [];
-        let childrenLength = children.length;
-        for (let i = 1; i < childrenLength; i++) {
-            let tmpchild = children[i];
-            if (tmpchild.href.split('/')[3] == 'app') {
-                let title = tmpchild.children[x].children[0];
-                if (!title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app') {
-                    title.setAttribute("dingPost", "dingPost");
-                    appid.push(tmpchild.href.split('/')[4]);
+                tab_newreleases_content = document.querySelector('#tab_popular_comingsoon_content');
+                if (!tab_newreleases_content) {
+                    return;
+                } else {
+                    x = 3;
                 }
+            } else {
+                x = 2;
             }
-        }
-
-        //send post request to server
-        if (appid.length != 0) {
-            let data = {
-                "Ids": appid.join()
-            };
-
-            function onload(response) {
-                console.log("got response for " + response.response.Data.Total + " appid");
-                //prefix all titles
-                for (let i = 1; i < childrenLength; i++) {
-                    let tmpchild = children[i];
-                    if (tmpchild.href.split('/')[3] == 'app') {
-                        let title = tmpchild.children[x].children[0];
-                        let thisid = tmpchild.href.split('/')[4];
-                        if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app' && appid.find(a => a == thisid)) {
-                            if (response.response.Data.AppInfo.find(a => a == thisid)) {
-                                title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
-                            } else {
-                                title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
-                            }
-                            appid.splice(appid.indexOf(thisid), 1);
-                            title.setAttribute("dingPrefix", "dingPrefix");
-                        }
-                    } else if (tmpchild.href.split('/')[3] == 'bundle') {
-                        let title = tmpchild.children[x].children[0];
-                        if (!title.getAttribute("dingPrefix")) {
-                            title.setAttribute("dingPrefix", "dingPrefix");
-                            title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
-                        }
-                    } else if (tmpchild.href.split('/')[3] == 'sub') {
-                        let title = tmpchild.children[x].children[0];
-                        if (!title.getAttribute("dingPrefix")) {
-                            title.setAttribute("dingPrefix", "dingPrefix");
-                            title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
-                        }
+            let children = tab_newreleases_content.children;
+            //restore all appid
+            let appid = [];
+            let childrenLength = children.length;
+            for (let i = 1; i < childrenLength; i++) {
+                let tmpchild = children[i];
+                if (tmpchild.href.split('/')[3] == 'app') {
+                    let title = tmpchild.children[x].children[0];
+                    if (!title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app') {
+                        title.setAttribute("dingPost", "dingPost");
+                        appid.push(tmpchild.href.split('/')[4]);
                     }
                 }
             }
-            T2Post(
-                "https://ddapi.133233.xyz/CheckIds",
-                data,
-                onload
-            );
-        }
-    } else if (window.location.pathname.split('/')[1] == 'wishlist') {
-        let wishlist_ctn = document.querySelector('#wishlist_ctn');
-        let children = wishlist_ctn.children;
-        let appid = [];
-        let childrenLength = children.length;
-        for (let i = 0; i < childrenLength; i++) {
-            let tmpchild = children[i];
-            if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'app') {
-                let title = tmpchild.children[2].children[0];
-                if (!title.getAttribute("dingPost") && title.href.split('/')[3] == 'app') {
-                    title.setAttribute("dingPost", "dingPost");
-                    appid.push(tmpchild.getAttribute("id").slice(13));
-                }
-            }
-        }
-        if (appid.length != 0) {
-            let data = {
-                "Ids": appid.join()
-            };
-            T2Post(
-                "https://ddapi.133233.xyz/CheckIds",
-                data,
-                function(response) {
+            //send post request to server
+            if (appid.length != 0) {
+                let data = {
+                    "Ids": appid.join()
+                };
+
+                function onload(response) {
                     console.log("got response for " + response.response.Data.Total + " appid");
                     //prefix all titles
-                    for (let i = 0; i < childrenLength; i++) {
+                    for (let i = 1; i < childrenLength; i++) {
                         let tmpchild = children[i];
-                        if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'app') {
-                            let title = tmpchild.querySelector('.content').children[0];
-                            let thisid = tmpchild.querySelector('.content').children[0].href.split('/')[4];
-                            if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && title.href.split('/')[3] == 'app' && appid.find(a => a == thisid)) {
+                        if (tmpchild.href.split('/')[3] == 'app') {
+                            let title = tmpchild.children[x].children[0];
+                            let thisid = tmpchild.href.split('/')[4];
+                            if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app' && appid.find(a => a == thisid)) {
                                 if (response.response.Data.AppInfo.find(a => a == thisid)) {
                                     title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
                                 } else {
@@ -579,14 +523,14 @@ window.addEventListener("load", function() {
                                 appid.splice(appid.indexOf(thisid), 1);
                                 title.setAttribute("dingPrefix", "dingPrefix");
                             }
-                        } else if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'bundle') {
-                            let title = tmpchild.querySelector('.content').children[0];
+                        } else if (tmpchild.href.split('/')[3] == 'bundle') {
+                            let title = tmpchild.children[x].children[0];
                             if (!title.getAttribute("dingPrefix")) {
                                 title.setAttribute("dingPrefix", "dingPrefix");
                                 title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
                             }
-                        } else if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'sub') {
-                            let title = tmpchild.querySelector('.content').children[0];
+                        } else if (tmpchild.href.split('/')[3] == 'sub') {
+                            let title = tmpchild.children[x].children[0];
                             if (!title.getAttribute("dingPrefix")) {
                                 title.setAttribute("dingPrefix", "dingPrefix");
                                 title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
@@ -594,164 +538,144 @@ window.addEventListener("load", function() {
                         }
                     }
                 }
-            );
-        }
-
-    } else if ((window.location.pathname.split('/')[1] == 'profiles' || window.location.pathname.split('/')[1] == 'id') && window.location.pathname.split('/')[3] == 'games') {
-        let games_list_rows = document.querySelector('#games_list_rows');
-        let children = games_list_rows.children;
-        let appid = [];
-        let childrenLength = children.length;
-        for (let i = 0; i < childrenLength; i++) {
-            let tmpchild = children[i];
-            let title = tmpchild.children[1].querySelector('.gameListRowItemTop').children[0].children[0];
-            if (!title.getAttribute("dingPost")) {
-                title.setAttribute("dingPost", "dingPost");
-                appid.push(tmpchild.getAttribute('id').slice(5));
+                T2Post(
+                    "https://ddapi.133233.xyz/CheckIds",
+                    data,
+                    onload
+                );
             }
         }
-        if (appid.length != 0) {
-            let data = {
-                "Ids": appid.join()
-            };
-            T2Post(
-                "https://ddapi.133233.xyz/CheckIds",
-                data,
-                function(response) {
-                    console.log("got response for " + response.response.Data.Total + " appid");
-                    //prefix all titles
-                    for (let i = 0; i < childrenLength; i++) {
-                        let tmpchild = children[i];
-                        let title = tmpchild.children[1].querySelector('.gameListRowItemTop').children[0].children[0];
-                        let thisid = tmpchild.getAttribute('id').slice(5);
-                        if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && appid.find(a => a == thisid)) {
-                            if (response.response.Data.AppInfo.find(a => a == thisid)) {
-                                title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
-                            } else {
-                                title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
-                            }
-                            appid.splice(appid.indexOf(thisid), 1);
-                            title.setAttribute("dingPrefix", "dingPrefix");
-                        }
+        else if (base_path_sp.length > 0 && base_path_sp[1] == 'wishlist') {
+            let wishlist_ctn = document.querySelector('#wishlist_ctn');
+            let children = wishlist_ctn.children;
+            let appid = [];
+            let childrenLength = children.length;
+            for (let i = 0; i < childrenLength; i++) {
+                let tmpchild = children[i];
+                if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'app') {
+                    let title = tmpchild.children[2].children[0];
+                    if (!title.getAttribute("dingPost") && title.href.split('/')[3] == 'app') {
+                        title.setAttribute("dingPost", "dingPost");
+                        appid.push(tmpchild.getAttribute("id").slice(13));
                     }
                 }
-            );
-        }
+            }
+            if (appid.length != 0) {
+                let data = {
+                    "Ids": appid.join()
+                };
+                T2Post(
+                    "https://ddapi.133233.xyz/CheckIds",
+                    data,
+                    function(response) {
+                        console.log("got response for " + response.response.Data.Total + " appid");
+                        //prefix all titles
+                        for (let i = 0; i < childrenLength; i++) {
+                            let tmpchild = children[i];
+                            if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'app') {
+                                let title = tmpchild.querySelector('.content').children[0];
+                                let thisid = tmpchild.querySelector('.content').children[0].href.split('/')[4];
+                                if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && title.href.split('/')[3] == 'app' && appid.find(a => a == thisid)) {
+                                    if (response.response.Data.AppInfo.find(a => a == thisid)) {
+                                        title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
+                                    } else {
+                                        title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
+                                    }
+                                    appid.splice(appid.indexOf(thisid), 1);
+                                    title.setAttribute("dingPrefix", "dingPrefix");
+                                }
+                            } else if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'bundle') {
+                                let title = tmpchild.querySelector('.content').children[0];
+                                if (!title.getAttribute("dingPrefix")) {
+                                    title.setAttribute("dingPrefix", "dingPrefix");
+                                    title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
+                                }
+                            } else if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'sub') {
+                                let title = tmpchild.querySelector('.content').children[0];
+                                if (!title.getAttribute("dingPrefix")) {
+                                    title.setAttribute("dingPrefix", "dingPrefix");
+                                    title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
+                                }
+                            }
+                        }
+                    }
+                );
+            }
 
-    } else if ((window.location.pathname.split('/')[1] == 'profiles' || window.location.pathname.split('/')[1] == 'id') && window.location.pathname.split('/')[3] == 'followedgames') {
-        let games_list_rows = document.querySelector('.games_list_rows');
-        let children = games_list_rows.children;
-        let appid = [];
-        let childrenLength = children.length;
-        for (let i = 0; i < childrenLength; i++) {
-            let tmpchild = children[i];
-            let title = tmpchild.children[1].children[0].children[0];
+        }
+        else if (base_path_sp.length > 0 && base_path_sp[1] == 'app') {
+            let appid = window.location.pathname.split('/')[2];
+            let data = {
+                Id: appid
+            };
+            let title = document.getElementById("appHubAppName");
             if (!title.getAttribute("dingPost")) {
                 title.setAttribute("dingPost", "dingPost");
-                appid.push(tmpchild.getAttribute('data-appid'));
-            }
-        }
-        if (appid.length != 0) {
-            let data = {
-                "Ids": appid.join()
-            };
-            T2Post(
-                "https://ddapi.133233.xyz/CheckIds",
-                data,
-                function(response) {
-                    console.log("got response for " + response.response.Data.Total + " appid");
-                    //prefix all titles
-                    for (let i = 0; i < childrenLength; i++) {
-                        let tmpchild = children[i];
-                        let title = tmpchild.children[1].children[0].children[0];
-                        let thisid = tmpchild.getAttribute('data-appid');
-                        if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && appid.find(a => a == thisid)) {
-                            if (response.response.Data.AppInfo.find(a => a == thisid)) {
-                                title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
-                            } else {
-                                title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
-                            }
-                            appid.splice(appid.indexOf(thisid), 1);
-                            title.setAttribute("dingPrefix", "dingPrefix");
-                        }
-                    }
-                }
-            );
-        }
-
-    } else if (window.location.pathname.split('/')[1] == 'app') {
-        let appid = window.location.pathname.split('/')[2];
-        let data = {
-            Id: appid
-        };
-        let title = document.getElementById("appHubAppName");
-        if (!title.getAttribute("dingPost")) {
-            title.setAttribute("dingPost", "dingPost");
-            T2Post(
-                "https://ddapi.133233.xyz/CheckId",
-                data,
-                function(response) {
-                    console.log("got response");
-                    var CheckIdResponse = {
-                        'is_recorded': null,
-                        'sharer': null
-                    };
-                    if (response.response.Data.Id == "0") {
-                        CheckIdResponse = {
-                            'is_recorded': false,
+                T2Post(
+                    "https://ddapi.133233.xyz/CheckId",
+                    data,
+                    function(response) {
+                        console.log("got response");
+                        var CheckIdResponse = {
+                            'is_recorded': null,
                             'sharer': null
                         };
-                        title.innerHTML += " ----- 公共库未收录";
-                    } else {
-                        let NickName = response.response.Data.NickName;
-                        if (!NickName || NickName.length === 0 || NickName === "") {
-                            NickName = "系统/匿名";
+                        if (response.response.Data.Id == "0") {
+                            CheckIdResponse = {
+                                'is_recorded': false,
+                                'sharer': null
+                            };
+                            title.innerHTML += " ----- 公共库未收录";
+                        } else {
+                            let NickName = response.response.Data.NickName;
+                            if (!NickName || NickName.length === 0 || NickName === "") {
+                                NickName = "系统/匿名";
+                            }
+                            CheckIdResponse = {
+                                'is_recorded': true,
+                                'sharer': NickName
+                            };
+                            title.innerHTML += " <br> 已收录，提交者：" + NickName + "，入库时间：" + response.response.Data.Date;
                         }
-                        CheckIdResponse = {
-                            'is_recorded': true,
-                            'sharer': NickName
-                        };
-                        title.innerHTML += " <br> 已收录，提交者：" + NickName + "，入库时间：" + response.response.Data.Date;
-                    }
-                    title.setAttribute("dingPrefix", "dingPrefix");
-                    //only if the response is received, then add subscribe/download button.
+                        title.setAttribute("dingPrefix", "dingPrefix");
+                        //only if the response is received, then add subscribe/download button.
 
-                    //自己提交的(判断CheckId返回的昵称?)/免费游戏/分享者为“系统/匿名”/未收录的,不再请求CheckSub
-                    //add a button for DingDownloadcost_credit
-                    if (getCookie('Ding_SessionId')) {
-                        //if logged in
-                        let queueBtnFollow = document.querySelector('#queueBtnFollow');
-                        let checkSubData = {
-                            'SessionId': getCookie('Ding_SessionId'),
-                            "AppId": appid
-                        };
+                        //自己提交的(判断CheckId返回的昵称?)/免费游戏/分享者为“系统/匿名”/未收录的,不再请求CheckSub
+                        //add a button for DingDownloadcost_credit
+                        if (getCookie('Ding_SessionId')) {
+                            //if logged in
+                            let queueBtnFollow = document.querySelector('#queueBtnFollow');
+                            let checkSubData = {
+                                'SessionId': getCookie('Ding_SessionId'),
+                                "AppId": appid
+                            };
 
-                        if (queueBtnFollow) {
-                            // if this page is an app instead of dlc
-                            const freeGameBtn = document.querySelector('#freeGameBtn'); // is this a free game?
-                            if (CheckIdResponse.is_recorded === true && CheckIdResponse.sharer !== UnicodeDecodeB64(getCookie('Ding_NickName')) && !freeGameBtn && CheckIdResponse.sharer !== "系统/匿名") {
-                                //only if the game is recorded
-                                //and the sharer is not the current user
-                                //and the game is not free.
-                                //and the sharer is not "系统/匿名"
-                                T2Post(
-                                    "https://ddapi.133233.xyz/AjaxCheckSub",
-                                    checkSubData,
-                                    function(response) {
-                                        if (response.response.Data.Credit && response.response.Data.Credit !== 2147483647) {
-                                            setCookie('Ding_Credit', response.response.Data.Credit, 30);
-                                        }
-                                        if (response.response.Data.Status > 0) {
-                                            //if not subscribed
-                                            let cost_credit = response.response.Data.Status;
-                                            queueBtnFollow.insertAdjacentHTML('beforeend', '<div id="dingdown_subscribe" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当订阅此游戏"><span>叮当订阅：-' + cost_credit + '分</span></a></div>');
-                                            let dingdown_subscribe = document.getElementById("dingdown_subscribe");
-                                            dingdown_subscribe.addEventListener("click", function() {
-                                                let subData = {
-                                                    'SessionId': getCookie('Ding_SessionId'),
-                                                    "AppId": appid
-                                                };
-                                                Swal.fire({
+                            if (queueBtnFollow) {
+                                // if this page is an app instead of dlc
+                                const freeGameBtn = document.querySelector('#freeGameBtn'); // is this a free game?
+                                if (CheckIdResponse.is_recorded === true && CheckIdResponse.sharer !== UnicodeDecodeB64(getCookie('Ding_NickName')) && !freeGameBtn && CheckIdResponse.sharer !== "系统/匿名") {
+                                    //only if the game is recorded
+                                    //and the sharer is not the current user
+                                    //and the game is not free.
+                                    //and the sharer is not "系统/匿名"
+                                    T2Post(
+                                        "https://ddapi.133233.xyz/AjaxCheckSub",
+                                        checkSubData,
+                                        function(response) {
+                                            if (response.response.Data.Credit && response.response.Data.Credit !== 2147483647) {
+                                                setCookie('Ding_Credit', response.response.Data.Credit, 30);
+                                            }
+                                            if (response.response.Data.Status > 0) {
+                                                //if not subscribed
+                                                let cost_credit = response.response.Data.Status;
+                                                queueBtnFollow.insertAdjacentHTML('beforeend', '<div id="dingdown_subscribe" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当订阅此游戏"><span>叮当订阅：-' + cost_credit + '分</span></a></div>');
+                                                let dingdown_subscribe = document.getElementById("dingdown_subscribe");
+                                                dingdown_subscribe.addEventListener("click", function() {
+                                                    let subData = {
+                                                        'SessionId': getCookie('Ding_SessionId'),
+                                                        "AppId": appid
+                                                    };
+                                                    Swal.fire({
                                                         title: '确认订阅？',
                                                         text: '订阅后将会消耗' + cost_credit + '分，确认订阅吗？',
                                                         type: 'warning',
@@ -759,40 +683,40 @@ window.addEventListener("load", function() {
                                                         confirmButtonText: '确认订阅',
                                                         cancelButtonText: '取消',
                                                     })
-                                                    .then(
+                                                        .then(
                                                         function(result) {
                                                             if (result.value) {
                                                                 Swal.fire({
-                                                                        title: '订阅中...',
-                                                                        html: '尝试订阅中,等待倒计时 <b></b> 毫秒.',
-                                                                        icon: 'question',
-                                                                        timer: 10000,
-                                                                        timerProgressBar: true,
-                                                                        allowOutsideClick: false,
-                                                                        allowEscapeKey: false,
-                                                                        allowEnterKey: false,
-                                                                        showConfirmButton: false,
-                                                                        didOpen: () => {
-                                                                            Swal.showLoading()
-                                                                            const b = Swal.getHtmlContainer().querySelector('b')
-                                                                            timerInterval = setInterval(() => {
-                                                                                b.textContent = Swal.getTimerLeft()
-                                                                            }, 100)
-                                                                        },
-                                                                        willClose: () => {
-                                                                            clearInterval(timerInterval);
-                                                                        }
-                                                                    })
+                                                                    title: '订阅中...',
+                                                                    html: '尝试订阅中,等待倒计时 <b></b> 毫秒.',
+                                                                    icon: 'question',
+                                                                    timer: 10000,
+                                                                    timerProgressBar: true,
+                                                                    allowOutsideClick: false,
+                                                                    allowEscapeKey: false,
+                                                                    allowEnterKey: false,
+                                                                    showConfirmButton: false,
+                                                                    didOpen: () => {
+                                                                        Swal.showLoading()
+                                                                        const b = Swal.getHtmlContainer().querySelector('b')
+                                                                        timerInterval = setInterval(() => {
+                                                                            b.textContent = Swal.getTimerLeft()
+                                                                        }, 100)
+                                                                    },
+                                                                    willClose: () => {
+                                                                        clearInterval(timerInterval);
+                                                                    }
+                                                                })
                                                                     .then((result) => {
-                                                                        if (result.dismiss === Swal.DismissReason.timer) {
-                                                                            Swal.fire({
-                                                                                title: '订阅超时，请检查网络后重试',
-                                                                                icon: 'error',
-                                                                                text: '订阅超时，请检查网络后重试',
-                                                                                confirmButtonText: '确定'
-                                                                            });
-                                                                        }
-                                                                    });
+                                                                    if (result.dismiss === Swal.DismissReason.timer) {
+                                                                        Swal.fire({
+                                                                            title: '订阅超时，请检查网络后重试',
+                                                                            icon: 'error',
+                                                                            text: '订阅超时，请检查网络后重试',
+                                                                            confirmButtonText: '确定'
+                                                                        });
+                                                                    }
+                                                                });
                                                                 T2Post(
                                                                     "https://ddapi.133233.xyz/AjaxSubApp",
                                                                     subData,
@@ -841,22 +765,388 @@ window.addEventListener("load", function() {
                                                         }
                                                     );
 
-                                            });
-                                        } else if (response.response.Data.Status === 0) {
-                                            //0 this game hasn't been recorded yet
-                                            //do nothing so far
-                                        } else if (response.response.Data.Status === -200) {
-                                            //-200 this is a dlc and is recorded.
+                                                });
+                                            } else if (response.response.Data.Status === 0) {
+                                                //0 this game hasn't been recorded yet
+                                                //do nothing so far
+                                            } else if (response.response.Data.Status === -200) {
+                                                //-200 this is a dlc and is recorded.
+                                                //do nothing so far
+                                            } else if (response.response.Data.Status === -20 || response.response.Data.Status === -30 || response.response.Data.Status === -100) {
+                                                //-20 the user is the sharer. -30 the user has subscribed. -100 the game is free or recorded by anonymous users. All means the user do not need to pay credit for this game.
+                                                queueBtnFollow.insertAdjacentHTML('beforeend', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载&启动游戏"><span>叮当试玩</span></a></div>');
+                                                const dingdown_download = document.getElementById("dingdown_download");
+                                                dingdown_download.addEventListener("click", function() {
+                                                    if (isWebBrowser()) {
+                                                        window.open("ding://install/" + appid);
+                                                    } else {
+                                                        window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid);
+                                                    }
+                                                });
+                                            } else if (response.response.Data.Status === -2) {
+                                                //if not logged in
+                                                setCookie('Ding_SessionId', "", -1);
+                                                setCookie('Ding_Credit', "", -1);
+                                                setCookie('Ding_NickName', "", -1);
+                                                Swal.fire({
+                                                    title: '您还没有登录，请先登录',
+                                                    text: response.response.Data.Message,
+                                                    icon: 'error',
+                                                    confirmButtonText: '确定',
+                                                    timer: 2000,
+                                                }).then(function() {
+                                                    window.location.reload();
+                                                });
+                                            } else {
+                                                console.log("error" + response.response.Data.Status + ',' + response.response.Data.Message);
+                                            }
+                                        }
+                                    );
+                                } else if (CheckIdResponse.is_recorded === false) {
+                                    //not recorded,
+                                    //未收录的判断网页内容是否有启动steam,有的话证明可入库.
+                                    const game_area_already_owned = document.getElementsByClassName("game_area_already_owned");
+                                    if (game_area_already_owned) {
+                                        //add a share button TODO
+                                    }
+                                } else if (CheckIdResponse.sharer === UnicodeDecodeB64(getCookie('Ding_NickName')) || freeGameBtn || CheckIdResponse.sharer === "系统/匿名") {
+                                    //user can download this game
+                                    queueBtnFollow.insertAdjacentHTML('beforeend', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载&启动游戏"><span>叮当试玩</span></a></div>');
+                                    const dingdown_download = document.getElementById("dingdown_download");
+                                    dingdown_download.addEventListener("click", function() {
+                                        if (isWebBrowser()) {
+                                            window.open("ding://install/" + appid);
+                                        } else {
+                                            window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid);
+                                        }
+                                    });
+                                }
+                            } else {
+                                //if dlc
+                                const game_area_dlc_bubble = document.querySelector(".game_area_dlc_bubble");
+                                let game_appid;
+                                if (game_area_dlc_bubble) {
+                                    game_appid = game_area_dlc_bubble.children[0].children[1].children[0].href.split('/')[4];
+                                }
+                                //if this dlc is not recorded: do nothing
+                                if (CheckIdResponse.is_recorded === true) {
+                                    //check parent game
+                                    T2Post(
+                                        "https://ddapi.133233.xyz/AjaxCheckSub", {
+                                            'SessionId': getCookie('Ding_SessionId'),
+                                            "AppId": game_appid
+                                        },
+                                        function(response) {
+                                            if (response.response.Data.Credit && response.response.Data.Credit !== 2147483647) {
+                                                setCookie('Ding_Credit', response.response.Data.Credit, 30);
+                                            }
+                                            if (response.response.Data.Status > 0) {
+                                                //if not subscribed
+                                                //请先叮当订阅游戏本体
+                                                const ignoreBtn = document.querySelector("#ignoreBtn");
+                                                if (ignoreBtn) {
+                                                    ignoreBtn.insertAdjacentHTML("beforebegin", '<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_need_game_subscribed" class="queue_control_button" style="flex-grow: 0;"><a href="http://store.steampowered.com/app/' + game_appid + '" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="请在使用叮当订阅dlc前先订阅游戏本体"><span>请先叮当订阅本体（点击跳转本体）</span></a></div></div>')
+                                                }
+                                            } else if (response.response.Data.Status === 0) {
+                                                //0 this game hasn't been recorded yet
+                                                const ignoreBtn = document.querySelector("#ignoreBtn");
+                                                if (ignoreBtn) {
+                                                    ignoreBtn.insertAdjacentHTML("beforebegin", '<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_need_game_recorded" class="queue_control_button" style="flex-grow: 0;"><a href="http://store.steampowered.com/app/' + game_appid + '" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="本地未收录，无法订阅本dlc"><span>叮当尚未收录本体（点击跳转本体）</span></a></div></div>')
+                                                }
+                                            } else if (response.response.Data.Status === -200) {
+                                                //-200 this is a dlc and is recorded.
+                                                //this condition is not needed. no dlc's parent is another dlc.
+                                            } else if (response.response.Data.Status === -20 || response.response.Data.Status === -30 || response.response.Data.Status === -100) {
+                                                //-20 the user is the sharer. -30 the user has subscribed. -100 the game is free or recorded by anonymous users. All means the user do not need to pay credit for this game.
+                                                const ignoreBtn = document.querySelector("#ignoreBtn");
+                                                console.log(ignoreBtn);
+                                                if (ignoreBtn) {
+                                                    ignoreBtn.insertAdjacentHTML("beforebegin", '<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a href="javascript:void(0);" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载本dlc"><span>叮当试玩</span></a></div></div>')
+                                                    const dingdown_download = document.getElementById("dingdown_download");
+                                                    dingdown_download.addEventListener("click", function() {
+                                                        if (isWebBrowser()) {
+                                                            window.open("ding://install/" + appid);
+                                                        } else {
+                                                            window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid);
+                                                        }
+                                                    });
+                                                }
+
+                                            } else if (response.response.Data.Status === -2) {
+                                                //if not logged in
+                                                setCookie('Ding_SessionId', "", -1);
+                                                setCookie('Ding_Credit', "", -1);
+                                                setCookie('Ding_NickName', "", -1);
+                                                Swal.fire({
+                                                    title: '您还没有登录，请先登录',
+                                                    text: response.response.Data.Message,
+                                                    icon: 'error',
+                                                    confirmButtonText: '确定',
+                                                    timer: 2000,
+                                                }).then(function() {
+                                                    window.location.reload();
+                                                });
+                                            } else {
+                                                console.log("error" + response.response.Data.Status + ',' + response.response.Data.Message);
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+
+                        }
+
+
+                    }
+                );
+            }
+
+        }
+        else if (base_path_sp.length > 0 && base_path_sp[1] == 'search') {
+            let tmp_script = document.querySelector('#responsive_page_template_content').children[0].innerHTML;
+            let position = tmp_script.search(/"infiniscroll"/);
+            let infiniscroll = tmp_script[position + 15]; //为0时没有无限下滚，为1时有。这个决定了整个页面变化的div如何定位。经过实测，如果无限下滚，则不需要onload的时候触发一次。
+            if (infiniscroll == 0) {
+                let searching_result = document.querySelector('#search_resultsRows'); //the box for searching result. each child in it is an <a>.
+                let children = searching_result.children;
+
+                //restore all appid
+                let appid = [];
+                let childrenLength = children.length;
+                for (let i = 0; i < childrenLength; i++) {
+                    let tmpchild = children[i];
+                    if (tmpchild.href.split('/')[3] == 'app') {
+                        let title = tmpchild.children[1].children[0].children[0];
+                        if (!title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app') {
+                            title.setAttribute("dingPost", "dingPost");
+                            appid.push(tmpchild.href.split('/')[4]);
+                        }
+                    }
+                }
+                //send post request to server
+                if (appid.length != 0) {
+                    let data = {
+                        "Ids": appid.join()
+                    };
+                    T2Post(
+                        "https://ddapi.133233.xyz/CheckIds",
+                        data,
+                        function(response) {
+                            console.log("got response for " + response.response.Data.Total + " appid");
+                            //prefix all titles
+                            for (let i = 0; i < childrenLength; i++) {
+                                let tmpchild = children[i];
+                                if (tmpchild.href.split('/')[3] == 'app') {
+                                    let title = tmpchild.children[1].children[0].children[0];
+                                    let thisid = tmpchild.href.split('/')[4];
+                                    if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app' && appid.find(a => a == thisid)) {
+                                        if (response.response.Data.AppInfo.find(a => a == thisid)) {
+                                            title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
+                                        } else {
+                                            title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
+                                        }
+                                        appid.splice(appid.indexOf(thisid), 1);
+                                        title.setAttribute("dingPrefix", "dingPrefix");
+                                    }
+                                } else if (tmpchild.href.split('/')[3] == 'bundle') {
+                                    let title = tmpchild.children[1].children[0].children[0];
+                                    if (!title.getAttribute("dingPrefix")) {
+                                        title.setAttribute("dingPrefix", "dingPrefix");
+                                        title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
+                                    }
+                                } else if (tmpchild.href.split('/')[3] == 'sub') {
+                                    let title = tmpchild.children[1].children[0].children[0];
+                                    if (!title.getAttribute("dingPrefix")) {
+                                        title.setAttribute("dingPrefix", "dingPrefix");
+                                        title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
+                                    }
+                                }
+                            }
+                        }
+                    );
+                }
+
+            }
+        }
+
+    }
+    //steamcommunity.com
+    else if (base_url.hostname == "steamcommunity.com"){
+        let base_path_sp = base_url.pathname.split('/');
+        //page initial post
+        if (base_path.length > 0 && (base_path_sp[1] == 'profiles' || base_path_sp[1] == 'id') && base_path_sp[3] == 'games') {
+            let games_list_rows = document.querySelector('#games_list_rows');
+            let children = games_list_rows.children;
+            let appid = [];
+            let childrenLength = children.length;
+            for (let i = 0; i < childrenLength; i++) {
+                let tmpchild = children[i];
+                let title = tmpchild.children[1].querySelector('.gameListRowItemTop').children[0].children[0];
+                if (!title.getAttribute("dingPost")) {
+                    title.setAttribute("dingPost", "dingPost");
+                    appid.push(tmpchild.getAttribute('id').slice(5));
+                }
+            }
+            if (appid.length != 0) {
+                let data = {
+                    "Ids": appid.join()
+                };
+                T2Post(
+                    "https://ddapi.133233.xyz/CheckIds",
+                    data,
+                    function(response) {
+                        console.log("got response for " + response.response.Data.Total + " appid");
+                        //prefix all titles
+                        for (let i = 0; i < childrenLength; i++) {
+                            let tmpchild = children[i];
+                            let title = tmpchild.children[1].querySelector('.gameListRowItemTop').children[0].children[0];
+                            let thisid = tmpchild.getAttribute('id').slice(5);
+                            if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && appid.find(a => a == thisid)) {
+                                if (response.response.Data.AppInfo.find(a => a == thisid)) {
+                                    title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
+                                } else {
+                                    title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
+                                }
+                                appid.splice(appid.indexOf(thisid), 1);
+                                title.setAttribute("dingPrefix", "dingPrefix");
+                            }
+                        }
+                    }
+                );
+            }
+
+        }
+        else if (base_path.length > 0 && (base_path_sp[1] == 'profiles' || base_path_sp[1] == 'id') && base_path_sp[3] == 'followedgames') {
+            let games_list_rows = document.querySelector('.games_list_rows');
+            let children = games_list_rows.children;
+            let appid = [];
+            let childrenLength = children.length;
+            for (let i = 0; i < childrenLength; i++) {
+                let tmpchild = children[i];
+                let title = tmpchild.children[1].children[0].children[0];
+                if (!title.getAttribute("dingPost")) {
+                    title.setAttribute("dingPost", "dingPost");
+                    appid.push(tmpchild.getAttribute('data-appid'));
+                }
+            }
+            if (appid.length != 0) {
+                let data = {
+                    "Ids": appid.join()
+                };
+                T2Post(
+                    "https://ddapi.133233.xyz/CheckIds",
+                    data,
+                    function(response) {
+                        console.log("got response for " + response.response.Data.Total + " appid");
+                        //prefix all titles
+                        for (let i = 0; i < childrenLength; i++) {
+                            let tmpchild = children[i];
+                            let title = tmpchild.children[1].children[0].children[0];
+                            let thisid = tmpchild.getAttribute('data-appid');
+                            if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && appid.find(a => a == thisid)) {
+                                if (response.response.Data.AppInfo.find(a => a == thisid)) {
+                                    title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
+                                } else {
+                                    title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
+                                }
+                                appid.splice(appid.indexOf(thisid), 1);
+                                title.setAttribute("dingPrefix", "dingPrefix");
+                            }
+                        }
+                    }
+                );
+            }
+
+        }
+        else if (base_path.length > 0 && (base_path_sp[1] == 'workshop' || base_path_sp[1] == 'sharedfiles') && base_path_sp[2] == 'filedetails') {
+            //if the page is workshop/filedetails
+            const SubscribeItemBtn = document.querySelector('#SubscribeItemBtn');
+            if (SubscribeItemBtn) {
+                //console.log("is_mod");
+                let modid = window.location.href.split('/')[5].slice(4);
+                let appid = document.querySelector('[name="appid"]').value;
+
+                //same logic as showing dingdownload button
+                if (getCookie('Ding_SessionId')) {
+                    T2Post(
+                        "https://ddapi.133233.xyz/CheckId", {
+                            "Id": appid
+                        },
+                        function(response) {
+                            console.log("got response");
+                            var CheckIdResponse = {
+                                'is_recorded': null,
+                                'sharer': null
+                            };
+                            if (response.response.Data.Id == "0") {
+                                CheckIdResponse = {
+                                    'is_recorded': false,
+                                    'sharer': null
+                                };
+                            } else {
+                                let NickName = response.response.Data.NickName;
+                                if (!NickName || NickName.length === 0 || NickName === "") {
+                                    NickName = "系统/匿名";
+                                }
+                                CheckIdResponse = {
+                                    'is_recorded': true,
+                                    'sharer': NickName
+                                };
+                            }
+
+                            //无需请求的情况下,不再请求CheckSub
+                            //可以叮当下载的前提下，显示叮当订阅按钮，否则显示未订阅游戏信息
+                            let queueBtnFollow = document.querySelector('#queueBtnFollow');
+                            let checkSubData = {
+                                'SessionId': getCookie('Ding_SessionId'),
+                                "AppId": appid
+                            };
+
+                            const freeGameBtn = document.querySelector('#freeGameBtn'); // is this a free game?
+                            if (CheckIdResponse.is_recorded === true && CheckIdResponse.sharer !== UnicodeDecodeB64(getCookie('Ding_NickName')) && !freeGameBtn && CheckIdResponse.sharer !== "系统/匿名") {
+                                //if the game is recorded
+                                //and the sharer is not the current user
+                                //and the game is not free.
+                                //and the sharer is not "系统/匿名"
+                                T2Post(
+                                    "https://ddapi.133233.xyz/AjaxCheckSub",
+                                    checkSubData,
+                                    function(response) {
+                                        if (response.response.Data.Credit && response.response.Data.Credit !== 2147483647) {
+                                            setCookie('Ding_Credit', response.response.Data.Credit, 30);
+                                        }
+                                        if (response.response.Data.Status > 0) {
+                                            //if not subscribed
+                                            //show information tell the user that he needs to subscribe the game first
+                                            SubscribeItemBtn.parentElement.insertAdjacentHTML('beforeend',
+                                                                                              '<a id="DingDownUnsubscribeModBtn" style="position: relative;" class="btnv6_lightblue_blue btn_border_2px btn_medium ">' +
+                                                                                              '    <div class="subscribeIcon"></div>' +
+                                                                                              '    <span class="subscribeText">' +
+                                                                                              '        叮当订阅需已订阅游戏本体！' +
+                                                                                              '    </span>' +
+                                                                                              '</a>'
+                                                                                             );
+
+                                        } else if (response.response.Data.Status === 0 || response.response.Data.Status === -200) {
+                                            //0 this game hasn't been recorded yet, -200 this is not game but dlc
                                             //do nothing so far
                                         } else if (response.response.Data.Status === -20 || response.response.Data.Status === -30 || response.response.Data.Status === -100) {
-                                            //-20 the user is the sharer. -30 the user has subscribed. -100 the game is free or recorded by anonymous users. All means the user do not need to pay credit for this game.
-                                            queueBtnFollow.insertAdjacentHTML('beforeend', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载&启动游戏"><span>叮当试玩</span></a></div>');
-                                            const dingdown_download = document.getElementById("dingdown_download");
-                                            dingdown_download.addEventListener("click", function() {
+                                            //-20 the user is the sharer. -30 the user has subscribed. -100 the game is free or recorded by anonymous users.
+                                            //All means the user do not need to pay credit for this game.
+                                            SubscribeItemBtn.parentElement.insertAdjacentHTML('beforeend',
+                                                                                              '<a id="DingDownSubscribeModBtn" style="position: relative;" class="btnv6_lightblue_blue btn_border_2px btn_medium ">' +
+                                                                                              '    <div class="subscribeIcon"></div>' +
+                                                                                              '    <span class="subscribeText">' +
+                                                                                              '        叮当订阅' +
+                                                                                              '    </span>' +
+                                                                                              '</a>'
+                                                                                             );
+                                            const DingDownSubscribeModBtn = document.querySelector('#DingDownSubscribeModBtn');
+                                            DingDownSubscribeModBtn.addEventListener('click', function() {
                                                 if (isWebBrowser()) {
-                                                    window.open("ding://install/" + appid);
+                                                    window.open("ding://install/" + appid + "/" + modid);
                                                 } else {
-                                                    window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid);
+                                                    window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid + "/" + modid);
                                                 }
                                             });
                                         } else if (response.response.Data.Status === -2) {
@@ -880,125 +1170,336 @@ window.addEventListener("load", function() {
                                 );
                             } else if (CheckIdResponse.is_recorded === false) {
                                 //not recorded,
-                                //未收录的判断网页内容是否有启动steam,有的话证明可入库.
-                                const game_area_already_owned = document.getElementsByClassName("game_area_already_owned");
-                                if (game_area_already_owned) {
-                                    //add a share button TODO
-                                }
+                                //do nothing
                             } else if (CheckIdResponse.sharer === UnicodeDecodeB64(getCookie('Ding_NickName')) || freeGameBtn || CheckIdResponse.sharer === "系统/匿名") {
                                 //user can download this game
-                                queueBtnFollow.insertAdjacentHTML('beforeend', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载&启动游戏"><span>叮当试玩</span></a></div>');
-                                const dingdown_download = document.getElementById("dingdown_download");
-                                dingdown_download.addEventListener("click", function() {
+                                SubscribeItemBtn.parentElement.insertAdjacentHTML('beforeend',
+                                                                                  '<a id="DingDownSubscribeModBtn" style="position: relative;" class="btnv6_lightblue_blue btn_border_2px btn_medium ">' +
+                                                                                  '    <div class="subscribeIcon"></div>' +
+                                                                                  '    <span class="subscribeText">' +
+                                                                                  '        叮当订阅' +
+                                                                                  '    </span>' +
+                                                                                  '</a>'
+                                                                                 );
+                                const DingDownSubscribeModBtn = document.querySelector('#DingDownSubscribeModBtn');
+                                DingDownSubscribeModBtn.addEventListener('click', function() {
                                     if (isWebBrowser()) {
-                                        window.open("ding://install/" + appid);
+                                        window.open("ding://install/" + appid + "/" + modid);
                                     } else {
-                                        window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid);
+                                        window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid + "/" + modid);
                                     }
                                 });
                             }
-                        } else {
-                            //if dlc
-                            const game_area_dlc_bubble = document.querySelector(".game_area_dlc_bubble");
-                            let game_appid;
-                            if (game_area_dlc_bubble) {
-                                game_appid = game_area_dlc_bubble.children[0].children[1].children[0].href.split('/')[4];
-                            }
-                            //if this dlc is not recorded: do nothing
-                            if (CheckIdResponse.is_recorded === true) {
-                                //check parent game
-                                T2Post(
-                                    "https://ddapi.133233.xyz/AjaxCheckSub", {
-                                        'SessionId': getCookie('Ding_SessionId'),
-                                        "AppId": game_appid
-                                    },
-                                    function(response) {
-                                        if (response.response.Data.Credit && response.response.Data.Credit !== 2147483647) {
-                                            setCookie('Ding_Credit', response.response.Data.Credit, 30);
-                                        }
-                                        if (response.response.Data.Status > 0) {
-                                            //if not subscribed
-                                            //请先叮当订阅游戏本体
-                                            const ignoreBtn = document.querySelector("#ignoreBtn");
-                                            if (ignoreBtn) {
-                                                ignoreBtn.insertAdjacentHTML("beforebegin", '<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_need_game_subscribed" class="queue_control_button" style="flex-grow: 0;"><a href="http://store.steampowered.com/app/' + game_appid + '" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="请在使用叮当订阅dlc前先订阅游戏本体"><span>请先叮当订阅本体（点击跳转本体）</span></a></div></div>')
-                                            }
-                                        } else if (response.response.Data.Status === 0) {
-                                            //0 this game hasn't been recorded yet
-                                            const ignoreBtn = document.querySelector("#ignoreBtn");
-                                            if (ignoreBtn) {
-                                                ignoreBtn.insertAdjacentHTML("beforebegin", '<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_need_game_recorded" class="queue_control_button" style="flex-grow: 0;"><a href="http://store.steampowered.com/app/' + game_appid + '" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="本地未收录，无法订阅本dlc"><span>叮当尚未收录本体（点击跳转本体）</span></a></div></div>')
-                                            }
-                                        } else if (response.response.Data.Status === -200) {
-                                            //-200 this is a dlc and is recorded.
-                                            //this condition is not needed. no dlc's parent is another dlc.
-                                        } else if (response.response.Data.Status === -20 || response.response.Data.Status === -30 || response.response.Data.Status === -100) {
-                                            //-20 the user is the sharer. -30 the user has subscribed. -100 the game is free or recorded by anonymous users. All means the user do not need to pay credit for this game.
-                                            const ignoreBtn = document.querySelector("#ignoreBtn");
-                                            console.log(ignoreBtn);
-                                            if (ignoreBtn) {
-                                                ignoreBtn.insertAdjacentHTML("beforebegin", '<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a href="javascript:void(0);" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载本dlc"><span>叮当试玩</span></a></div></div>')
-                                                const dingdown_download = document.getElementById("dingdown_download");
-                                                dingdown_download.addEventListener("click", function() {
-                                                    if (isWebBrowser()) {
-                                                        window.open("ding://install/" + appid);
-                                                    } else {
-                                                        window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid);
-                                                    }
-                                                });
-                                            }
 
-                                        } else if (response.response.Data.Status === -2) {
-                                            //if not logged in
-                                            setCookie('Ding_SessionId', "", -1);
-                                            setCookie('Ding_Credit', "", -1);
-                                            setCookie('Ding_NickName', "", -1);
-                                            Swal.fire({
-                                                title: '您还没有登录，请先登录',
-                                                text: response.response.Data.Message,
-                                                icon: 'error',
-                                                confirmButtonText: '确定',
-                                                timer: 2000,
-                                            }).then(function() {
-                                                window.location.reload();
-                                            });
-                                        } else {
-                                            console.log("error" + response.response.Data.Status + ',' + response.response.Data.Message);
-                                        }
-                                    }
-                                )
-                            }
+
+
                         }
-
+                    );
+                } else {
+                    //if not loged in
+                    //show login button
+                    SubscribeItemBtn.parentElement.insertAdjacentHTML('beforeend',
+                                                                      '<a id="dingdown_login" style="position: relative;" class="btnv6_lightblue_blue btn_border_2px btn_medium ">' +
+                                                                      '    <span class="subscribeText">' +
+                                                                      '        叮当登录' +
+                                                                      '    </span>' +
+                                                                      '</a>'
+                                                                     );
+                    const dingdown_login = document.getElementById("dingdown_login");
+                    if (dingdown_login) {
+                        dingdown_login.addEventListener("click", DingDownLoginForm);
                     }
-
-
                 }
-            );
+            } else {
+                //console.log("not_mod")
+            }
+        }
+    }
+    //steamdb.info
+    else if (base_url.hostname == "steamdb.info"){
+      let base_path = window.location.pathname.split('/');
+      if (base_path.length > 0 && base_path[1] === "app") {
+        let head_node = document.getElementsByClassName("pagehead");
+        if (head_node && head_node.length >0){
+           let appids = [];
+        //base appid
+            let base_appid = base_path[2];
+            appids.push(base_appid);
+
+        //get the dlc table.
+       let dlc_node = document.querySelector("#dlc");
+        if (dlc_node)
+        {
+            //body
+           let children = dlc_node.getElementsByTagName("tbody");
+                //restore all appid
+            let childrenLength = children.length;
+            for (let i = 0; i < childrenLength; i++) {
+                let tmpchild = children[i].getElementsByTagName("tr");
+                let tmpchildLength = tmpchild.length;
+                 for (let k = 0; k < tmpchildLength; k++) {
+                     let appid = tmpchild[k].getAttribute("data-appid");
+                     if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                         appids.push(appid);
+                     }
+                 }
+            }
         }
 
-    } else if (window.location.pathname.split('/')[1] == 'search') {
-        let tmp_script = document.querySelector('#responsive_page_template_content').children[0].innerHTML;
-        let position = tmp_script.search(/"infiniscroll"/);
-        let infiniscroll = tmp_script[position + 15]; //为0时没有无限下滚，为1时有。这个决定了整个页面变化的div如何定位。经过实测，如果无限下滚，则不需要onload的时候触发一次。
-        if (infiniscroll == 0) {
-            let searching_result = document.querySelector('#search_resultsRows'); //the box for searching result. each child in it is an <a>.
-            let children = searching_result.children;
+           if (appids.length != 0) {
+                let data = {
+                    "Ids": appids.join()
+                };
+                T2Post(
+                    "https://ddapi.133233.xyz/CheckIds",
+                    data,
+                    function (response) {
+                        console.log("got response for " + response.response.Data.Total + " appid");
+                          //body
 
+                        //prefix head name.
+                        let head_name = head_node[0].getElementsByTagName("h1");
+                        if (head_name && head_name.length >0){
+                                if (response.response.Data.AppInfo.find(a => a == base_appid)) {
+                                    head_name[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + head_name[0].innerHTML;
+                                } else {
+                                    head_name[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + head_name[0].innerHTML;
+                                }
+                        }
+                        if (dlc_node){
+                            let children = dlc_node.getElementsByTagName("tbody");
+                            //restore all appid
+                            let childrenLength = children.length;
+                            //prefix DLC table
+                            for (let i = 0; i < childrenLength; i++) {
+                                let tmpchild = children[i].getElementsByTagName("tr");
+                                let tmpchildLength = tmpchild.length;
+                                for (let k = 0; k < tmpchildLength; k++) {
+                                    let tmpnode = tmpchild[k];
+                                    let appid = tmpnode.getAttribute("data-appid");
+                                    let tmptext = tmpnode.getElementsByTagName("td");
+                                    if (tmptext && tmptext.length >0) {
+                                        if (appids.find(a => a == appid)) {
+                                            if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                                tmptext[1].innerHTML = "<span style='color:green;'>（已收录）</span>" + tmptext[1].innerHTML;
+                                            } else {
+                                                tmptext[1].innerHTML = "<span style='color:red;'>（未收录）</span>" + tmptext[1].innerHTML;
+                                            }
+                                            appids.splice(appids.indexOf(appid), 1);
+                                        }
+
+                                        }
+
+                                    }
+
+                                }
+                         }
+                        }
+                );
+            }
+        }
+    }
+    }
+});
+
+//mutation检测是否在搜索结果内部分有变化。若有，触发脚本
+if (base_url.hostname == 'store.steampowered.com') {
+    //主页. xxx1是服务于类搜索结果的部分的.
+    let base_path_sp = window.location.pathname.split('/');
+    if(base_url.pathname === "/" || (base_path_sp.length > 0 && base_path_sp[1] == 'explore') ){
+        let targetNode1 = document.querySelector('#last_tab');
+        let targetNode2 = document.querySelector('#tab_topsellers_content');
+
+        let config = {
+            subtree: true,
+            childList: true,
+            characterData: true
+        };
+
+        var callback1 = mutations => {
+            let tags = targetNode1.getAttribute("value");
+            if (tags && tags !== "") {
+                let display = document.querySelector('#' + tags.replace(/\$/g, '\\$')); //the box for searching result. each child in it is an <a>. //# syntax doesn't allow for an unescaped
+                // tab_topsellers_content 热销商品标签 is different from others
+                let children;
+                let i;
+                let x;
+                if (tags == "tab_topsellers_content") {
+                    children = display.children[2].children;
+                    i = 0;
+                    x = 2;
+                } else if (tags == "tab_all_comingsoon_content" || tags == "tab_popular_comingsoon_content") {
+                    children = display.children;
+                    i = 1;
+                    x = 3;
+                } else {
+                    children = display.children;
+                    i = 1;
+                    x = 2;
+                }
+                //restore all appid
+                let appid = [];
+                let childrenLength = children.length;
+                for (; i < childrenLength; i++) {
+                    let tmpchild = children[i];
+                    if (tmpchild && tmpchild.href && tmpchild.href.split('/')[3] == 'app') {
+                        let title = tmpchild.children[x].children[0];
+                        if (title && !title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app') {
+                            title.setAttribute("dingPost", "dingPost");
+                            appid.push(tmpchild.href.split('/')[4]);
+                        }
+                    }
+                }
+                //send post request to server
+                if (appid.length != 0) {
+                    let data = {
+                        "Ids": appid.join()
+                    };
+                    T2Post(
+                        "https://ddapi.133233.xyz/CheckIds",
+                        data,
+                        function(response) {
+                            console.log("got response for " + response.response.Data.Total + " appid");
+                            //prefix all titles
+                            let i;
+                            if (tags == "tab_topsellers_content") {
+                                i = 0;
+                            } else {
+                                i = 1;
+                            }
+                            for (; i < childrenLength; i++) {
+                                let tmpchild = children[i];
+                                if (tmpchild.href.split('/')[3] == 'app') {
+                                    let title = tmpchild.children[x].children[0];
+                                    let thisid = tmpchild.href.split('/')[4];
+                                    if (title && !title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app' && appid.find(a => a == thisid)) {
+                                        if (response.response.Data.AppInfo.find(a => a == thisid)) {
+                                            title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
+                                        } else {
+                                            title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
+                                        }
+                                        appid.splice(appid.indexOf(thisid), 1);
+                                        title.setAttribute("dingPrefix", "dingPrefix");
+                                    }
+                                } else if (tmpchild.href.split('/')[3] == 'bundle') {
+                                    let title = tmpchild.children[x].children[0];
+                                    if (!title.getAttribute("dingPrefix")) {
+                                        title.setAttribute("dingPrefix", "dingPrefix");
+                                        title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
+                                    }
+                                } else if (tmpchild.href.split('/')[3] == 'sub') {
+                                    let title = tmpchild.children[x].children[0];
+                                    if (!title.getAttribute("dingPrefix")) {
+                                        title.setAttribute("dingPrefix", "dingPrefix");
+                                        title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
+                                    }
+                                }
+                            }
+                        }
+                    );
+                }
+
+            }
+        }
+
+        const observer1 = new MutationObserver(callback1);
+        observer1.observe(targetNode1, {
+            attributes: true
+        });
+        if (targetNode2) {
+            observer1.observe(targetNode2, config);
+        }
+    }
+    //搜索页面
+    else if (base_path_sp.length > 0 && base_path_sp[1] == 'search') {
+        let targetNode = document.querySelector('#search_results');
+        let config;
+
+        config = {
+            subtree: true,
+            attributes: true,
+            childList: true,
+            characterData: true
+        };
+
+
+        let callback = mutations => {
+            mutations.forEach(mutation => {
+                let searching_result = document.querySelector('#search_resultsRows'); //the box for searching result. each child in it is an <a>.
+                let children = searching_result.children;
+
+                for (let i = 0; i < children.length; i++) {
+                    let child = children[i];
+                    if (child.href.split('/')[3] == 'app') {
+
+                        let data = {
+                            Id: child.href.split('/')[4]
+                        };
+                        let title = child.children[1].children[0].children[0];
+                        if (!title.getAttribute("dingPost")) {
+                            title.setAttribute("dingPost", "dingPost");
+                            T2Post(
+                                "https://ddapi.133233.xyz/CheckId",
+                                data,
+                                function(response) {
+                                    console.log("got response");
+                                    if (response.response.Data.Id == "0") {
+                                        title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
+                                    } else {
+                                        title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
+                                    }
+                                    title.setAttribute("dingPrefix", "dingPrefix");
+                                }
+                            );
+                        }
+                    } else if (child.href.split('/')[3] == 'bundle') {
+                        let title = child.children[1].children[0].children[0];
+                        if (!title.getAttribute("dingPrefix")) {
+                            title.setAttribute("dingPrefix", "dingPrefix");
+                            title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
+                        }
+                    } else if (child.href.split('/')[3] == 'sub') {
+                        let title = child.children[1].children[0].children[0];
+                        if (!title.getAttribute("dingPrefix")) {
+                            title.setAttribute("dingPrefix", "dingPrefix");
+                            title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
+                        }
+                    }
+                }
+            });
+        }
+
+        const observer = new MutationObserver(callback);
+
+        observer.observe(targetNode, config);
+    }
+    //愿望单
+    else if (base_path_sp.length > 0 && base_path_sp[1] == 'wishlist') {
+        let targetNode1 = document.querySelector('#filters_container');
+        let targetNode2 = document.querySelector('#wishlist_ctn')
+        let config = {
+            subtree: true,
+            attributes: true,
+            childList: true,
+            characterData: true
+        };
+
+        let callback1 = mutations => {
+            let wishlist = document.querySelector('#wishlist_ctn')
+            let children = wishlist.children;
             //restore all appid
             let appid = [];
             let childrenLength = children.length;
             for (let i = 0; i < childrenLength; i++) {
                 let tmpchild = children[i];
-                if (tmpchild.href.split('/')[3] == 'app') {
-                    let title = tmpchild.children[1].children[0].children[0];
-                    if (!title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app') {
+                if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'app') {
+                    let title = tmpchild.querySelector('.content').children[0];
+                    if (!title.getAttribute("dingPost") && title.href.split('/')[3] == 'app') {
                         title.setAttribute("dingPost", "dingPost");
-                        appid.push(tmpchild.href.split('/')[4]);
+                        appid.push(tmpchild.getAttribute("id").slice(13));
                     }
                 }
             }
-            //send post request to server
             if (appid.length != 0) {
                 let data = {
                     "Ids": appid.join()
@@ -1011,10 +1512,10 @@ window.addEventListener("load", function() {
                         //prefix all titles
                         for (let i = 0; i < childrenLength; i++) {
                             let tmpchild = children[i];
-                            if (tmpchild.href.split('/')[3] == 'app') {
-                                let title = tmpchild.children[1].children[0].children[0];
-                                let thisid = tmpchild.href.split('/')[4];
-                                if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app' && appid.find(a => a == thisid)) {
+                            if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'app') {
+                                let title = tmpchild.querySelector('.content').children[0];
+                                let thisid = tmpchild.querySelector('.content').children[0].href.split('/')[4];
+                                if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && title.href.split('/')[3] == 'app' && appid.find(a => a == thisid)) {
                                     if (response.response.Data.AppInfo.find(a => a == thisid)) {
                                         title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
                                     } else {
@@ -1023,14 +1524,14 @@ window.addEventListener("load", function() {
                                     appid.splice(appid.indexOf(thisid), 1);
                                     title.setAttribute("dingPrefix", "dingPrefix");
                                 }
-                            } else if (tmpchild.href.split('/')[3] == 'bundle') {
-                                let title = tmpchild.children[1].children[0].children[0];
+                            } else if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'bundle') {
+                                let title = tmpchild.querySelector('.content').children[0];
                                 if (!title.getAttribute("dingPrefix")) {
                                     title.setAttribute("dingPrefix", "dingPrefix");
                                     title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
                                 }
-                            } else if (tmpchild.href.split('/')[3] == 'sub') {
-                                let title = tmpchild.children[1].children[0].children[0];
+                            } else if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'sub') {
+                                let title = tmpchild.querySelector('.content').children[0];
                                 if (!title.getAttribute("dingPrefix")) {
                                     title.setAttribute("dingPrefix", "dingPrefix");
                                     title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
@@ -1042,579 +1543,192 @@ window.addEventListener("load", function() {
             }
 
         }
-    } else if ((window.location.pathname.split('/')[1] == 'workshop' || window.location.pathname.split('/')[1] == 'sharedfiles') && window.location.pathname.split('/')[2] == 'filedetails') {
-        //if the page is workshop/filedetails
-        const SubscribeItemBtn = document.querySelector('#SubscribeItemBtn');
-        if (SubscribeItemBtn) {
-            //console.log("is_mod");
-            let modid = window.location.href.split('/')[5].slice(4);
-            let appid = document.querySelector('[name="appid"]').value;
 
-            //same logic as showing dingdownload button
-            if (getCookie('Ding_SessionId')) {
-                T2Post(
-                    "https://ddapi.133233.xyz/CheckId", {
-                        "Id": appid
-                    },
-                    function(response) {
-                        console.log("got response");
-                        var CheckIdResponse = {
-                            'is_recorded': null,
-                            'sharer': null
-                        };
-                        if (response.response.Data.Id == "0") {
-                            CheckIdResponse = {
-                                'is_recorded': false,
-                                'sharer': null
-                            };
-                        } else {
-                            let NickName = response.response.Data.NickName;
-                            if (!NickName || NickName.length === 0 || NickName === "") {
-                                NickName = "系统/匿名";
-                            }
-                            CheckIdResponse = {
-                                'is_recorded': true,
-                                'sharer': NickName
-                            };
-                        }
-
-                        //无需请求的情况下,不再请求CheckSub
-                        //可以叮当下载的前提下，显示叮当订阅按钮，否则显示未订阅游戏信息
-                        let queueBtnFollow = document.querySelector('#queueBtnFollow');
-                        let checkSubData = {
-                            'SessionId': getCookie('Ding_SessionId'),
-                            "AppId": appid
-                        };
-
-                        const freeGameBtn = document.querySelector('#freeGameBtn'); // is this a free game?
-                        if (CheckIdResponse.is_recorded === true && CheckIdResponse.sharer !== UnicodeDecodeB64(getCookie('Ding_NickName')) && !freeGameBtn && CheckIdResponse.sharer !== "系统/匿名") {
-                            //if the game is recorded
-                            //and the sharer is not the current user
-                            //and the game is not free.
-                            //and the sharer is not "系统/匿名"
-                            T2Post(
-                                "https://ddapi.133233.xyz/AjaxCheckSub",
-                                checkSubData,
-                                function(response) {
-                                    if (response.response.Data.Credit && response.response.Data.Credit !== 2147483647) {
-                                        setCookie('Ding_Credit', response.response.Data.Credit, 30);
-                                    }
-                                    if (response.response.Data.Status > 0) {
-                                        //if not subscribed
-                                        //show information tell the user that he needs to subscribe the game first
-                                        SubscribeItemBtn.parentElement.insertAdjacentHTML('beforeend',
-                                            '<a id="DingDownUnsubscribeModBtn" style="position: relative;" class="btnv6_lightblue_blue btn_border_2px btn_medium ">' +
-                                            '    <div class="subscribeIcon"></div>' +
-                                            '    <span class="subscribeText">' +
-                                            '        叮当订阅需已订阅游戏本体！' +
-                                            '    </span>' +
-                                            '</a>'
-                                        );
-
-                                    } else if (response.response.Data.Status === 0 || response.response.Data.Status === -200) {
-                                        //0 this game hasn't been recorded yet, -200 this is not game but dlc
-                                        //do nothing so far
-                                    } else if (response.response.Data.Status === -20 || response.response.Data.Status === -30 || response.response.Data.Status === -100) {
-                                        //-20 the user is the sharer. -30 the user has subscribed. -100 the game is free or recorded by anonymous users.
-                                        //All means the user do not need to pay credit for this game.
-                                        SubscribeItemBtn.parentElement.insertAdjacentHTML('beforeend',
-                                            '<a id="DingDownSubscribeModBtn" style="position: relative;" class="btnv6_lightblue_blue btn_border_2px btn_medium ">' +
-                                            '    <div class="subscribeIcon"></div>' +
-                                            '    <span class="subscribeText">' +
-                                            '        叮当订阅' +
-                                            '    </span>' +
-                                            '</a>'
-                                        );
-                                        const DingDownSubscribeModBtn = document.querySelector('#DingDownSubscribeModBtn');
-                                        DingDownSubscribeModBtn.addEventListener('click', function() {
-                                            if (isWebBrowser()) {
-                                                window.open("ding://install/" + appid + "/" + modid);
-                                            } else {
-                                                window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid + "/" + modid);
-                                            }
-                                        });
-                                    } else if (response.response.Data.Status === -2) {
-                                        //if not logged in
-                                        setCookie('Ding_SessionId', "", -1);
-                                        setCookie('Ding_Credit', "", -1);
-                                        setCookie('Ding_NickName', "", -1);
-                                        Swal.fire({
-                                            title: '您还没有登录，请先登录',
-                                            text: response.response.Data.Message,
-                                            icon: 'error',
-                                            confirmButtonText: '确定',
-                                            timer: 2000,
-                                        }).then(function() {
-                                            window.location.reload();
-                                        });
-                                    } else {
-                                        console.log("error" + response.response.Data.Status + ',' + response.response.Data.Message);
-                                    }
-                                }
-                            );
-                        } else if (CheckIdResponse.is_recorded === false) {
-                            //not recorded,
-                            //do nothing
-                        } else if (CheckIdResponse.sharer === UnicodeDecodeB64(getCookie('Ding_NickName')) || freeGameBtn || CheckIdResponse.sharer === "系统/匿名") {
-                            //user can download this game
-                            SubscribeItemBtn.parentElement.insertAdjacentHTML('beforeend',
-                                '<a id="DingDownSubscribeModBtn" style="position: relative;" class="btnv6_lightblue_blue btn_border_2px btn_medium ">' +
-                                '    <div class="subscribeIcon"></div>' +
-                                '    <span class="subscribeText">' +
-                                '        叮当订阅' +
-                                '    </span>' +
-                                '</a>'
-                            );
-                            const DingDownSubscribeModBtn = document.querySelector('#DingDownSubscribeModBtn');
-                            DingDownSubscribeModBtn.addEventListener('click', function() {
-                                if (isWebBrowser()) {
-                                    window.open("ding://install/" + appid + "/" + modid);
-                                } else {
-                                    window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid + "/" + modid);
-                                }
-                            });
-                        }
-
-
-
-                    }
-                );
-            } else {
-                //if not loged in
-                //show login button
-                SubscribeItemBtn.parentElement.insertAdjacentHTML('beforeend',
-                    '<a id="dingdown_login" style="position: relative;" class="btnv6_lightblue_blue btn_border_2px btn_medium ">' +
-                    '    <span class="subscribeText">' +
-                    '        叮当登录' +
-                    '    </span>' +
-                    '</a>'
-                );
-                const dingdown_login = document.getElementById("dingdown_login");
-                if (dingdown_login) {
-                    dingdown_login.addEventListener("click", DingDownLoginForm);
-                }
-            }
-
-
-
-        } else {
-            //console.log("not_mod")
-        }
-
-    }
-})
-
-//mutation检测是否在搜索结果内部分有变化。若有，触发脚本
-
-//主页. xxx1是服务于类搜索结果的部分的.
-if (window.location == 'https://store.steampowered.com/' || window.location.pathname.split('/')[1] == 'explore') {
-    let targetNode1 = document.querySelector('#last_tab');
-    let targetNode2 = document.querySelector('#tab_topsellers_content');
-
-    let config = {
-        subtree: true,
-        childList: true,
-        characterData: true
-    };
-
-    var callback1 = mutations => {
-        let tags = targetNode1.getAttribute("value");
-        if (tags && tags !== "") {
-            let display = document.querySelector('#' + tags.replace(/\$/g, '\\$')); //the box for searching result. each child in it is an <a>. //# syntax doesn't allow for an unescaped
-            // tab_topsellers_content 热销商品标签 is different from others
-            let children;
-            let i;
-            let x;
-            if (tags == "tab_topsellers_content") {
-                children = display.children[2].children;
-                i = 0;
-                x = 2;
-            } else if (tags == "tab_all_comingsoon_content" || tags == "tab_popular_comingsoon_content") {
-                children = display.children;
-                i = 1;
-                x = 3;
-            } else {
-                children = display.children;
-                i = 1;
-                x = 2;
-            }
-            //restore all appid
-            let appid = [];
-            let childrenLength = children.length;
-            for (; i < childrenLength; i++) {
-                let tmpchild = children[i];
-                if (tmpchild && tmpchild.href && tmpchild.href.split('/')[3] == 'app') {
-                    let title = tmpchild.children[x].children[0];
-                    if (title && !title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app') {
-                        title.setAttribute("dingPost", "dingPost");
-                        appid.push(tmpchild.href.split('/')[4]);
-                    }
-                }
-            }
-            //send post request to server
-            if (appid.length != 0) {
-                let data = {
-                    "Ids": appid.join()
-                };
-                T2Post(
-                    "https://ddapi.133233.xyz/CheckIds",
-                    data,
-                    function(response) {
-                        console.log("got response for " + response.response.Data.Total + " appid");
-                        //prefix all titles
-                        let i;
-                        if (tags == "tab_topsellers_content") {
-                            i = 0;
-                        } else {
-                            i = 1;
-                        }
-                        for (; i < childrenLength; i++) {
-                            let tmpchild = children[i];
-                            if (tmpchild.href.split('/')[3] == 'app') {
-                                let title = tmpchild.children[x].children[0];
-                                let thisid = tmpchild.href.split('/')[4];
-                                if (title && !title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app' && appid.find(a => a == thisid)) {
-                                    if (response.response.Data.AppInfo.find(a => a == thisid)) {
-                                        title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
-                                    } else {
-                                        title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
-                                    }
-                                    appid.splice(appid.indexOf(thisid), 1);
-                                    title.setAttribute("dingPrefix", "dingPrefix");
-                                }
-                            } else if (tmpchild.href.split('/')[3] == 'bundle') {
-                                let title = tmpchild.children[x].children[0];
-                                if (!title.getAttribute("dingPrefix")) {
-                                    title.setAttribute("dingPrefix", "dingPrefix");
-                                    title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
-                                }
-                            } else if (tmpchild.href.split('/')[3] == 'sub') {
-                                let title = tmpchild.children[x].children[0];
-                                if (!title.getAttribute("dingPrefix")) {
-                                    title.setAttribute("dingPrefix", "dingPrefix");
-                                    title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
-                                }
-                            }
-                        }
-                    }
-                );
-            }
-
-        }
-    }
-
-    const observer1 = new MutationObserver(callback1);
-    observer1.observe(targetNode1, {
-        attributes: true
-    });
-    if (targetNode2) {
+        const observer1 = new MutationObserver(callback1);
+        observer1.observe(targetNode1, config);
         observer1.observe(targetNode2, config);
     }
-
-
-}
-
-//搜索页面
-else if (window.location.pathname.split('/')[1] == 'search') {
-    let targetNode = document.querySelector('#search_results');
-    let config;
-
-    config = {
-        subtree: true,
-        attributes: true,
-        childList: true,
-        characterData: true
-    };
-
-
-    let callback = mutations => {
-        mutations.forEach(mutation => {
-            let searching_result = document.querySelector('#search_resultsRows'); //the box for searching result. each child in it is an <a>.
-            let children = searching_result.children;
-
-            for (let i = 0; i < children.length; i++) {
-                let child = children[i];
-                if (child.href.split('/')[3] == 'app') {
-
-                    let data = {
-                        Id: child.href.split('/')[4]
-                    };
-                    let title = child.children[1].children[0].children[0];
-                    if (!title.getAttribute("dingPost")) {
-                        title.setAttribute("dingPost", "dingPost");
-                        T2Post(
-                            "https://ddapi.133233.xyz/CheckId",
-                            data,
-                            function(response) {
-                                console.log("got response");
-                                if (response.response.Data.Id == "0") {
-                                    title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
-                                } else {
-                                    title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
-                                }
-                                title.setAttribute("dingPrefix", "dingPrefix");
-                            }
-                        );
-                    }
-                } else if (child.href.split('/')[3] == 'bundle') {
-                    let title = child.children[1].children[0].children[0];
-                    if (!title.getAttribute("dingPrefix")) {
-                        title.setAttribute("dingPrefix", "dingPrefix");
-                        title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
-                    }
-                } else if (child.href.split('/')[3] == 'sub') {
-                    let title = child.children[1].children[0].children[0];
-                    if (!title.getAttribute("dingPrefix")) {
-                        title.setAttribute("dingPrefix", "dingPrefix");
-                        title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
-                    }
-                }
-            }
-        });
-    }
-
-    const observer = new MutationObserver(callback);
-
-    observer.observe(targetNode, config);
-}
-
-//愿望单
-else if (window.location.pathname.split('/')[1] == 'wishlist') {
-    let targetNode1 = document.querySelector('#filters_container');
-    let targetNode2 = document.querySelector('#wishlist_ctn')
-    let config = {
-        subtree: true,
-        attributes: true,
-        childList: true,
-        characterData: true
-    };
-
-    let callback1 = mutations => {
-        let wishlist = document.querySelector('#wishlist_ctn')
-        let children = wishlist.children;
-        //restore all appid
-        let appid = [];
-        let childrenLength = children.length;
-        for (let i = 0; i < childrenLength; i++) {
-            let tmpchild = children[i];
-            if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'app') {
-                let title = tmpchild.querySelector('.content').children[0];
-                if (!title.getAttribute("dingPost") && title.href.split('/')[3] == 'app') {
-                    title.setAttribute("dingPost", "dingPost");
-                    appid.push(tmpchild.getAttribute("id").slice(13));
-                }
-            }
-        }
-        if (appid.length != 0) {
-            let data = {
-                "Ids": appid.join()
-            };
-            T2Post(
-                "https://ddapi.133233.xyz/CheckIds",
-                data,
-                function(response) {
-                    console.log("got response for " + response.response.Data.Total + " appid");
-                    //prefix all titles
-                    for (let i = 0; i < childrenLength; i++) {
-                        let tmpchild = children[i];
-                        if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'app') {
-                            let title = tmpchild.querySelector('.content').children[0];
-                            let thisid = tmpchild.querySelector('.content').children[0].href.split('/')[4];
-                            if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && title.href.split('/')[3] == 'app' && appid.find(a => a == thisid)) {
-                                if (response.response.Data.AppInfo.find(a => a == thisid)) {
-                                    title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
-                                } else {
-                                    title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
-                                }
-                                appid.splice(appid.indexOf(thisid), 1);
-                                title.setAttribute("dingPrefix", "dingPrefix");
-                            }
-                        } else if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'bundle') {
-                            let title = tmpchild.querySelector('.content').children[0];
-                            if (!title.getAttribute("dingPrefix")) {
-                                title.setAttribute("dingPrefix", "dingPrefix");
-                                title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
-                            }
-                        } else if (tmpchild.querySelector('.content').children[0].href.split('/')[3] == 'sub') {
-                            let title = tmpchild.querySelector('.content').children[0];
-                            if (!title.getAttribute("dingPrefix")) {
-                                title.setAttribute("dingPrefix", "dingPrefix");
-                                title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
-                            }
-                        }
-                    }
-                }
-            );
-        }
-
-    }
-
-    const observer1 = new MutationObserver(callback1);
-    observer1.observe(targetNode1, config);
-    observer1.observe(targetNode2, config);
-}
-
-//全局。目前主要是global_hover_content.
-let targetNode0 = document.querySelector('body');
-
-let config = {
-    subtree: true,
-    attributes: true,
-    childList: true,
-    characterData: true,
-    attributeFilter: ['style']
-};
-let callback0 = mutations => {
-    mutations.forEach(mutation => {
-        try {
-            let global_hover_content = document.getElementById('global_hover_content');
-            if (global_hover_content) {
-                let children = global_hover_content.children;
-                for (let i = 0; i < children.length; i++) {
-                    let child = children[i];
-                    if (child.id.slice(6, 9) == "app") {
-                        let data = {
-                            Id: child.id.slice(10)
-                        };
-                        if (!child.getAttribute("dingPost")) {
-                            child.setAttribute("dingPost", "dingPost");
-                            T2Post(
-                                "https://ddapi.133233.xyz/CheckId",
-                                data,
-                                function(response) {
-                                    console.log("got response");
-                                    if (response.response.Data.Id == "0") {
-                                        child.children[1].innerHTML = "<span style='color:red;'>（未收录）</span>" + child.children[1].innerHTML;
-                                    } else {
-                                        child.children[1].innerHTML = "<span style='color:green;'>（已收录）</span>" + child.children[1].innerHTML;
-                                    }
-                                    child.setAttribute("dingPrefix", "dingPrefix");
-                                }
-                            );
-                        }
-                    } else if (child.id.slice(6, 12) == "bundle") {
-                        if (!child.getAttribute("dingPost")) {
-                            child.setAttribute("dingPost", "dingPost");
-                            child.children[1].innerHTML = "<span style='color:orange;'>（合集）</span>" + child.children[1].innerHTML;
-                            child.setAttribute("dingPrefix", "dingPrefix");
-                        }
-                    } else if (child.id.slice(6, 9) == "sub") {
-                        if (!child.getAttribute("dingPost")) {
-                            child.setAttribute("dingPost", "dingPost");
-                            child.children[1].innerHTML = "<span style='color:orange;'>（礼包）</span>" + child.children[1].innerHTML;
-                            child.setAttribute("dingPrefix", "dingPrefix");
-                        }
-                    }
-                }
-            } else {
-                let gamehover_BottomShelfOffScreen_Vseoa = document.querySelector(".gamehover_BottomShelfOffScreen_Vseoa");
-                if (gamehover_BottomShelfOffScreen_Vseoa) {
-                    let children = gamehover_BottomShelfOffScreen_Vseoa.children;
-                    for (let i = 0; i < children.length; i++) {
-                        let alink = children[i].getElementsByTagName('a')[0];
-                        if (alink) {
-                            let ahref = alink.getAttribute("href").split('/');
-                            if (ahref.length > 3 && ahref[3] == 'app') {
+    //全局。目前主要是global_hover_content.
+    else{
+        let targetNode0 = document.querySelector('body');
+        let config = {
+            subtree: true,
+            attributes: true,
+            childList: true,
+            characterData: true,
+            attributeFilter: ['style']
+        };
+        let callback0 = mutations => {
+            mutations.forEach(mutation => {
+                try {
+                    let global_hover_content = document.getElementById('global_hover_content');
+                    if (global_hover_content) {
+                        let children = global_hover_content.children;
+                        for (let i = 0; i < children.length; i++) {
+                            let child = children[i];
+                            if (child.id.slice(6, 9) == "app") {
                                 let data = {
-                                    Id: ahref[4]
+                                    Id: child.id.slice(10)
                                 };
-                                if (!alink.getAttribute("dingPost")) {
-                                    alink.setAttribute("dingPost", "dingPost");
+                                if (!child.getAttribute("dingPost")) {
+                                    child.setAttribute("dingPost", "dingPost");
                                     T2Post(
                                         "https://ddapi.133233.xyz/CheckId",
                                         data,
                                         function(response) {
                                             console.log("got response");
                                             if (response.response.Data.Id == "0") {
-                                                alink.children[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + alink.children[0].innerHTML;
+                                                child.children[1].innerHTML = "<span style='color:red;'>（未收录）</span>" + child.children[1].innerHTML;
                                             } else {
-                                                alink.children[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + alink.children[0].innerHTML;
+                                                child.children[1].innerHTML = "<span style='color:green;'>（已收录）</span>" + child.children[1].innerHTML;
                                             }
-                                            alink.setAttribute("dingPrefix", "dingPrefix");
+                                            child.setAttribute("dingPrefix", "dingPrefix");
                                         }
                                     );
                                 }
-                            } else if (ahref.length > 3 && ahref[3] == "bundle") {
-                                if (!alink.getAttribute("dingPost")) {
-                                    alink.setAttribute("dingPost", "dingPost");
-                                    alink.children[0].innerHTML = "<span style='color:orange;'>（合集）</span>" + alink.children[0].innerHTML;
-                                    alink.setAttribute("dingPrefix", "dingPrefix");
+                            } else if (child.id.slice(6, 12) == "bundle") {
+                                if (!child.getAttribute("dingPost")) {
+                                    child.setAttribute("dingPost", "dingPost");
+                                    child.children[1].innerHTML = "<span style='color:orange;'>（合集）</span>" + child.children[1].innerHTML;
+                                    child.setAttribute("dingPrefix", "dingPrefix");
                                 }
-                            } else if (ahref.length > 2 && ahref[3] == "sub") {
-                                if (!alink.getAttribute("dingPost")) {
-                                    alink.setAttribute("dingPost", "dingPost");
-                                    alink.children[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + alink.children[0].innerHTML;
-                                    alink.setAttribute("dingPrefix", "dingPrefix");
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    //特惠
-                    let facetedbrowse_FacetedBrowseItems = document.querySelector(".facetedbrowse_FacetedBrowseItems_NO-IP");
-                    if (facetedbrowse_FacetedBrowseItems) {
-                        let children = facetedbrowse_FacetedBrowseItems.children;
-                        for (let i = 0; i < children.length; i++) {
-                            let alink = children[i].getElementsByTagName('a')[1];
-                            if (alink) {
-                                let ahref = alink.getAttribute("href").split('/');
-                                if (ahref.length > 3 && ahref[3] == 'app') {
-                                    let data = {
-                                        Id: ahref[4]
-                                    };
-                                    if (!alink.getAttribute("dingPost")) {
-                                        alink.setAttribute("dingPost", "dingPost");
-                                        T2Post(
-                                            "https://ddapi.133233.xyz/CheckId",
-                                            data,
-                                            function(response) {
-                                                console.log("got response");
-                                                if (response.response.Data.Id == "0") {
-                                                    alink.children[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + alink.children[0].innerHTML;
-                                                } else {
-                                                    alink.children[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + alink.children[0].innerHTML;
-                                                }
-                                                alink.setAttribute("dingPrefix", "dingPrefix");
-                                            }
-                                        );
-                                    }
-                                } else if (ahref.length > 3 && ahref[3] == "bundle") {
-                                    if (!alink.getAttribute("dingPost")) {
-                                        alink.setAttribute("dingPost", "dingPost");
-                                        alink.children[0].innerHTML = "<span style='color:orange;'>（合集）</span>" + alink.children[0].innerHTML;
-                                        alink.setAttribute("dingPrefix", "dingPrefix");
-                                    }
-                                } else if (ahref.length > 2 && ahref[3] == "sub") {
-                                    if (!alink.getAttribute("dingPost")) {
-                                        alink.setAttribute("dingPost", "dingPost");
-                                        alink.children[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + alink.children[0].innerHTML;
-                                        alink.setAttribute("dingPrefix", "dingPrefix");
-                                    }
+                            } else if (child.id.slice(6, 9) == "sub") {
+                                if (!child.getAttribute("dingPost")) {
+                                    child.setAttribute("dingPost", "dingPost");
+                                    child.children[1].innerHTML = "<span style='color:orange;'>（礼包）</span>" + child.children[1].innerHTML;
+                                    child.setAttribute("dingPrefix", "dingPrefix");
                                 }
                             }
                         }
-                    }else{
-                        //热门 热销
-                        let application_root = document.querySelector("#application_root");
-                        if (application_root) {
-                            let children = application_root.children;
+                    } else {
+                        let gamehover_BottomShelfOffScreen_Vseoa = document.querySelector(".gamehover_BottomShelfOffScreen_Vseoa");
+                        if (gamehover_BottomShelfOffScreen_Vseoa) {
+                            let children = gamehover_BottomShelfOffScreen_Vseoa.children;
                             for (let i = 0; i < children.length; i++) {
-                                let alink = children[i].getElementsByTagName('a');
+                                let alink = children[i].getElementsByTagName('a')[0];
                                 if (alink) {
-                                    for(var k = 0; k < alink.length; k++){
-                                        let klink = alink[k];
-                                        let ahref = klink.getAttribute("href").split('/');
+                                    let ahref = alink.getAttribute("href").split('/');
+                                    if (ahref.length > 3 && ahref[3] == 'app') {
+                                        let data = {
+                                            Id: ahref[4]
+                                        };
+                                        if (!alink.getAttribute("dingPost")) {
+                                            alink.setAttribute("dingPost", "dingPost");
+                                            T2Post(
+                                                "https://ddapi.133233.xyz/CheckId",
+                                                data,
+                                                function(response) {
+                                                    console.log("got response");
+                                                    if (response.response.Data.Id == "0") {
+                                                        alink.children[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + alink.children[0].innerHTML;
+                                                    } else {
+                                                        alink.children[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + alink.children[0].innerHTML;
+                                                    }
+                                                    alink.setAttribute("dingPrefix", "dingPrefix");
+                                                }
+                                            );
+                                        }
+                                    } else if (ahref.length > 3 && ahref[3] == "bundle") {
+                                        if (!alink.getAttribute("dingPost")) {
+                                            alink.setAttribute("dingPost", "dingPost");
+                                            alink.children[0].innerHTML = "<span style='color:orange;'>（合集）</span>" + alink.children[0].innerHTML;
+                                            alink.setAttribute("dingPrefix", "dingPrefix");
+                                        }
+                                    } else if (ahref.length > 2 && ahref[3] == "sub") {
+                                        if (!alink.getAttribute("dingPost")) {
+                                            alink.setAttribute("dingPost", "dingPost");
+                                            alink.children[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + alink.children[0].innerHTML;
+                                            alink.setAttribute("dingPrefix", "dingPrefix");
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            //特惠
+                            let facetedbrowse_FacetedBrowseItems = document.querySelector(".facetedbrowse_FacetedBrowseItems_NO-IP");
+                            if (facetedbrowse_FacetedBrowseItems) {
+                                let children = facetedbrowse_FacetedBrowseItems.children;
+                                for (let i = 0; i < children.length; i++) {
+                                    let alink = children[i].getElementsByTagName('a')[1];
+                                    if (alink) {
+                                        let ahref = alink.getAttribute("href").split('/');
                                         if (ahref.length > 3 && ahref[3] == 'app') {
                                             let data = {
                                                 Id: ahref[4]
                                             };
-                                            if (!klink.getAttribute("dingPost")) {
-                                                klink.setAttribute("dingPost", "dingPost");
+                                            if (!alink.getAttribute("dingPost")) {
+                                                alink.setAttribute("dingPost", "dingPost");
                                                 T2Post(
                                                     "https://ddapi.133233.xyz/CheckId",
                                                     data,
                                                     function(response) {
                                                         console.log("got response");
+                                                        if (response.response.Data.Id == "0") {
+                                                            alink.children[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + alink.children[0].innerHTML;
+                                                        } else {
+                                                            alink.children[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + alink.children[0].innerHTML;
+                                                        }
+                                                        alink.setAttribute("dingPrefix", "dingPrefix");
+                                                    }
+                                                );
+                                            }
+                                        } else if (ahref.length > 3 && ahref[3] == "bundle") {
+                                            if (!alink.getAttribute("dingPost")) {
+                                                alink.setAttribute("dingPost", "dingPost");
+                                                alink.children[0].innerHTML = "<span style='color:orange;'>（合集）</span>" + alink.children[0].innerHTML;
+                                                alink.setAttribute("dingPrefix", "dingPrefix");
+                                            }
+                                        } else if (ahref.length > 2 && ahref[3] == "sub") {
+                                            if (!alink.getAttribute("dingPost")) {
+                                                alink.setAttribute("dingPost", "dingPost");
+                                                alink.children[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + alink.children[0].innerHTML;
+                                                alink.setAttribute("dingPrefix", "dingPrefix");
+                                            }
+                                        }
+                                    }
+                                }
+                            }else{
+                                //热门 热销
+                                let application_root = document.querySelector("#application_root");
+                                if (application_root) {
+                                    let children = application_root.children;
+                                    for (let i = 0; i < children.length; i++) {
+                                        let alink = children[i].getElementsByTagName('a');
+                                        if (alink) {
+                                            for(var k = 0; k < alink.length; k++){
+                                                let klink = alink[k];
+                                                let ahref = klink.getAttribute("href").split('/');
+                                                if (ahref.length > 3 && ahref[3] == 'app') {
+                                                    let data = {
+                                                        Id: ahref[4]
+                                                    };
+                                                    if (!klink.getAttribute("dingPost")) {
+                                                        klink.setAttribute("dingPost", "dingPost");
+                                                        T2Post(
+                                                            "https://ddapi.133233.xyz/CheckId",
+                                                            data,
+                                                            function(response) {
+                                                                console.log("got response");
+                                                                let index;
+                                                                if (klink.childElementCount > 2){
+                                                                    index = 2;
+                                                                }else if (klink.childElementCount > 1){
+                                                                    index = 1;
+                                                                }else{
+                                                                    index= 0;
+                                                                }
+
+                                                                if (response.response.Data.Id == "0") {
+                                                                    klink.children[index].innerHTML = "<span style='color:red;'>（未收录）</span>" + klink.children[index].innerHTML;
+                                                                } else {
+                                                                    klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
+                                                                }
+                                                                klink.setAttribute("dingPrefix", "dingPrefix");
+                                                            }
+                                                        );
+                                                    }
+                                                } else if (ahref.length > 3 && ahref[3] == "bundle") {
+                                                    if (!klink.getAttribute("dingPost")) {
                                                         let index;
                                                         if (klink.childElementCount > 2){
                                                             index = 2;
@@ -1623,61 +1737,242 @@ let callback0 = mutations => {
                                                         }else{
                                                             index= 0;
                                                         }
-
-                                                        if (response.response.Data.Id == "0") {
-                                                            klink.children[index].innerHTML = "<span style='color:red;'>（未收录）</span>" + klink.children[index].innerHTML;
-                                                        } else {
-                                                            klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
-                                                        }
+                                                        klink.setAttribute("dingPost", "dingPost");
+                                                        klink.children[index].innerHTML = "<span style='color:orange;'>（合集）</span>" + klink.children[index].innerHTML;
                                                         klink.setAttribute("dingPrefix", "dingPrefix");
                                                     }
-                                                );
-                                            }
-                                        } else if (ahref.length > 3 && ahref[3] == "bundle") {
-                                            if (!klink.getAttribute("dingPost")) {
-                                                 let index;
-                                                if (klink.childElementCount > 2){
-                                                    index = 2;
-                                                }else if (klink.childElementCount > 1){
-                                                    index = 1;
-                                                }else{
-                                                    index= 0;
+                                                } else if (ahref.length > 2 && ahref[3] == "sub") {
+                                                    if (!klink.getAttribute("dingPost")) {
+                                                        let index;
+                                                        if (klink.childElementCount > 2){
+                                                            index = 2;
+                                                        }else if (klink.childElementCount > 1){
+                                                            index = 1;
+                                                        }else{
+                                                            index= 0;
+                                                        }
+                                                        klink.setAttribute("dingPost", "dingPost");
+                                                        klink.children[index].innerHTML = "<span style='color:orange;'>（礼包）</span>" + klink.children[index].innerHTML;
+                                                        klink.setAttribute("dingPrefix", "dingPrefix");
+                                                    }
                                                 }
-                                                klink.setAttribute("dingPost", "dingPost");
-                                                klink.children[index].innerHTML = "<span style='color:orange;'>（合集）</span>" + klink.children[index].innerHTML;
-                                                klink.setAttribute("dingPrefix", "dingPrefix");
                                             }
-                                        } else if (ahref.length > 2 && ahref[3] == "sub") {
-                                            if (!klink.getAttribute("dingPost")) {
-                                                 let index;
-                                                if (klink.childElementCount > 2){
-                                                    index = 2;
-                                                }else if (klink.childElementCount > 1){
-                                                    index = 1;
-                                                }else{
-                                                    index= 0;
-                                                }
-                                                klink.setAttribute("dingPost", "dingPost");
-                                                klink.children[index].innerHTML = "<span style='color:orange;'>（礼包）</span>" + klink.children[index].innerHTML;
-                                                klink.setAttribute("dingPrefix", "dingPrefix");
-                                            }
+
                                         }
                                     }
-                                   
                                 }
                             }
                         }
                     }
+
+
+
+                } catch (e) {
+                    //exception handle;
                 }
+            })
+        }
+
+        const observer0 = new MutationObserver(callback0);
+        observer0.observe(targetNode0, config);
+    }
+}
+//steamdb.info
+else if (window.location.hostname == "steamdb.info") {
+    let base_path_sp = window.location.pathname.split('/');
+    //index page
+    if (window.location.pathname === "/") {
+        //get the sales table
+        let targetNode1 = document.getElementsByTagName('tbody')[0];
+        let config = {
+            attributes: true,
+            childList: true,
+            characterData: true,
+            subtree: true
+        };
+
+        let callback1 = mutations => {
+            let children = document.getElementsByTagName("tbody");
+            //restore all appid
+            let appids = [];
+            let childrenLength = children.length;
+            for (let i = 0; i < childrenLength; i++) {
+                let tmpchild = children[i].getElementsByTagName("tr");
+                let tmpchildLength = tmpchild.length;
+                 for (let k = 0; k < tmpchildLength; k++) {
+                     let tmpnode = tmpchild[k];
+                     let tmptext = tmpnode.getElementsByClassName("css-truncate");
+                     if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPost")) {
+                         tmptext[0].setAttribute("dingPost", "dingPost");
+                         let appid = tmpnode.getAttribute("data-appid");
+                         if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                             appids.push(appid);
+                         }
+                     }
+
+                 }
             }
 
 
+            if (appids.length != 0) {
+                let data = {
+                    "Ids": appids.join()
+                };
+                T2Post(
+                    "https://ddapi.133233.xyz/CheckIds",
+                    data,
+                    function (response) {
+                        console.log("got response for " + response.response.Data.Total + " appid");
+                        //prefix all titles
+                        for (let i = 0; i < childrenLength; i++) {
+                            let tmpchild = children[i].getElementsByTagName("tr");
+                            let tmpchildLength = tmpchild.length;
+                            for (let k = 0; k < tmpchildLength; k++) {
+                                let tmpnode = tmpchild[k];
+                                let appid = tmpnode.getAttribute("data-appid");
+                                let tmptext = tmpnode.getElementsByClassName("css-truncate");
+                                 if (tmptext && tmptext.length >0) {
+                                     let tmp_href = new URL(tmptext[0].href);
+                                     if (tmp_href.host == 'steamdb.info'){
+                                         let path_sp = tmp_href.pathname.split('/');
+                                         if (path_sp[1] == 'app') {
+                                          if (appids.find(a => a == appid)) {
+                                              if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                                  tmptext[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + tmptext[0].innerHTML;
+                                              } else {
+                                                  tmptext[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + tmptext[0].innerHTML;
+                                              }
+                                              appids.splice(appids.indexOf(appid), 1);
+                                              tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+                                          }
+                                         } else if (path_sp[1] == 'bundle') {
+                                             let tmptext = tmpnode.getElementsByClassName("subinfo");
+                                             if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPrefix")) {
+                                                 tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+                                                 tmptext[0].innerHTML = "<span style='color:orange;'>（合集）</span>" + tmptext[0].innerHTML;
+                                             }
+                                         } else if (path_sp[1] == 'sub') {
+                                             let tmptext = tmpnode.getElementsByClassName("subinfo");
+                                             if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPrefix")) {
+                                                 tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+                                                 tmptext[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + tmptext[0].innerHTML;
+                                             }
+                                         }
 
-        } catch (e) {
-            //exception handle;
+                                     }
+
+                                 }
+
+                          }
+                        }
+                    }
+                );
+            }
+
         }
-    })
+
+        const observer1 = new MutationObserver(callback1);
+        observer1.observe(targetNode1, config);
+    }
+    //sales
+    else if (base_path_sp.length > 0 && base_path_sp[1] == 'sales') {
+        //get the sales table
+        let targetNode1 = document.getElementsByTagName('tbody')[0];
+        let config = {
+            attributes: true,
+            childList: true,
+            characterData: true,
+            subtree: true
+        };
+
+        let callback1 = mutations => {
+            let children = document.getElementsByTagName("tbody");
+            //restore all appid
+            let appids = [];
+            let childrenLength = children.length;
+            for (let i = 0; i < childrenLength; i++) {
+                let tmpchild = children[i].getElementsByTagName("tr");
+                let tmpchildLength = tmpchild.length;
+                 for (let k = 0; k < tmpchildLength; k++) {
+                     let tmpnode = tmpchild[k];
+                     let tmptext = tmpnode.getElementsByClassName("applogo");
+                     if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPost")) {
+                         tmptext[0].setAttribute("dingPost", "dingPost");
+                         let appid = tmpnode.getAttribute("data-appid");
+                         if (appid && isInteger(appid)){
+                             appids.push(appid);
+                         }
+                     }
+
+                 }
+            }
+
+            if (appids.length != 0) {
+                let data = {
+                    "Ids": appids.join()
+                };
+                T2Post(
+                    "https://ddapi.133233.xyz/CheckIds",
+                    data,
+                    function (response) {
+                        console.log("got response for " + response.response.Data.Total + " appid");
+                        //prefix all titles
+                        for (let i = 0; i < childrenLength; i++) {
+                            let tmpchild = children[i].getElementsByTagName("tr");
+                            let tmpchildLength = tmpchild.length;
+                            for (let k = 0; k < tmpchildLength; k++) {
+                                let tmpnode = tmpchild[k];
+                                let appid = tmpnode.getAttribute("data-appid");
+                                let tmplink = tmpnode.getElementsByTagName("a");
+                                let tmplinkLength = tmplink.length;
+                                 for (let y = 0; y < tmplinkLength;y++) {
+                                     let tmp_href = new URL(tmplink[y].href);
+                                     if (tmp_href.host == 'store.steampowered.com'){
+                                         let path_sp = tmp_href.pathname.split('/');
+                                         if (path_sp[1] == 'app') {
+                                          let tmptext = tmpnode.getElementsByClassName("applogo");
+                                          if (tmptext && tmptext.length >0 && appids.find(a => a == appid)) {
+                                              let next_class = tmptext[0].nextElementSibling;
+                                              if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                                  next_class.children[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + next_class.children[0].innerHTML;
+                                              } else {
+                                                  next_class.children[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + next_class.children[0].innerHTML;
+                                              }
+                                              appids.splice(appids.indexOf(appid), 1);
+                                              tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+                                          }
+                                         } else if (path_sp[1] == 'bundle') {
+                                             let tmptext = tmpnode.getElementsByClassName("applogo");
+                                             let next_class = tmptext[0].nextElementSibling;
+                                             if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPrefix")) {
+                                                 tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+                                                 next_class.children[0].innerHTML = "<span style='color:orange;'>（合集）</span>" + next_class.children[0].innerHTML;
+                                             }
+                                         } else if (path_sp[1] == 'sub') {
+                                             let tmptext = tmpnode.getElementsByClassName("applogo");
+                                             let next_class = tmptext[0].nextElementSibling;
+                                             if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPrefix")) {
+                                                 tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+                                                 next_class.children[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + next_class.children[0].innerHTML;
+                                             }
+                                         }
+
+                                     }
+
+                                 }
+
+                          }
+                        }
+                    }
+                );
+            }
+
+        }
+
+        const observer1 = new MutationObserver(callback1);
+        observer1.observe(targetNode1, config);
+    }
+    //return;
 }
 
-const observer0 = new MutationObserver(callback0);
-observer0.observe(targetNode0, config);
+
