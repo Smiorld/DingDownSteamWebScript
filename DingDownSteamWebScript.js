@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.32
+// @version      1.0.33
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -203,8 +203,6 @@ async function digestMessage(data, sname, message) {
     data[sname] = hashHex;
     return hashHex;
 }
-
-
 
 async function T2LoginPost(username, password) {
     //prepare post data
@@ -467,7 +465,6 @@ window.addEventListener("load", function() {
             dingdown_logout.addEventListener("click", DingDownLogout);
         }
     }
-
 
     //store
     if (base_url.hostname == "store.steampowered.com"){
@@ -1549,63 +1546,106 @@ if (base_url.hostname == 'store.steampowered.com') {
         observer1.observe(targetNode2, config);
     }
     //全局。目前主要是global_hover_content.
-    else{
-        let targetNode0 = document.querySelector('body');
-        let config = {
-            subtree: true,
-            attributes: true,
-            childList: true,
-            characterData: true,
-            attributeFilter: ['style']
-        };
-        let callback0 = mutations => {
-            mutations.forEach(mutation => {
-                try {
-                    let global_hover_content = document.getElementById('global_hover_content');
-                    if (global_hover_content) {
-                        let children = global_hover_content.children;
-                        for (let i = 0; i < children.length; i++) {
-                            let child = children[i];
-                            if (child.id.slice(6, 9) == "app") {
-                                let data = {
-                                    Id: child.id.slice(10)
-                                };
-                                if (!child.getAttribute("dingPost")) {
-                                    child.setAttribute("dingPost", "dingPost");
-                                    T2Post(
-                                        "https://ddapi.133233.xyz/CheckId",
-                                        data,
-                                        function(response) {
-                                            console.log("got response");
-                                            if (response.response.Data.Id == "0") {
-                                                child.children[1].innerHTML = "<span style='color:red;'>（未收录）</span>" + child.children[1].innerHTML;
-                                            } else {
-                                                child.children[1].innerHTML = "<span style='color:green;'>（已收录）</span>" + child.children[1].innerHTML;
-                                            }
-                                            child.setAttribute("dingPrefix", "dingPrefix");
+    let targetNode0 = document.querySelector('body');
+    let config = {
+        subtree: true,
+        attributes: true,
+        childList: true,
+        characterData: true,
+        attributeFilter: ['style']
+    };
+    let callback0 = mutations => {
+        mutations.forEach(mutation => {
+            try {
+                let global_hover_content = document.getElementById('global_hover_content');
+                if (global_hover_content) {
+                    let children = global_hover_content.children;
+                    for (let i = 0; i < children.length; i++) {
+                        let child = children[i];
+                        if (child.id.slice(6, 9) == "app") {
+                            let data = {
+                                Id: child.id.slice(10)
+                            };
+                            if (!child.getAttribute("dingPost")) {
+                                child.setAttribute("dingPost", "dingPost");
+                                T2Post(
+                                    "https://ddapi.133233.xyz/CheckId",
+                                    data,
+                                    function(response) {
+                                        console.log("got response");
+                                        if (response.response.Data.Id == "0") {
+                                            child.children[1].innerHTML = "<span style='color:red;'>（未收录）</span>" + child.children[1].innerHTML;
+                                        } else {
+                                            child.children[1].innerHTML = "<span style='color:green;'>（已收录）</span>" + child.children[1].innerHTML;
                                         }
-                                    );
-                                }
-                            } else if (child.id.slice(6, 12) == "bundle") {
-                                if (!child.getAttribute("dingPost")) {
-                                    child.setAttribute("dingPost", "dingPost");
-                                    child.children[1].innerHTML = "<span style='color:orange;'>（合集）</span>" + child.children[1].innerHTML;
-                                    child.setAttribute("dingPrefix", "dingPrefix");
-                                }
-                            } else if (child.id.slice(6, 9) == "sub") {
-                                if (!child.getAttribute("dingPost")) {
-                                    child.setAttribute("dingPost", "dingPost");
-                                    child.children[1].innerHTML = "<span style='color:orange;'>（礼包）</span>" + child.children[1].innerHTML;
-                                    child.setAttribute("dingPrefix", "dingPrefix");
+                                        child.setAttribute("dingPrefix", "dingPrefix");
+                                    }
+                                );
+                            }
+                        } else if (child.id.slice(6, 12) == "bundle") {
+                            if (!child.getAttribute("dingPost")) {
+                                child.setAttribute("dingPost", "dingPost");
+                                child.children[1].innerHTML = "<span style='color:orange;'>（合集）</span>" + child.children[1].innerHTML;
+                                child.setAttribute("dingPrefix", "dingPrefix");
+                            }
+                        } else if (child.id.slice(6, 9) == "sub") {
+                            if (!child.getAttribute("dingPost")) {
+                                child.setAttribute("dingPost", "dingPost");
+                                child.children[1].innerHTML = "<span style='color:orange;'>（礼包）</span>" + child.children[1].innerHTML;
+                                child.setAttribute("dingPrefix", "dingPrefix");
+                            }
+                        }
+                    }
+                } else {
+                    let gamehover_BottomShelfOffScreen_Vseoa = document.querySelector(".gamehover_BottomShelfOffScreen_Vseoa");
+                    if (gamehover_BottomShelfOffScreen_Vseoa) {
+                        let children = gamehover_BottomShelfOffScreen_Vseoa.children;
+                        for (let i = 0; i < children.length; i++) {
+                            let alink = children[i].getElementsByTagName('a')[0];
+                            if (alink) {
+                                let ahref = alink.getAttribute("href").split('/');
+                                if (ahref.length > 3 && ahref[3] == 'app') {
+                                    let data = {
+                                        Id: ahref[4]
+                                    };
+                                    if (!alink.getAttribute("dingPost")) {
+                                        alink.setAttribute("dingPost", "dingPost");
+                                        T2Post(
+                                            "https://ddapi.133233.xyz/CheckId",
+                                            data,
+                                            function(response) {
+                                                console.log("got response");
+                                                if (response.response.Data.Id == "0") {
+                                                    alink.children[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + alink.children[0].innerHTML;
+                                                } else {
+                                                    alink.children[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + alink.children[0].innerHTML;
+                                                }
+                                                alink.setAttribute("dingPrefix", "dingPrefix");
+                                            }
+                                        );
+                                    }
+                                } else if (ahref.length > 3 && ahref[3] == "bundle") {
+                                    if (!alink.getAttribute("dingPost")) {
+                                        alink.setAttribute("dingPost", "dingPost");
+                                        alink.children[0].innerHTML = "<span style='color:orange;'>（合集）</span>" + alink.children[0].innerHTML;
+                                        alink.setAttribute("dingPrefix", "dingPrefix");
+                                    }
+                                } else if (ahref.length > 2 && ahref[3] == "sub") {
+                                    if (!alink.getAttribute("dingPost")) {
+                                        alink.setAttribute("dingPost", "dingPost");
+                                        alink.children[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + alink.children[0].innerHTML;
+                                        alink.setAttribute("dingPrefix", "dingPrefix");
+                                    }
                                 }
                             }
                         }
                     } else {
-                        let gamehover_BottomShelfOffScreen_Vseoa = document.querySelector(".gamehover_BottomShelfOffScreen_Vseoa");
-                        if (gamehover_BottomShelfOffScreen_Vseoa) {
-                            let children = gamehover_BottomShelfOffScreen_Vseoa.children;
+                        //特惠
+                        let facetedbrowse_FacetedBrowseItems = document.querySelector(".facetedbrowse_FacetedBrowseItems_NO-IP");
+                        if (facetedbrowse_FacetedBrowseItems) {
+                            let children = facetedbrowse_FacetedBrowseItems.children;
                             for (let i = 0; i < children.length; i++) {
-                                let alink = children[i].getElementsByTagName('a')[0];
+                                let alink = children[i].getElementsByTagName('a')[1];
                                 if (alink) {
                                     let ahref = alink.getAttribute("href").split('/');
                                     if (ahref.length > 3 && ahref[3] == 'app') {
@@ -1643,139 +1683,95 @@ if (base_url.hostname == 'store.steampowered.com') {
                                     }
                                 }
                             }
-                        } else {
-                            //特惠
-                            let facetedbrowse_FacetedBrowseItems = document.querySelector(".facetedbrowse_FacetedBrowseItems_NO-IP");
-                            if (facetedbrowse_FacetedBrowseItems) {
-                                let children = facetedbrowse_FacetedBrowseItems.children;
+                        }else{
+                            //热门 热销
+                            let application_root = document.querySelector("#application_root");
+                            if (application_root) {
+                                let children = application_root.children;
                                 for (let i = 0; i < children.length; i++) {
-                                    let alink = children[i].getElementsByTagName('a')[1];
+                                    let alink = children[i].getElementsByTagName('a');
                                     if (alink) {
-                                        let ahref = alink.getAttribute("href").split('/');
-                                        if (ahref.length > 3 && ahref[3] == 'app') {
-                                            let data = {
-                                                Id: ahref[4]
-                                            };
-                                            if (!alink.getAttribute("dingPost")) {
-                                                alink.setAttribute("dingPost", "dingPost");
-                                                T2Post(
-                                                    "https://ddapi.133233.xyz/CheckId",
-                                                    data,
-                                                    function(response) {
-                                                        console.log("got response");
-                                                        if (response.response.Data.Id == "0") {
-                                                            alink.children[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + alink.children[0].innerHTML;
-                                                        } else {
-                                                            alink.children[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + alink.children[0].innerHTML;
-                                                        }
-                                                        alink.setAttribute("dingPrefix", "dingPrefix");
-                                                    }
-                                                );
-                                            }
-                                        } else if (ahref.length > 3 && ahref[3] == "bundle") {
-                                            if (!alink.getAttribute("dingPost")) {
-                                                alink.setAttribute("dingPost", "dingPost");
-                                                alink.children[0].innerHTML = "<span style='color:orange;'>（合集）</span>" + alink.children[0].innerHTML;
-                                                alink.setAttribute("dingPrefix", "dingPrefix");
-                                            }
-                                        } else if (ahref.length > 2 && ahref[3] == "sub") {
-                                            if (!alink.getAttribute("dingPost")) {
-                                                alink.setAttribute("dingPost", "dingPost");
-                                                alink.children[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + alink.children[0].innerHTML;
-                                                alink.setAttribute("dingPrefix", "dingPrefix");
-                                            }
-                                        }
-                                    }
-                                }
-                            }else{
-                                //热门 热销
-                                let application_root = document.querySelector("#application_root");
-                                if (application_root) {
-                                    let children = application_root.children;
-                                    for (let i = 0; i < children.length; i++) {
-                                        let alink = children[i].getElementsByTagName('a');
-                                        if (alink) {
-                                            for(var k = 0; k < alink.length; k++){
-                                                let klink = alink[k];
-                                                let ahref = klink.getAttribute("href").split('/');
-                                                if (ahref.length > 3 && ahref[3] == 'app') {
-                                                    let data = {
-                                                        Id: ahref[4]
-                                                    };
-                                                    if (!klink.getAttribute("dingPost")) {
-                                                        klink.setAttribute("dingPost", "dingPost");
-                                                        T2Post(
-                                                            "https://ddapi.133233.xyz/CheckId",
-                                                            data,
-                                                            function(response) {
-                                                                console.log("got response");
-                                                                let index;
-                                                                if (klink.childElementCount > 2){
-                                                                    index = 2;
-                                                                }else if (klink.childElementCount > 1){
-                                                                    index = 1;
-                                                                }else{
-                                                                    index= 0;
-                                                                }
-
-                                                                if (response.response.Data.Id == "0") {
-                                                                    klink.children[index].innerHTML = "<span style='color:red;'>（未收录）</span>" + klink.children[index].innerHTML;
-                                                                } else {
-                                                                    klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
-                                                                }
-                                                                klink.setAttribute("dingPrefix", "dingPrefix");
+                                        for(var k = 0; k < alink.length; k++){
+                                            let klink = alink[k];
+                                            let ahref = klink.getAttribute("href").split('/');
+                                            if (ahref.length > 3 && ahref[3] == 'app') {
+                                                let data = {
+                                                    Id: ahref[4]
+                                                };
+                                                if (!klink.getAttribute("dingPost")) {
+                                                    klink.setAttribute("dingPost", "dingPost");
+                                                    T2Post(
+                                                        "https://ddapi.133233.xyz/CheckId",
+                                                        data,
+                                                        function(response) {
+                                                            console.log("got response");
+                                                            let index;
+                                                            if (klink.childElementCount > 2){
+                                                                index = 2;
+                                                            }else if (klink.childElementCount > 1){
+                                                                index = 1;
+                                                            }else{
+                                                                index= 0;
                                                             }
-                                                        );
-                                                    }
-                                                } else if (ahref.length > 3 && ahref[3] == "bundle") {
-                                                    if (!klink.getAttribute("dingPost")) {
-                                                        let index;
-                                                        if (klink.childElementCount > 2){
-                                                            index = 2;
-                                                        }else if (klink.childElementCount > 1){
-                                                            index = 1;
-                                                        }else{
-                                                            index= 0;
+
+                                                            if (response.response.Data.Id == "0") {
+                                                                klink.children[index].innerHTML = "<span style='color:red;'>（未收录）</span>" + klink.children[index].innerHTML;
+                                                            } else {
+                                                                klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
+                                                            }
+                                                            klink.setAttribute("dingPrefix", "dingPrefix");
                                                         }
-                                                        klink.setAttribute("dingPost", "dingPost");
-                                                        klink.children[index].innerHTML = "<span style='color:orange;'>（合集）</span>" + klink.children[index].innerHTML;
-                                                        klink.setAttribute("dingPrefix", "dingPrefix");
+                                                    );
+                                                }
+                                            } else if (ahref.length > 3 && ahref[3] == "bundle") {
+                                                if (!klink.getAttribute("dingPost")) {
+                                                    let index;
+                                                    if (klink.childElementCount > 2){
+                                                        index = 2;
+                                                    }else if (klink.childElementCount > 1){
+                                                        index = 1;
+                                                    }else{
+                                                        index= 0;
                                                     }
-                                                } else if (ahref.length > 2 && ahref[3] == "sub") {
-                                                    if (!klink.getAttribute("dingPost")) {
-                                                        let index;
-                                                        if (klink.childElementCount > 2){
-                                                            index = 2;
-                                                        }else if (klink.childElementCount > 1){
-                                                            index = 1;
-                                                        }else{
-                                                            index= 0;
-                                                        }
-                                                        klink.setAttribute("dingPost", "dingPost");
-                                                        klink.children[index].innerHTML = "<span style='color:orange;'>（礼包）</span>" + klink.children[index].innerHTML;
-                                                        klink.setAttribute("dingPrefix", "dingPrefix");
+                                                    klink.setAttribute("dingPost", "dingPost");
+                                                    klink.children[index].innerHTML = "<span style='color:orange;'>（合集）</span>" + klink.children[index].innerHTML;
+                                                    klink.setAttribute("dingPrefix", "dingPrefix");
+                                                }
+                                            } else if (ahref.length > 2 && ahref[3] == "sub") {
+                                                if (!klink.getAttribute("dingPost")) {
+                                                    let index;
+                                                    if (klink.childElementCount > 2){
+                                                        index = 2;
+                                                    }else if (klink.childElementCount > 1){
+                                                        index = 1;
+                                                    }else{
+                                                        index= 0;
                                                     }
+                                                    klink.setAttribute("dingPost", "dingPost");
+                                                    klink.children[index].innerHTML = "<span style='color:orange;'>（礼包）</span>" + klink.children[index].innerHTML;
+                                                    klink.setAttribute("dingPrefix", "dingPrefix");
                                                 }
                                             }
-
                                         }
+
                                     }
                                 }
                             }
                         }
                     }
-
-
-
-                } catch (e) {
-                    //exception handle;
                 }
-            })
-        }
 
-        const observer0 = new MutationObserver(callback0);
-        observer0.observe(targetNode0, config);
+
+
+            } catch (e) {
+                //exception handle;
+            }
+        })
     }
+
+    const observer0 = new MutationObserver(callback0);
+    observer0.observe(targetNode0, config);
+
 }
 //steamdb.info
 else if (window.location.hostname == "steamdb.info") {
@@ -1974,5 +1970,3 @@ else if (window.location.hostname == "steamdb.info") {
     }
     //return;
 }
-
-
