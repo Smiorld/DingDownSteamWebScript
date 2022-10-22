@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.37
+// @version      1.0.38
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -1358,6 +1358,33 @@ window.addEventListener("load", function() {
                                 }
                          }
                         }
+                );
+            }
+        }
+    }
+      else if (base_path.length > 0 && base_path[1] === "depot") {
+        let head_node = document.getElementsByClassName("pagehead");
+        if (head_node && head_node.length >0){
+           let base_depotid = base_path[2];
+            if (base_depotid && base_depotid.length >1 && base_depotid.length < 10 && isInteger(base_depotid)){
+                let data = {
+                Id: base_depotid
+                };
+                T2Post(
+                    "https://ddapi.133233.xyz/CheckDepot",
+                    data,
+                    function(response) {
+                        console.log("got response");
+                        let next_class = head_node[0].nextElementSibling;
+                        if(next_class){
+                            let tmpchild = next_class.children[0].getElementsByTagName("tr")[0];
+                            if (response.response.Data.Id == "0") {
+                                tmpchild.children[1].innerHTML += "<span style='color:red;'>（未收录）</span>";
+                            } else {
+                                tmpchild.children[1].innerHTML += "<span style='color:green;'>（已收录）</span>";
+                            }
+                        }
+                    }
                 );
             }
         }
