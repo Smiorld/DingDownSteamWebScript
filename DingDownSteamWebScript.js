@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.36
+// @version      1.0.37
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -1219,32 +1219,54 @@ window.addEventListener("load", function() {
       if (base_path.length > 0 && base_path[1] === "app") {
         let head_node = document.getElementsByClassName("pagehead");
         if (head_node && head_node.length >0){
-           let appids = [];
+            let appids = [];
+            let depots = [];
         //base appid
             let base_appid = base_path[2];
             appids.push(base_appid);
 
-        //get the dlc table.
-       let dlc_node = document.querySelector("#dlc");
-        if (dlc_node)
-        {
-            //body
-           let children = dlc_node.getElementsByTagName("tbody");
+            //get the dlc table.
+            let dlc_node = document.querySelector("#dlc");
+            if (dlc_node)
+            {
+                //body
+                let children = dlc_node.getElementsByTagName("tbody");
                 //restore all appid
-            let childrenLength = children.length;
-            for (let i = 0; i < childrenLength; i++) {
-                let tmpchild = children[i].getElementsByTagName("tr");
-                let tmpchildLength = tmpchild.length;
-                 for (let k = 0; k < tmpchildLength; k++) {
-                     let appid = tmpchild[k].getAttribute("data-appid");
-                     if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
-                         appids.push(appid);
-                     }
-                 }
+                let childrenLength = children.length;
+                for (let i = 0; i < childrenLength; i++) {
+                    let tmpchild = children[i].getElementsByTagName("tr");
+                    let tmpchildLength = tmpchild.length;
+                    for (let k = 0; k < tmpchildLength; k++) {
+                        let appid = tmpchild[k].getAttribute("data-appid");
+                        if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                            appids.push(appid);
+                        }
+                    }
+                }
             }
-        }
+            let depot_node = document.querySelector("#depots");
+            if (depot_node)
+            {
+                //body
+                let children = depot_node.getElementsByTagName("tbody");
+                //restore all appid
+                let childrenLength = children.length;
+                for (let i = 0; i < childrenLength; i++) {
+                    let tmpchild = children[i].getElementsByTagName("tr");
+                    let tmpchildLength = tmpchild.length;
+                    for (let k = 0; k < tmpchildLength; k++) {
+                        let depotnode = tmpchild[k].getElementsByTagName("a");
+                        if (depotnode && depotnode.length >0){
+                            let depotid = depotnode[0].innerText;
+                            if (depotid && depotid.length >1 && depotid.length < 10 && isInteger(depotid)){
+                                depots.push(depotid);
+                            }
+                        }
+                    }
+                }
+            }
 
-           if (appids.length != 0) {
+            if (appids.length != 0) {
                 let data = {
                     "Ids": appids.join()
                 };
@@ -1288,6 +1310,49 @@ window.addEventListener("load", function() {
 
                                         }
 
+                                    }
+
+                                }
+                         }
+                        }
+                );
+            }
+            if (depots.length != 0) {
+                let data = {
+                    "Ids": depots.join()
+                };
+                T2Post(
+                    "https://ddapi.133233.xyz/CheckDepots",
+                    data,
+                    function (response) {
+                        console.log("got response for " + response.response.Data.Total + " depots");
+                          //body
+                        if (depot_node){
+                            let children = depot_node.getElementsByTagName("tbody");
+                            //restore all appid
+                            let childrenLength = children.length;
+                            //prefix DLC table
+                            for (let i = 0; i < childrenLength; i++) {
+                                let tmpchild = children[i].getElementsByTagName("tr");
+                                let tmpchildLength = tmpchild.length;
+                                for (let k = 0; k < tmpchildLength; k++) {
+                                    let depotnode = tmpchild[k].getElementsByTagName("a");
+                                    if (depotnode && depotnode.length >0){
+                                        let depotid = depotnode[0].innerText;
+                                        if (depotid && depotid.length >1 && depotid.length < 10){
+                                            if (depots.find(a => a == depotid)) {
+                                                let tmptext = tmpchild[k].getElementsByTagName("td");
+                                                if (tmptext && tmptext.length >0) {
+                                                    if (response.response.Data.AppInfo.find(a => a == depotid)) {
+                                                        tmptext[1].innerHTML = "<span style='color:green;font-style: normal;'>（已收录）</span>" + tmptext[1].innerHTML;
+                                                    } else {
+                                                        tmptext[1].innerHTML = "<span style='color:red;font-style: normal;'>（未收录）</span>" + tmptext[1].innerHTML;
+                                                    }
+                                                }
+                                                depots.splice(depots.indexOf(depotid), 1);
+                                             }
+                                        }
+                                    }
                                     }
 
                                 }
