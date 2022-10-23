@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.43
+// @version      1.0.44
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -2088,7 +2088,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                                         console.log("got response");
                                         if (response.response.Data.Id == "0") {
                                             //child.children[1].innerHTML = "<span style='color:red;'>（未收录）</span>" + child.children[1].innerHTML;
-                                            child.children[1].outerHTML = child.children[1].outerHTML + "<div class=\"hover_release\" style=\"display: initial;\"><span style='color:green;'>叮当公共库</span>: <span style='color:red;'>未收录</span></div><div></div>";
+                                            child.children[1].outerHTML = child.children[1].outerHTML + "<div class=\"hover_release\" style=\"display: initial;\"><span style='color:green;'>叮当分享</span>: <span style='color:red;'>未收录</span></div><div></div>";
                                         } else {
                                             let NickName = response.response.Data.NickName;
                                             if (!NickName || NickName.length === 0 || NickName === "") {
@@ -2096,7 +2096,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                                             }else{
                                                 NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date;
                                             }
-                                            child.children[1].outerHTML = child.children[1].outerHTML + "<div class=\"hover_release\" style=\"display: initial;\"><span style='color:green;'>叮当公共库</span>: " + NickName + "）</div><div></div>";
+                                            child.children[1].outerHTML = child.children[1].outerHTML + "<div class=\"hover_release\" style=\"display: initial;\"><span style='color:green;'>叮当分享</span>: " + NickName + "）</div><div></div>";
                                             //child.children[1].innerHTML = "<span style='color:green;'>（已收录）</span>" + child.children[1].innerHTML;
                                         }
                                         child.setAttribute("dingPrefix", "dingPrefix");
@@ -2667,7 +2667,7 @@ else if (window.location.hostname == "steamdb.info") {
                                     function(response) {
                                         console.log("got response");
                                         if (response.response.Data.Id == "0") {
-                                            child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\"><span style='color:green;'>叮当公共库: </span><span style='color:red;'><b>未收录</b></span></div>";
+                                            child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\"><span style='color:green;'>叮当分享: </span><span style='color:red;'><b>未收录</b></span></div>";
                                         } else {
                                             let NickName = response.response.Data.NickName;
                                             if (!NickName || NickName.length === 0 || NickName === "") {
@@ -2675,7 +2675,7 @@ else if (window.location.hostname == "steamdb.info") {
                                             }else{
                                                 NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date;
                                             }
-                                            child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\"><span style='color:green;'>叮当公共库</span>: " + NickName + "）</div>";
+                                            child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\"><span style='color:green;'>叮当分享</span>: " + NickName + "）</div>";
                                         }
                                         child.setAttribute("dingPrefix", "dingPrefix");
                                     }
