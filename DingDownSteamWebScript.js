@@ -1472,200 +1472,291 @@ if (base_url.hostname == 'store.steampowered.com') {
     }
     //优化单页加载
     else if (base_path_sp.length > 0 && base_path_sp[1] == 'app') {
-            let appid = base_path_sp[2];
-            let data = {
-                Id: appid
-            };
-            let title = document.getElementById("userReviews");
-            if (!title.getAttribute("dingPost")) {
-                title.setAttribute("dingPost", "dingPost");
-                T2Post(
-                    "https://ddapi.133233.xyz/CheckId",
-                    data,
-                    function(response) {
-                        console.log("got response");
-                        var CheckIdResponse = {
-                            'is_recorded': null,
+        let appid = base_path_sp[2];
+        let data = {
+            Id: appid
+        };
+        let title = document.getElementById("userReviews");
+        if (!title.getAttribute("dingPost")) {
+            title.setAttribute("dingPost", "dingPost");
+            T2Post(
+                "https://ddapi.133233.xyz/CheckId",
+                data,
+                function(response) {
+                    console.log("got response");
+                    var CheckIdResponse = {
+                        'is_recorded': null,
+                        'sharer': null
+                    };
+                    if (response.response.Data.Id == "0") {
+                        CheckIdResponse = {
+                            'is_recorded': false,
                             'sharer': null
                         };
-                        if (response.response.Data.Id == "0") {
-                            CheckIdResponse = {
-                                'is_recorded': false,
-                                'sharer': null
-                            };
-                            //title.innerHTML += " ----- 公共库未收录";
-                            title.innerHTML = "<div class=\"user_reviews_summary_row\"><div class=\"subtitle column all\">叮当分享:</div><div class=\"summary column\"><span style='color:red;'><b>未收录</b></span></div></div>" + title.innerHTML;
-                        } else {
-                            let NickName = response.response.Data.NickName;
-                            if (!NickName || NickName.length === 0 || NickName === "") {
-                                NickName = "<div class=\"summary column\"><span style='color:green;'><b>系统/匿名</b></span>（" + response.response.Data.Date + "）</div>";
-                            }else{
-                                NickName= "<div class=\"summary column\"><span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date + "）</div>";
-                            }
-                            CheckIdResponse = {
-                                'is_recorded': true,
-                                'sharer': NickName
-                            };
-                            title.innerHTML = "<div class=\"user_reviews_summary_row\"><div class=\"subtitle column all\">叮当分享:</div>" + NickName + "</div>" + title.innerHTML;
+                        //title.innerHTML += " ----- 公共库未收录";
+                        title.innerHTML = "<div class=\"user_reviews_summary_row\"><div class=\"subtitle column all\">叮当分享:</div><div class=\"summary column\"><span style='color:red;'><b>未收录</b></span></div></div>" + title.innerHTML;
+                    } else {
+                        let NickName = response.response.Data.NickName;
+                        if (!NickName || NickName.length === 0 || NickName === "") {
+                            NickName = "<div class=\"summary column\"><span style='color:green;'><b>系统/匿名</b></span>（" + response.response.Data.Date + "）</div>";
+                        }else{
+                            NickName= "<div class=\"summary column\"><span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date + "）</div>";
                         }
-                        title.setAttribute("dingPrefix", "dingPrefix");
-                        //only if the response is received, then add subscribe/download button.
+                        CheckIdResponse = {
+                            'is_recorded': true,
+                            'sharer': NickName
+                        };
+                        title.innerHTML = "<div class=\"user_reviews_summary_row\"><div class=\"subtitle column all\">叮当分享:</div>" + NickName + "</div>" + title.innerHTML;
+                    }
+                    title.setAttribute("dingPrefix", "dingPrefix");
+                    //only if the response is received, then add subscribe/download button.
 
-                        //自己提交的(判断CheckId返回的昵称?)/免费游戏/分享者为“系统/匿名”/未收录的,不再请求CheckSub
-                        //add a button for DingDownloadcost_credit
-                        if (getCookie('Ding_SessionId')) {
-                            //if logged in
-                            let queueBtnFollow = document.querySelector('#queueActionsCtn');
-                            // if this is a DLC, try find the main appid.
-                                let ostmain = document.querySelector(".game_area_soundtrack_bubble")
-                                if (!ostmain){
-                                    let dlcmain = document.getElementsByClassName('glance_details');
-                                    if (dlcmain && dlcmain.length >0){
-                                        let node_a = dlcmain[0].getElementsByTagName("a");
-                                        if (node_a && node_a.length > 0){
-                                            let tmplinkLength = node_a.length;
-                                            for (let y = 0; y < tmplinkLength;y++) {
-                                                let tmp_href = new URL(node_a[y].href);
-                                                if (tmp_href.host == 'store.steampowered.com'){
-                                                    let path_sp = tmp_href.pathname.split('/');
-                                                    appid = path_sp[2];
-                                                    break;
-                                                }
-                                            }
+                    //自己提交的(判断CheckId返回的昵称?)/免费游戏/分享者为“系统/匿名”/未收录的,不再请求CheckSub
+                    //add a button for DingDownloadcost_credit
+                    if (getCookie('Ding_SessionId')) {
+                        //if logged in
+                        let queueBtnFollow = document.querySelector('#queueActionsCtn');
+                        // if this is a DLC, try find the main appid.
+                        let ostmain = document.querySelector(".game_area_soundtrack_bubble")
+                        if (!ostmain){
+                            let dlcmain = document.getElementsByClassName('glance_details');
+                            if (dlcmain && dlcmain.length >0){
+                                let node_a = dlcmain[0].getElementsByTagName("a");
+                                if (node_a && node_a.length > 0){
+                                    let tmplinkLength = node_a.length;
+                                    for (let y = 0; y < tmplinkLength;y++) {
+                                        let tmp_href = new URL(node_a[y].href);
+                                        if (tmp_href.host == 'store.steampowered.com'){
+                                            let path_sp = tmp_href.pathname.split('/');
+                                            appid = path_sp[2];
+                                            break;
                                         }
                                     }
                                 }
+                            }
+                        }
 
-                            let checkSubData = {
-                                'SessionId': getCookie('Ding_SessionId'),
-                                "AppId": appid
-                            };
+                        let checkSubData = {
+                            'SessionId': getCookie('Ding_SessionId'),
+                            "AppId": appid
+                        };
 
-                            if (queueBtnFollow) {
-                                // if this page is an app instead of dlc
-                                const freeGameBtn = document.querySelector('#freeGameBtn'); // is this a free game?
-                                if (CheckIdResponse.is_recorded === true && CheckIdResponse.sharer !== UnicodeDecodeB64(getCookie('Ding_NickName')) && !freeGameBtn && CheckIdResponse.sharer !== "系统/匿名") {
-                                    //only if the game is recorded
-                                    //and the sharer is not the current user
-                                    //and the game is not free.
-                                    //and the sharer is not "系统/匿名"
-                                    T2Post(
-                                        "https://ddapi.133233.xyz/AjaxCheckSub",
-                                        checkSubData,
-                                        function(response) {
-                                            if (response.response.Data.Credit && response.response.Data.Credit !== 2147483647) {
-                                                setCookie('Ding_Credit', response.response.Data.Credit, 30);
-                                            }
-                                            if (response.response.Data.Status > 0) {
-                                                //if not subscribed
-                                                let cost_credit = response.response.Data.Status;
-                                                queueBtnFollow.insertAdjacentHTML('afterbegin', '<div id="dingdown_subscribe" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当订阅此游戏"><span>叮当订阅：-' + cost_credit + '分</span></a></div>');
-                                                let dingdown_subscribe = document.getElementById("dingdown_subscribe");
-                                                dingdown_subscribe.addEventListener("click", function() {
-                                                    let subData = {
-                                                        'SessionId': getCookie('Ding_SessionId'),
-                                                        "AppId": appid
-                                                    };
-                                                    Swal.fire({
-                                                        title: '确认订阅？',
-                                                        text: '订阅后将会消耗' + cost_credit + '分，确认订阅吗？',
-                                                        type: 'warning',
-                                                        showCancelButton: true,
-                                                        confirmButtonText: '确认订阅',
-                                                        cancelButtonText: '取消',
-                                                    })
-                                                        .then(
-                                                        function(result) {
-                                                            if (result.value) {
-                                                                Swal.fire({
-                                                                    title: '订阅中...',
-                                                                    html: '尝试订阅中,等待倒计时 <b></b> 毫秒.',
-                                                                    icon: 'question',
-                                                                    timer: 10000,
-                                                                    timerProgressBar: true,
-                                                                    allowOutsideClick: false,
-                                                                    allowEscapeKey: false,
-                                                                    allowEnterKey: false,
-                                                                    showConfirmButton: false,
-                                                                    didOpen: () => {
-                                                                        Swal.showLoading()
-                                                                        const b = Swal.getHtmlContainer().querySelector('b')
-                                                                        timerInterval = setInterval(() => {
-                                                                            b.textContent = Swal.getTimerLeft()
-                                                                        }, 100)
-                                                                    },
-                                                                    willClose: () => {
-                                                                        clearInterval(timerInterval);
-                                                                    }
-                                                                })
-                                                                    .then((result) => {
-                                                                    if (result.dismiss === Swal.DismissReason.timer) {
+                        if (queueBtnFollow) {
+                            // if this page is an app instead of dlc
+                            const freeGameBtn = document.querySelector('#freeGameBtn'); // is this a free game?
+                            if (CheckIdResponse.is_recorded === true && CheckIdResponse.sharer !== UnicodeDecodeB64(getCookie('Ding_NickName')) && !freeGameBtn && CheckIdResponse.sharer !== "系统/匿名") {
+                                //only if the game is recorded
+                                //and the sharer is not the current user
+                                //and the game is not free.
+                                //and the sharer is not "系统/匿名"
+                                T2Post(
+                                    "https://ddapi.133233.xyz/AjaxCheckSub",
+                                    checkSubData,
+                                    function(response) {
+                                        if (response.response.Data.Credit && response.response.Data.Credit !== 2147483647) {
+                                            setCookie('Ding_Credit', response.response.Data.Credit, 30);
+                                        }
+                                        if (response.response.Data.Status > 0) {
+                                            //if not subscribed
+                                            let cost_credit = response.response.Data.Status;
+                                            queueBtnFollow.insertAdjacentHTML('afterbegin', '<div id="dingdown_subscribe" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当订阅此游戏"><span>叮当订阅：-' + cost_credit + '分</span></a></div>');
+                                            let dingdown_subscribe = document.getElementById("dingdown_subscribe");
+                                            dingdown_subscribe.addEventListener("click", function() {
+                                                let subData = {
+                                                    'SessionId': getCookie('Ding_SessionId'),
+                                                    "AppId": appid
+                                                };
+                                                Swal.fire({
+                                                    title: '确认订阅？',
+                                                    text: '订阅后将会消耗' + cost_credit + '分，确认订阅吗？',
+                                                    type: 'warning',
+                                                    showCancelButton: true,
+                                                    confirmButtonText: '确认订阅',
+                                                    cancelButtonText: '取消',
+                                                })
+                                                    .then(
+                                                    function(result) {
+                                                        if (result.value) {
+                                                            Swal.fire({
+                                                                title: '订阅中...',
+                                                                html: '尝试订阅中,等待倒计时 <b></b> 毫秒.',
+                                                                icon: 'question',
+                                                                timer: 10000,
+                                                                timerProgressBar: true,
+                                                                allowOutsideClick: false,
+                                                                allowEscapeKey: false,
+                                                                allowEnterKey: false,
+                                                                showConfirmButton: false,
+                                                                didOpen: () => {
+                                                                    Swal.showLoading()
+                                                                    const b = Swal.getHtmlContainer().querySelector('b')
+                                                                    timerInterval = setInterval(() => {
+                                                                        b.textContent = Swal.getTimerLeft()
+                                                                    }, 100)
+                                                                },
+                                                                willClose: () => {
+                                                                    clearInterval(timerInterval);
+                                                                }
+                                                            })
+                                                                .then((result) => {
+                                                                if (result.dismiss === Swal.DismissReason.timer) {
+                                                                    Swal.fire({
+                                                                        title: '订阅超时，请检查网络后重试',
+                                                                        icon: 'error',
+                                                                        text: '订阅超时，请检查网络后重试',
+                                                                        confirmButtonText: '确定'
+                                                                    });
+                                                                }
+                                                            });
+                                                            T2Post(
+                                                                "https://ddapi.133233.xyz/AjaxSubApp",
+                                                                subData,
+                                                                function(response) {
+                                                                    if (response.response.Data.Status === 0) {
+                                                                        if (response.response.Data.Credit && response.response.Data.Credit !== 2147483647) {
+                                                                            setCookie('Ding_Credit', response.response.Data.Credit, 30);
+                                                                        }
                                                                         Swal.fire({
-                                                                            title: '订阅超时，请检查网络后重试',
-                                                                            icon: 'error',
-                                                                            text: '订阅超时，请检查网络后重试',
-                                                                            confirmButtonText: '确定'
+                                                                            title: '订阅成功',
+                                                                            text: '订阅成功，剩余' + getCookie('Ding_Credit') + '分',
+                                                                            type: 'success',
+                                                                            confirmButtonText: '确定',
+
+                                                                        }).then(function() {
+                                                                            window.location.reload();
+                                                                        });
+
+                                                                    } else if (response.response.Data.Status === -2) {
+                                                                        setCookie('Ding_SessionId', "", -1);
+                                                                        setCookie('Ding_Credit', "", -1);
+                                                                        setCookie('Ding_NickName', "", -1);
+                                                                        Swal.fire({
+                                                                            title: '订阅失败',
+                                                                            text: response.response.Data.Message,
+                                                                            type: 'error',
+                                                                            confirmButtonText: '确定',
+
+                                                                        }).then(function() {
+                                                                            window.location.reload();
+                                                                        });
+                                                                    } else {
+                                                                        Swal.fire({
+                                                                            title: '订阅失败',
+                                                                            text: '订阅失败，' + response.response.Data.Message,
+                                                                            type: 'error',
+                                                                            confirmButtonText: '确定',
+
+                                                                        }).then(function() {
+                                                                            window.location.reload();
                                                                         });
                                                                     }
-                                                                });
-                                                                T2Post(
-                                                                    "https://ddapi.133233.xyz/AjaxSubApp",
-                                                                    subData,
-                                                                    function(response) {
-                                                                        if (response.response.Data.Status === 0) {
-                                                                            if (response.response.Data.Credit && response.response.Data.Credit !== 2147483647) {
-                                                                                setCookie('Ding_Credit', response.response.Data.Credit, 30);
-                                                                            }
-                                                                            Swal.fire({
-                                                                                title: '订阅成功',
-                                                                                text: '订阅成功，剩余' + getCookie('Ding_Credit') + '分',
-                                                                                type: 'success',
-                                                                                confirmButtonText: '确定',
-
-                                                                            }).then(function() {
-                                                                                window.location.reload();
-                                                                            });
-
-                                                                        } else if (response.response.Data.Status === -2) {
-                                                                            setCookie('Ding_SessionId', "", -1);
-                                                                            setCookie('Ding_Credit', "", -1);
-                                                                            setCookie('Ding_NickName', "", -1);
-                                                                            Swal.fire({
-                                                                                title: '订阅失败',
-                                                                                text: response.response.Data.Message,
-                                                                                type: 'error',
-                                                                                confirmButtonText: '确定',
-
-                                                                            }).then(function() {
-                                                                                window.location.reload();
-                                                                            });
-                                                                        } else {
-                                                                            Swal.fire({
-                                                                                title: '订阅失败',
-                                                                                text: '订阅失败，' + response.response.Data.Message,
-                                                                                type: 'error',
-                                                                                confirmButtonText: '确定',
-
-                                                                            }).then(function() {
-                                                                                window.location.reload();
-                                                                            });
-                                                                        }
-                                                                    }
-                                                                );
-                                                            }
+                                                                }
+                                                            );
                                                         }
-                                                    );
+                                                    }
+                                                );
 
-                                                });
-                                            } else if (response.response.Data.Status === 0) {
-                                                //0 this game hasn't been recorded yet
-                                                //do nothing so far
-                                            } else if (response.response.Data.Status === -200) {
-                                                //-200 this is a dlc and is recorded.
-                                                //do nothing so far
-                                            } else if (response.response.Data.Status === -20 || response.response.Data.Status === -30 || response.response.Data.Status === -100) {
-                                                //-20 the user is the sharer. -30 the user has subscribed. -100 the game is free or recorded by anonymous users. All means the user do not need to pay credit for this game.
-                                                queueBtnFollow.insertAdjacentHTML('afterbegin', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载&启动游戏"><span>叮当试玩</span></a></div>');
+                                            });
+                                        } else if (response.response.Data.Status === 0) {
+                                            //0 this game hasn't been recorded yet
+                                            //do nothing so far
+                                        } else if (response.response.Data.Status === -200) {
+                                            //-200 this is a dlc and is recorded.
+                                            //do nothing so far
+                                        } else if (response.response.Data.Status === -20 || response.response.Data.Status === -30 || response.response.Data.Status === -100) {
+                                            //-20 the user is the sharer. -30 the user has subscribed. -100 the game is free or recorded by anonymous users. All means the user do not need to pay credit for this game.
+                                            if(ostmain){
+                                            queueBtnFollow.insertAdjacentHTML('afterbegin', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载&启动游戏"><span>叮当下载原生轨</span></a></div>');
+                                            }else{
+                                            queueBtnFollow.insertAdjacentHTML('afterbegin', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载&启动游戏"><span>叮当试玩</span></a></div>');
+                                            }
+                                            const dingdown_download = document.getElementById("dingdown_download");
+                                            dingdown_download.addEventListener("click", function() {
+                                                if (isWebBrowser()) {
+                                                    window.open("ding://install/" + appid);
+                                                } else {
+                                                    window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid);
+                                                }
+                                            });
+                                        } else if (response.response.Data.Status === -2) {
+                                            //if not logged in
+                                            setCookie('Ding_SessionId', "", -1);
+                                            setCookie('Ding_Credit', "", -1);
+                                            setCookie('Ding_NickName', "", -1);
+                                            Swal.fire({
+                                                title: '您还没有登录，请先登录',
+                                                text: response.response.Data.Message,
+                                                icon: 'error',
+                                                confirmButtonText: '确定',
+                                                timer: 2000,
+                                            }).then(function() {
+                                                window.location.reload();
+                                            });
+                                        } else {
+                                            console.log("error" + response.response.Data.Status + ',' + response.response.Data.Message);
+                                        }
+                                    }
+                                );
+                            } else if (CheckIdResponse.is_recorded === false) {
+                                //not recorded,
+                                //未收录的判断网页内容是否有启动steam,有的话证明可入库.
+                                const game_area_already_owned = document.getElementsByClassName("game_area_already_owned");
+                                if (game_area_already_owned) {
+                                    //add a share button TODO
+                                }
+                            } else if (CheckIdResponse.sharer === UnicodeDecodeB64(getCookie('Ding_NickName')) || freeGameBtn || CheckIdResponse.sharer === "系统/匿名") {
+                                //user can download this game
+                                queueBtnFollow.insertAdjacentHTML('beforeend', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载&启动游戏"><span>叮当试玩</span></a></div>');
+                                const dingdown_download = document.getElementById("dingdown_download");
+                                dingdown_download.addEventListener("click", function() {
+                                    if (isWebBrowser()) {
+                                        window.open("ding://install/" + appid);
+                                    } else {
+                                        window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid);
+                                    }
+                                });
+                            }
+                        } else {
+                            //if dlc
+                            const game_area_dlc_bubble = document.querySelector(".game_area_dlc_bubble");
+                            let game_appid;
+                            if (game_area_dlc_bubble) {
+                                game_appid = game_area_dlc_bubble.children[0].children[1].children[0].href.split('/')[4];
+                            }
+                            //if this dlc is not recorded: do nothing
+                            if (CheckIdResponse.is_recorded === true && game_appid) {
+                                //check parent game
+                                T2Post(
+                                    "https://ddapi.133233.xyz/AjaxCheckSub", {
+                                        'SessionId': getCookie('Ding_SessionId'),
+                                        "AppId": game_appid
+                                    },
+                                    function(response) {
+                                        if (response.response.Data.Credit && response.response.Data.Credit !== 2147483647) {
+                                            setCookie('Ding_Credit', response.response.Data.Credit, 30);
+                                        }
+                                        if (response.response.Data.Status > 0) {
+                                            //if not subscribed
+                                            //请先叮当订阅游戏本体
+                                            const ignoreBtn = document.querySelector("#ignoreBtn");
+                                            if (ignoreBtn) {
+                                                ignoreBtn.insertAdjacentHTML("beforebegin", '<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_need_game_subscribed" class="queue_control_button" style="flex-grow: 0;"><a href="http://store.steampowered.com/app/' + game_appid + '" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="请在使用叮当订阅dlc前先订阅游戏本体"><span>请先叮当订阅本体（点击跳转本体）</span></a></div></div>')
+                                            }
+                                        } else if (response.response.Data.Status === 0) {
+                                            //0 this game hasn't been recorded yet
+                                            const ignoreBtn = document.querySelector("#ignoreBtn");
+                                            if (ignoreBtn) {
+                                                ignoreBtn.insertAdjacentHTML("beforebegin", '<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_need_game_recorded" class="queue_control_button" style="flex-grow: 0;"><a href="http://store.steampowered.com/app/' + game_appid + '" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="本地未收录，无法订阅本dlc"><span>叮当尚未收录本体（点击跳转本体）</span></a></div></div>')
+                                            }
+                                        } else if (response.response.Data.Status === -200) {
+                                            //-200 this is a dlc and is recorded.
+                                            //this condition is not needed. no dlc's parent is another dlc.
+                                        } else if (response.response.Data.Status === -20 || response.response.Data.Status === -30 || response.response.Data.Status === -100) {
+                                            //-20 the user is the sharer. -30 the user has subscribed. -100 the game is free or recorded by anonymous users. All means the user do not need to pay credit for this game.
+                                            const ignoreBtn = document.querySelector("#ignoreBtn");
+                                            console.log(ignoreBtn);
+                                            if (ignoreBtn) {
+                                                ignoreBtn.insertAdjacentHTML("beforebegin", '<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a href="javascript:void(0);" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载本dlc"><span>叮当试玩</span></a></div></div>')
                                                 const dingdown_download = document.getElementById("dingdown_download");
                                                 dingdown_download.addEventListener("click", function() {
                                                     if (isWebBrowser()) {
@@ -1674,125 +1765,38 @@ if (base_url.hostname == 'store.steampowered.com') {
                                                         window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid);
                                                     }
                                                 });
-                                            } else if (response.response.Data.Status === -2) {
-                                                //if not logged in
-                                                setCookie('Ding_SessionId', "", -1);
-                                                setCookie('Ding_Credit', "", -1);
-                                                setCookie('Ding_NickName', "", -1);
-                                                Swal.fire({
-                                                    title: '您还没有登录，请先登录',
-                                                    text: response.response.Data.Message,
-                                                    icon: 'error',
-                                                    confirmButtonText: '确定',
-                                                    timer: 2000,
-                                                }).then(function() {
-                                                    window.location.reload();
-                                                });
-                                            } else {
-                                                console.log("error" + response.response.Data.Status + ',' + response.response.Data.Message);
                                             }
-                                        }
-                                    );
-                                } else if (CheckIdResponse.is_recorded === false) {
-                                    //not recorded,
-                                    //未收录的判断网页内容是否有启动steam,有的话证明可入库.
-                                    const game_area_already_owned = document.getElementsByClassName("game_area_already_owned");
-                                    if (game_area_already_owned) {
-                                        //add a share button TODO
-                                    }
-                                } else if (CheckIdResponse.sharer === UnicodeDecodeB64(getCookie('Ding_NickName')) || freeGameBtn || CheckIdResponse.sharer === "系统/匿名") {
-                                    //user can download this game
-                                    queueBtnFollow.insertAdjacentHTML('beforeend', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载&启动游戏"><span>叮当试玩</span></a></div>');
-                                    const dingdown_download = document.getElementById("dingdown_download");
-                                    dingdown_download.addEventListener("click", function() {
-                                        if (isWebBrowser()) {
-                                            window.open("ding://install/" + appid);
+
+                                        } else if (response.response.Data.Status === -2) {
+                                            //if not logged in
+                                            setCookie('Ding_SessionId', "", -1);
+                                            setCookie('Ding_Credit', "", -1);
+                                            setCookie('Ding_NickName', "", -1);
+                                            Swal.fire({
+                                                title: '您还没有登录，请先登录',
+                                                text: response.response.Data.Message,
+                                                icon: 'error',
+                                                confirmButtonText: '确定',
+                                                timer: 2000,
+                                            }).then(function() {
+                                                window.location.reload();
+                                            });
                                         } else {
-                                            window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid);
+                                            console.log("error" + response.response.Data.Status + ',' + response.response.Data.Message);
                                         }
-                                    });
-                                }
-                            } else {
-                                //if dlc
-                                const game_area_dlc_bubble = document.querySelector(".game_area_dlc_bubble");
-                                let game_appid;
-                                if (game_area_dlc_bubble) {
-                                    game_appid = game_area_dlc_bubble.children[0].children[1].children[0].href.split('/')[4];
-                                }
-                                //if this dlc is not recorded: do nothing
-                                if (CheckIdResponse.is_recorded === true && game_appid) {
-                                    //check parent game
-                                    T2Post(
-                                        "https://ddapi.133233.xyz/AjaxCheckSub", {
-                                            'SessionId': getCookie('Ding_SessionId'),
-                                            "AppId": game_appid
-                                        },
-                                        function(response) {
-                                            if (response.response.Data.Credit && response.response.Data.Credit !== 2147483647) {
-                                                setCookie('Ding_Credit', response.response.Data.Credit, 30);
-                                            }
-                                            if (response.response.Data.Status > 0) {
-                                                //if not subscribed
-                                                //请先叮当订阅游戏本体
-                                                const ignoreBtn = document.querySelector("#ignoreBtn");
-                                                if (ignoreBtn) {
-                                                    ignoreBtn.insertAdjacentHTML("beforebegin", '<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_need_game_subscribed" class="queue_control_button" style="flex-grow: 0;"><a href="http://store.steampowered.com/app/' + game_appid + '" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="请在使用叮当订阅dlc前先订阅游戏本体"><span>请先叮当订阅本体（点击跳转本体）</span></a></div></div>')
-                                                }
-                                            } else if (response.response.Data.Status === 0) {
-                                                //0 this game hasn't been recorded yet
-                                                const ignoreBtn = document.querySelector("#ignoreBtn");
-                                                if (ignoreBtn) {
-                                                    ignoreBtn.insertAdjacentHTML("beforebegin", '<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_need_game_recorded" class="queue_control_button" style="flex-grow: 0;"><a href="http://store.steampowered.com/app/' + game_appid + '" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="本地未收录，无法订阅本dlc"><span>叮当尚未收录本体（点击跳转本体）</span></a></div></div>')
-                                                }
-                                            } else if (response.response.Data.Status === -200) {
-                                                //-200 this is a dlc and is recorded.
-                                                //this condition is not needed. no dlc's parent is another dlc.
-                                            } else if (response.response.Data.Status === -20 || response.response.Data.Status === -30 || response.response.Data.Status === -100) {
-                                                //-20 the user is the sharer. -30 the user has subscribed. -100 the game is free or recorded by anonymous users. All means the user do not need to pay credit for this game.
-                                                const ignoreBtn = document.querySelector("#ignoreBtn");
-                                                console.log(ignoreBtn);
-                                                if (ignoreBtn) {
-                                                    ignoreBtn.insertAdjacentHTML("beforebegin", '<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a href="javascript:void(0);" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载本dlc"><span>叮当试玩</span></a></div></div>')
-                                                    const dingdown_download = document.getElementById("dingdown_download");
-                                                    dingdown_download.addEventListener("click", function() {
-                                                        if (isWebBrowser()) {
-                                                            window.open("ding://install/" + appid);
-                                                        } else {
-                                                            window.open("steam://openurl_external/https://ddapi.133233.xyz/install/" + appid);
-                                                        }
-                                                    });
-                                                }
-
-                                            } else if (response.response.Data.Status === -2) {
-                                                //if not logged in
-                                                setCookie('Ding_SessionId', "", -1);
-                                                setCookie('Ding_Credit', "", -1);
-                                                setCookie('Ding_NickName', "", -1);
-                                                Swal.fire({
-                                                    title: '您还没有登录，请先登录',
-                                                    text: response.response.Data.Message,
-                                                    icon: 'error',
-                                                    confirmButtonText: '确定',
-                                                    timer: 2000,
-                                                }).then(function() {
-                                                    window.location.reload();
-                                                });
-                                            } else {
-                                                console.log("error" + response.response.Data.Status + ',' + response.response.Data.Message);
-                                            }
-                                        }
-                                    )
-                                }
+                                    }
+                                )
                             }
-
                         }
 
-
                     }
-                );
-            }
 
+
+                }
+            );
         }
+
+    }
     //搜索页面
     else if (base_path_sp.length > 0 && base_path_sp[1] == 'search') {
         let targetNode = document.querySelector('#search_results');
