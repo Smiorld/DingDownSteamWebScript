@@ -62,7 +62,7 @@ function formatDate(date) {
     var d = new Date(date),
         month = '' + (d.getMonth() + 1),
         day = '' + d.getDate(),
-        year = d.getFullYear().toString().substr(-2);
+        year = d.getFullYear().toString().substr(2,2);
     if (month.length < 2){
         month = '0' + month;
     }
@@ -1516,9 +1516,9 @@ if (base_url.hostname == 'store.steampowered.com') {
                         let NickName = response.response.Data.NickName;
                         let dateformat = "入库于 "+response.response.Data.Date;
                         if (!NickName || NickName.length === 0 || NickName === "") {
-                            NickName = "<div class=\"summary column ding\"><span style='color:green;' data-tooltip-text=\""+dateformat+"\"><b>系统/匿名</b></span>（<span class='date' data-tooltip-text=\""+dateformat+"\">" + formatDate(response.response.Data.Date) + "</span>）</div>";
+                            NickName = "<div class=\"summary column ding\"><span style='color:green;' data-tooltip-text=\""+dateformat+"\"><b>系统/匿名</b><span style=\"color: #8f98a0;\">（" + formatDate(response.response.Data.Date) + "</span></span>）</div>";
                         }else{
-                            NickName= "<div class=\"summary column ding\"><span style='color:#ff683b;' data-tooltip-text=\""+dateformat+"\"><b>"+ NickName +"</b></span>（<span class='date' data-tooltip-text=\""+dateformat+"\">" + formatDate(response.response.Data.Date) + "</span>）</div>";
+                            NickName= "<div class=\"summary column ding\"><span style='color:#ff683b;' data-tooltip-text=\""+dateformat+"\"><b>"+ NickName +"</b><span style=\"color: #8f98a0;\">（" + formatDate(response.response.Data.Date) + "</span></span>）</div>";
                         }
                         CheckIdResponse = {
                             'is_recorded': true,
