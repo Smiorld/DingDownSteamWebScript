@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.45
+// @version      1.0.46
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -1516,6 +1516,26 @@ if (base_url.hostname == 'store.steampowered.com') {
                         if (getCookie('Ding_SessionId')) {
                             //if logged in
                             let queueBtnFollow = document.querySelector('#queueActionsCtn');
+                            // if this is a DLC, try find the main appid.
+                                let ostmain = document.querySelector(".game_area_soundtrack_bubble")
+                                if (!ostmain){
+                                    let dlcmain = document.getElementsByClassName('glance_details');
+                                    if (dlcmain && dlcmain.length >0){
+                                        let node_a = dlcmain[0].getElementsByTagName("a");
+                                        if (node_a && node_a.length > 0){
+                                            let tmplinkLength = node_a.length;
+                                            for (let y = 0; y < tmplinkLength;y++) {
+                                                let tmp_href = new URL(node_a[y].href);
+                                                if (tmp_href.host == 'store.steampowered.com'){
+                                                    let path_sp = tmp_href.pathname.split('/');
+                                                    appid = path_sp[2];
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
                             let checkSubData = {
                                 'SessionId': getCookie('Ding_SessionId'),
                                 "AppId": appid
