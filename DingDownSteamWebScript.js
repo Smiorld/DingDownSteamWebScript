@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.47
+// @version      1.0.48
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -1479,7 +1479,7 @@ if (base_url.hostname == 'store.steampowered.com') {
         let title = document.getElementById("userReviews");
         let iscomingson = document.querySelector(".game_area_comingsoon");
         if (iscomingson){
-            title.innerHTML = "<div class=\"user_reviews_summary_row\"><div class=\"subtitle column all\">叮当分享:</div><div class=\"summary column\"><span style='color:red;'><b>游戏未发行</b></span></div></div>" + title.innerHTML;
+            title.insertAdjacentHTML("afterbegin","<span class=\"user_reviews_summary_row\"><div class=\"subtitle column\">叮当分享:</div><div class=\"summary column ding\"><span style='color:red;'><b>游戏未发行</b></span></div></span>");
         }else if (!title.getAttribute("dingPost")) {
             title.setAttribute("dingPost", "dingPost");
             T2Post(
@@ -1497,19 +1497,20 @@ if (base_url.hostname == 'store.steampowered.com') {
                             'sharer': null
                         };
                         //title.innerHTML += " ----- 公共库未收录";
-                        title.innerHTML = "<div class=\"user_reviews_summary_row\"><div class=\"subtitle column all\">叮当分享:</div><div class=\"summary column\"><span style='color:red;'><b>未收录</b></span></div></div>" + title.innerHTML;
+                        title.insertAdjacentHTML("afterbegin","<span class=\"user_reviews_summary_row\"><div class=\"subtitle column\">叮当分享:</div><div class=\"summary column\"><span style='color:red;'><b>未收录</b></span></div></span>");
                     } else {
                         let NickName = response.response.Data.NickName;
                         if (!NickName || NickName.length === 0 || NickName === "") {
-                            NickName = "<div class=\"summary column\"><span style='color:green;'><b>系统/匿名</b></span>（" + response.response.Data.Date + "）</div>";
+                            NickName = "<div class=\"summary column ding\"><span style='color:green;'><b>系统/匿名</b></span>（" + response.response.Data.Date + "）</div>";
                         }else{
-                            NickName= "<div class=\"summary column\"><span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date + "）</div>";
+                            NickName= "<div class=\"summary column ding\"><span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date + "）</div>";
                         }
                         CheckIdResponse = {
                             'is_recorded': true,
                             'sharer': NickName
                         };
-                        title.innerHTML = "<div class=\"user_reviews_summary_row\"><div class=\"subtitle column all\">叮当分享:</div>" + NickName + "</div>" + title.innerHTML;
+                        title.insertAdjacentHTML("afterbegin","<span class=\"user_reviews_summary_row\"><div class=\"subtitle column\">叮当分享:</div>" + NickName + "</span>" );
+                        //title.outerHTML = "<div class=\"user_reviews_summary_row\"><div class=\"subtitle column\">叮当分享:</div>" + NickName + "</div>" + title.outerHTML;
                     }
                     title.setAttribute("dingPrefix", "dingPrefix");
                     //only if the response is received, then add subscribe/download button.
