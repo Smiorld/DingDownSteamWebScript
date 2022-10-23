@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.46
+// @version      1.0.47
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -1477,7 +1477,10 @@ if (base_url.hostname == 'store.steampowered.com') {
             Id: appid
         };
         let title = document.getElementById("userReviews");
-        if (!title.getAttribute("dingPost")) {
+        let iscomingson = document.querySelector(".game_area_comingsoon");
+        if (iscomingson){
+            title.innerHTML = "<div class=\"user_reviews_summary_row\"><div class=\"subtitle column all\">叮当分享:</div><div class=\"summary column\"><span style='color:red;'><b>游戏未发行</b></span></div></div>" + title.innerHTML;
+        }else if (!title.getAttribute("dingPost")) {
             title.setAttribute("dingPost", "dingPost");
             T2Post(
                 "https://ddapi.133233.xyz/CheckId",
