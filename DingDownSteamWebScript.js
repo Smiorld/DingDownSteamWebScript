@@ -1237,11 +1237,11 @@ window.addEventListener("load", function() {
                             let head_name = head_node[0].getElementsByTagName("h1");
                             if (head_name && head_name.length >0){
                                 if (response.response.Data.Id == "0") {
-                                    head_name[0].innerHTML = head_name[0].innerHTML + "<span style='color:red;'>（未收录）</span>";
+                                    head_name[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + head_name[0].innerHTML;
                                 }
                                 else
                                 {
-                                    head_name[0].innerHTML = head_name[0].innerHTML + "<span style='color:green;'>（已收录）</span>";
+                                    head_name[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + head_name[0].innerHTML;
                                     let next_class = head_node[0].nextElementSibling;
                                     let node_tr = next_class.children[0].getElementsByTagName("tr");
                                     if (node_tr){
