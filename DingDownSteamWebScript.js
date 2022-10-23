@@ -1479,7 +1479,7 @@ if (base_url.hostname == 'store.steampowered.com') {
         let title = document.getElementById("userReviews");
         let iscomingson = document.querySelector(".game_area_comingsoon");
         if (iscomingson){
-            title.insertAdjacentHTML("afterbegin","<span class=\"user_reviews_summary_row\"><div class=\"subtitle column\">叮当分享:</div><div class=\"summary column ding\"><span style='color:red;'><b>游戏未发行</b></span></div></span>");
+            title.insertAdjacentHTML("beforeend","<span class=\"user_reviews_summary_row\"><div class=\"subtitle column\">叮当分享:</div><div class=\"summary column ding\"><span style='color:#929396;'>游戏未发行</span></div></span>");
         }else if (!title.getAttribute("dingPost")) {
             title.setAttribute("dingPost", "dingPost");
             T2Post(
