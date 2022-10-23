@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.42
+// @version      1.0.43
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -1947,9 +1947,15 @@ if (base_url.hostname == 'store.steampowered.com') {
                                                 }
 
                                                 if (response.response.Data.Id == "0") {
-                                                    klink.children[index].innerHTML = "<span style='color:red;'><b>（未收录）</b></span>" + klink.children[index].innerHTML;
+                                                    klink.children[index].innerHTML = "<span style='color:red;'><b>（叮当未收录）</b></span>" + klink.children[index].innerHTML;
                                                 } else {
-                                                    klink.children[index].innerHTML = "<span style='color:green;'><b>（已收录）</b></span>" + klink.children[index].innerHTML;
+                                                    let NickName = response.response.Data.NickName;
+                                                    if (!NickName || NickName.length === 0 || NickName === "") {
+                                                        NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span>（" + response.response.Data.Date;
+                                                    }else{
+                                                        NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date;
+                                                    }
+                                                    klink.children[index].innerHTML = "<span style='color:green;'><b>叮当分享</b></span>：" + NickName + "）"+ klink.children[index].innerHTML;
                                                 }
                                                 klink.setAttribute("dingPrefix", "dingPrefix");
                                             }
@@ -1991,70 +1997,74 @@ if (base_url.hostname == 'store.steampowered.com') {
                         let children = ContentHubMainCarouselCapsule;
                         for (let i = 0; i < children.length; i++) {
                             let alink = children[i].getElementsByTagName('a');
-                            if (alink) {
-                                for(var z = 0; z < alink.length; z++){
-                                    let klink = alink[z];
-                                    let ahref = klink.getAttribute("href").split('/');
-                                    if (ahref.length > 3 && ahref[3] == 'app') {
-                                        let data = {
-                                            Id: ahref[4]
-                                        };
-                                        if (!klink.getAttribute("dingPost")) {
-                                            klink.setAttribute("dingPost", "dingPost");
-                                            T2Post(
-                                                "https://ddapi.133233.xyz/CheckId",
-                                                data,
-                                                function(response) {
-                                                    console.log("got response");
-                                                    let index;
-                                                    if (klink.childElementCount > 2){
-                                                        index = 2;
-                                                    }else if (klink.childElementCount > 1){
-                                                        index = 1;
-                                                    }else{
-                                                        index= 0;
-                                                    }
-
-                                                    if (response.response.Data.Id == "0") {
-                                                        klink.children[index].innerHTML = "<span style='color:red;'>（未收录）</span>" + klink.children[index].innerHTML;
-                                                    } else {
-                                                        klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
-                                                    }
-                                                    klink.setAttribute("dingPrefix", "dingPrefix");
+                            if (alink && alink.length >2) {
+                                let klink = alink[2];
+                                let ahref = klink.getAttribute("href").split('/');
+                                if (ahref.length > 3 && ahref[3] == 'app') {
+                                    let data = {
+                                        Id: ahref[4]
+                                    };
+                                    if (!klink.getAttribute("dingPost")) {
+                                        klink.setAttribute("dingPost", "dingPost");
+                                        T2Post(
+                                            "https://ddapi.133233.xyz/CheckId",
+                                            data,
+                                            function(response) {
+                                                console.log("got response");
+                                                let index;
+                                                if (klink.childElementCount > 2){
+                                                    index = 2;
+                                                }else if (klink.childElementCount > 1){
+                                                    index = 1;
+                                                }else{
+                                                    index= 0;
                                                 }
-                                            );
-                                        }
-                                    } else if (ahref.length > 3 && ahref[3] == "bundle") {
-                                        if (!klink.getAttribute("dingPost")) {
-                                            let index;
-                                            if (klink.childElementCount > 2){
-                                                index = 2;
-                                            }else if (klink.childElementCount > 1){
-                                                index = 1;
-                                            }else{
-                                                index= 0;
+
+                                                if (response.response.Data.Id == "0") {
+                                                    klink.children[index].innerHTML = "<span style='color:red;'>（叮当未收录）</span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">|</span>" + klink.children[index].innerHTML;
+                                                } else {
+                                                    let NickName = response.response.Data.NickName;
+                                                    if (!NickName || NickName.length === 0 || NickName === "") {
+                                                        NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">|</span>";
+                                                    }else{
+                                                        NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">|</span>";
+                                                    }
+                                                    //klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
+                                                    klink.children[index].outerHTML = "<span style='color:green;'><b>叮当分享</b></span>：" + NickName + klink.children[index].outerHTML;
+                                                }
+                                                klink.setAttribute("dingPrefix", "dingPrefix");
                                             }
-                                            klink.setAttribute("dingPost", "dingPost");
-                                            klink.children[index].innerHTML = "<span style='color:orange;'>（合集）</span>" + klink.children[index].innerHTML;
-                                            klink.setAttribute("dingPrefix", "dingPrefix");
+                                        );
+                                    }
+                                } else if (ahref.length > 3 && ahref[3] == "bundle") {
+                                    if (!klink.getAttribute("dingPost")) {
+                                        let index;
+                                        if (klink.childElementCount > 2){
+                                            index = 2;
+                                        }else if (klink.childElementCount > 1){
+                                            index = 1;
+                                        }else{
+                                            index= 0;
                                         }
-                                    } else if (ahref.length > 2 && ahref[3] == "sub") {
-                                        if (!klink.getAttribute("dingPost")) {
-                                            let index;
-                                            if (klink.childElementCount > 2){
-                                                index = 2;
-                                            }else if (klink.childElementCount > 1){
-                                                index = 1;
-                                            }else{
-                                                index= 0;
-                                            }
-                                            klink.setAttribute("dingPost", "dingPost");
-                                            klink.children[index].innerHTML = "<span style='color:orange;'>（礼包）</span>" + klink.children[index].innerHTML;
-                                            klink.setAttribute("dingPrefix", "dingPrefix");
+                                        klink.setAttribute("dingPost", "dingPost");
+                                        klink.children[index].innerHTML = "<span style='color:orange;'>（合集）</span>" + klink.children[index].innerHTML;
+                                        klink.setAttribute("dingPrefix", "dingPrefix");
+                                    }
+                                } else if (ahref.length > 2 && ahref[3] == "sub") {
+                                    if (!klink.getAttribute("dingPost")) {
+                                        let index;
+                                        if (klink.childElementCount > 2){
+                                            index = 2;
+                                        }else if (klink.childElementCount > 1){
+                                            index = 1;
+                                        }else{
+                                            index= 0;
                                         }
+                                        klink.setAttribute("dingPost", "dingPost");
+                                        klink.children[index].innerHTML = "<span style='color:orange;'>（礼包）</span>" + klink.children[index].innerHTML;
+                                        klink.setAttribute("dingPrefix", "dingPrefix");
                                     }
                                 }
-
                             }
                         }
                     }
@@ -2077,9 +2087,17 @@ if (base_url.hostname == 'store.steampowered.com') {
                                     function(response) {
                                         console.log("got response");
                                         if (response.response.Data.Id == "0") {
-                                            child.children[1].innerHTML = "<span style='color:red;'>（未收录）</span>" + child.children[1].innerHTML;
+                                            //child.children[1].innerHTML = "<span style='color:red;'>（未收录）</span>" + child.children[1].innerHTML;
+                                            child.children[1].outerHTML = child.children[1].outerHTML + "<div class=\"hover_release\" style=\"display: initial;\"><span style='color:green;'>叮当公共库</span>: <span style='color:red;'>未收录</span></div><div></div>";
                                         } else {
-                                            child.children[1].innerHTML = "<span style='color:green;'>（已收录）</span>" + child.children[1].innerHTML;
+                                            let NickName = response.response.Data.NickName;
+                                            if (!NickName || NickName.length === 0 || NickName === "") {
+                                                NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span>（" + response.response.Data.Date;
+                                            }else{
+                                                NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date;
+                                            }
+                                            child.children[1].outerHTML = child.children[1].outerHTML + "<div class=\"hover_release\" style=\"display: initial;\"><span style='color:green;'>叮当公共库</span>: " + NickName + "）</div><div></div>";
+                                            //child.children[1].innerHTML = "<span style='color:green;'>（已收录）</span>" + child.children[1].innerHTML;
                                         }
                                         child.setAttribute("dingPrefix", "dingPrefix");
                                     }
