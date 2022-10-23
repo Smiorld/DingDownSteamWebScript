@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.48
+// @version      1.0.49
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -56,6 +56,20 @@ function b64EncodeUnicode(str) {
 
 function UnicodeDecodeB64(str) {
     return decodeURIComponent(atob(str));
+}
+
+function formatDate(date) {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear().toString().substr(-2);
+    if (month.length < 2){
+        month = '0' + month;
+    }
+    if (day.length < 2){
+        day = '0' + day;
+    }
+    return [year, month, day].join('-');
 }
 
 function T2_xmlhttpRequest(option) {
@@ -1500,10 +1514,11 @@ if (base_url.hostname == 'store.steampowered.com') {
                         title.insertAdjacentHTML("afterbegin","<span class=\"user_reviews_summary_row\"><div class=\"subtitle column\">叮当分享:</div><div class=\"summary column\"><span style='color:red;'><b>未收录</b></span></div></span>");
                     } else {
                         let NickName = response.response.Data.NickName;
+                        let dateformat = "入库于 "+response.response.Data.Date;
                         if (!NickName || NickName.length === 0 || NickName === "") {
-                            NickName = "<div class=\"summary column ding\"><span style='color:green;'><b>系统/匿名</b></span>（" + response.response.Data.Date + "）</div>";
+                            NickName = "<div class=\"summary column ding\"><span style='color:green;' data-tooltip-text=\""+dateformat+"\"><b>系统/匿名</b></span>（<span class='date' data-tooltip-text=\""+dateformat+"\">" + formatDate(response.response.Data.Date) + "</span>）</div>";
                         }else{
-                            NickName= "<div class=\"summary column ding\"><span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date + "）</div>";
+                            NickName= "<div class=\"summary column ding\"><span style='color:#ff683b;' data-tooltip-text=\""+dateformat+"\"><b>"+ NickName +"</b></span>（<span class='date' data-tooltip-text=\""+dateformat+"\">" + formatDate(response.response.Data.Date) + "</span>）</div>";
                         }
                         CheckIdResponse = {
                             'is_recorded': true,
@@ -2120,7 +2135,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                                         console.log("got response");
                                         if (response.response.Data.Id == "0") {
                                             //child.children[1].innerHTML = "<span style='color:red;'>（未收录）</span>" + child.children[1].innerHTML;
-                                            child.children[1].outerHTML = child.children[1].outerHTML + "<div class=\"hover_release\" style=\"display: initial;\"><span style='color:green;'>叮当分享</span>: <span style='color:red;'>未收录</span></div><div></div>";
+                                            child.children[1].outerHTML = child.children[1].outerHTML + "<div class=\"hover_release\" style=\"display: initial;\"><span style='color:green;'>叮当分享</span>: <span style='color:red;'><b>未收录</b></span></div><div></div>";
                                         } else {
                                             let NickName = response.response.Data.NickName;
                                             if (!NickName || NickName.length === 0 || NickName === "") {
