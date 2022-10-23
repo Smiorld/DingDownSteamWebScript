@@ -1666,9 +1666,9 @@ if (base_url.hostname == 'store.steampowered.com') {
                                         } else if (response.response.Data.Status === -20 || response.response.Data.Status === -30 || response.response.Data.Status === -100) {
                                             //-20 the user is the sharer. -30 the user has subscribed. -100 the game is free or recorded by anonymous users. All means the user do not need to pay credit for this game.
                                             if(ostmain){
-                                            queueBtnFollow.insertAdjacentHTML('afterbegin', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载&启动游戏"><span>叮当下载原生轨</span></a></div>');
+                                                queueBtnFollow.insertAdjacentHTML('afterbegin', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载&启动游戏"><span>叮当下载原声轨</span></a></div>');
                                             }else{
-                                            queueBtnFollow.insertAdjacentHTML('afterbegin', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载&启动游戏"><span>叮当试玩</span></a></div>');
+                                                queueBtnFollow.insertAdjacentHTML('afterbegin', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载&启动游戏"><span>叮当试玩</span></a></div>');
                                             }
                                             const dingdown_download = document.getElementById("dingdown_download");
                                             dingdown_download.addEventListener("click", function() {
