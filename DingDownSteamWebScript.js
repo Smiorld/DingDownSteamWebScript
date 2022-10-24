@@ -2166,9 +2166,9 @@ if (base_url.hostname == 'store.steampowered.com') {
                         for (let i = 0; i < children.length; i++) {
                             let alink = children[i].getElementsByTagName('a')[0];
                             if (!children[i].getAttribute("dingPost") && alink) {
-                                children[i].setAttribute("dingPost", "dingPost");
                                 let ahref = alink.getAttribute("href").split('/');
                                 if (ahref.length > 3 && ahref[3] == 'app') {
+                                    children[i].setAttribute("dingPost", "dingPost");
                                     let data = {
                                         Id: ahref[4]
                                     };
