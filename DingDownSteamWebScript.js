@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.52
+// @version      1.0.53
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -612,81 +612,13 @@ window.addEventListener("load", function() {
                     }
                 );
             }
-
         }
-        else if (base_path_sp.length > 0 && base_path_sp[1] == 'search') {
-            let tmp_script = document.querySelector('#responsive_page_template_content').children[0].innerHTML;
-            let position = tmp_script.search(/"infiniscroll"/);
-            let infiniscroll = tmp_script[position + 15]; //为0时没有无限下滚，为1时有。这个决定了整个页面变化的div如何定位。经过实测，如果无限下滚，则不需要onload的时候触发一次。
-            if (infiniscroll == 0) {
-                let searching_result = document.querySelector('#search_resultsRows'); //the box for searching result. each child in it is an <a>.
-                let children = searching_result.children;
-
-                //restore all appid
-                let appid = [];
-                let childrenLength = children.length;
-                for (let i = 0; i < childrenLength; i++) {
-                    let tmpchild = children[i];
-                    if (tmpchild.href.split('/')[3] == 'app') {
-                        let title = tmpchild.children[1].children[0].children[0];
-                        if (!title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app') {
-                            title.setAttribute("dingPost", "dingPost");
-                            appid.push(tmpchild.href.split('/')[4]);
-                        }
-                    }
-                }
-                //send post request to server
-                if (appid.length != 0) {
-                    let data = {
-                        "Ids": appid.join()
-                    };
-                    T2Post(
-                        "https://ddapi.133233.xyz/CheckIds",
-                        data,
-                        function(response) {
-                            console.log("got response for " + response.response.Data.Total + " appid");
-                            //prefix all titles
-                            for (let i = 0; i < childrenLength; i++) {
-                                let tmpchild = children[i];
-                                if (tmpchild.href.split('/')[3] == 'app') {
-                                    let title = tmpchild.children[1].children[0].children[0];
-                                    let thisid = tmpchild.href.split('/')[4];
-                                    if (!title.getAttribute("dingPrefix") && title.getAttribute("dingPost") && tmpchild.href.split('/')[3] == 'app' && appid.find(a => a == thisid)) {
-                                        if (response.response.Data.AppInfo.find(a => a == thisid)) {
-                                            title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
-                                        } else {
-                                            title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
-                                        }
-                                        appid.splice(appid.indexOf(thisid), 1);
-                                        title.setAttribute("dingPrefix", "dingPrefix");
-                                    }
-                                } else if (tmpchild.href.split('/')[3] == 'bundle') {
-                                    let title = tmpchild.children[1].children[0].children[0];
-                                    if (!title.getAttribute("dingPrefix")) {
-                                        title.setAttribute("dingPrefix", "dingPrefix");
-                                        title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
-                                    }
-                                } else if (tmpchild.href.split('/')[3] == 'sub') {
-                                    let title = tmpchild.children[1].children[0].children[0];
-                                    if (!title.getAttribute("dingPrefix")) {
-                                        title.setAttribute("dingPrefix", "dingPrefix");
-                                        title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
-                                    }
-                                }
-                            }
-                        }
-                    );
-                }
-
-            }
-        }
-
     }
     //steamcommunity.com
     else if (base_url.hostname == "steamcommunity.com"){
         let base_path_sp = base_url.pathname.split('/');
         //page initial post
-        if (base_path.length > 0 && (base_path_sp[1] == 'profiles' || base_path_sp[1] == 'id') && base_path_sp[3] == 'games') {
+        if (base_path_sp.length > 0 && (base_path_sp[1] == 'profiles' || base_path_sp[1] == 'id') && base_path_sp[3] == 'games') {
             let games_list_rows = document.querySelector('#games_list_rows');
             let children = games_list_rows.children;
             let appid = [];
@@ -1825,54 +1757,101 @@ if (base_url.hostname == 'store.steampowered.com') {
             subtree: true,
             attributes: true,
             childList: true,
-            characterData: true
+            characterData: true,
+            attributeFilter: ['class']
         };
 
 
         let callback = mutations => {
             mutations.forEach(mutation => {
                 let searching_result = document.querySelector('#search_resultsRows'); //the box for searching result. each child in it is an <a>.
-                let children = searching_result.children;
-
-                for (let i = 0; i < children.length; i++) {
-                    let child = children[i];
-                    if (child.href.split('/')[3] == 'app') {
-
-                        let data = {
-                            Id: child.href.split('/')[4]
-                        };
-                        let title = child.children[1].children[0].children[0];
-                        if (!title.getAttribute("dingPost")) {
-                            title.setAttribute("dingPost", "dingPost");
-                            T2Post(
-                                "https://ddapi.133233.xyz/CheckId",
-                                data,
-                                function(response) {
-                                    console.log("got response");
-                                    if (response.response.Data.Id == "0") {
-                                        title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
-                                    } else {
-                                        title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
-                                    }
-                                    title.setAttribute("dingPrefix", "dingPrefix");
+                if (searching_result && searching_result.childElementCount > 0){
+                    let children = searching_result.children;
+                    let appids = [];
+                    for (let i = 0; i < children.length; i++) {
+                        let child = children[i];
+                        if (child && !child.getAttribute("dingPost")) {
+                            let child_sp = child.href.split('/');
+                            if (child_sp[3] == "app"){
+                                child.setAttribute("dingPost", "dingPost");
+                                let appid = child_sp[4];
+                                if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                                    appids.push(appid);
                                 }
-                            );
-                        }
-                    } else if (child.href.split('/')[3] == 'bundle') {
-                        let title = child.children[1].children[0].children[0];
-                        if (!title.getAttribute("dingPrefix")) {
-                            title.setAttribute("dingPrefix", "dingPrefix");
-                            title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
-                        }
-                    } else if (child.href.split('/')[3] == 'sub') {
-                        let title = child.children[1].children[0].children[0];
-                        if (!title.getAttribute("dingPrefix")) {
-                            title.setAttribute("dingPrefix", "dingPrefix");
-                            title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
+                            }
                         }
                     }
+
+                    if (appids.length != 0) {
+                        let data = {
+                            "Ids": appids.join()
+                        };
+                        T2Post(
+                            "https://ddapi.133233.xyz/CheckIds",
+                            data,
+                            function (response) {
+                                for (let i = 0; i < children.length; i++) {
+                                    let child = children[i];
+                                    let child_sp = child.href.split('/');
+                                    if (child_sp[3] == 'app') {
+                                        if (!child.getAttribute("dingPrefix")) {
+                                            child.setAttribute("dingPrefix", "dingPrefix");
+                                            let appid = child_sp[4];
+                                            if(appids.find(a => a == appid)){
+                                                let title = child.getElementsByClassName("title");
+                                                if (!title || title.lenght < 1){
+                                                    title = child.children[1].children[0].children[0];
+                                                }
+                                                else
+                                                {
+                                                    title = title[0];
+                                                }
+                                                if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                                    title.innerHTML = "<span style='color:green;'>（已收录）</span>" + title.innerHTML;
+                                                } else {
+                                                    title.innerHTML = "<span style='color:red;'>（未收录）</span>" + title.innerHTML;
+                                                }
+                                                appids.splice(appids.indexOf(appid), 1);
+                                            }
+                                        }
+                                    } else if (child_sp[3] == 'bundle') {
+                                        if (!child.getAttribute("dingPrefix")){
+                                            child.setAttribute("dingPrefix", "dingPrefix");
+                                            let title = child.getElementsByClassName("title");
+                                            if (!title || title.lenght < 1){
+                                                title = child.children[1].children[0].children[0];
+                                            }
+                                            else
+                                            {
+                                                title = title[0];
+                                            }
+                                            title.innerHTML = "<span style='color:orange;'>（合集）</span>" + title.innerHTML;
+                                        }
+                                    } else if (child_sp[3] == 'sub') {
+                                        if (!child.getAttribute("dingPrefix")){
+                                            child.setAttribute("dingPrefix", "dingPrefix");
+                                            let title = child.getElementsByClassName("title");
+                                            if (!title || title.lenght < 1){
+                                                title = child.children[1].children[0].children[0];
+                                            }
+                                            else
+                                            {
+                                                title = title[0];
+                                            }
+                                            title.innerHTML = "<span style='color:orange;'>（礼包）</span>" + title.innerHTML;
+                                        }
+                                    }
+                                }
+
+                            }
+
+
+                        );
+                    }
+
                 }
-            });
+            }
+                             );
         }
 
         const observer = new MutationObserver(callback);
@@ -1960,7 +1939,8 @@ if (base_url.hostname == 'store.steampowered.com') {
         subtree: true,
         attributes: true,
         childList: true,
-        characterData: true
+        characterData: true,
+        attributeFilter: ['class']
     };
     let callback0 = mutations => {
         mutations.forEach(mutation => {
@@ -2209,121 +2189,165 @@ if (base_url.hostname == 'store.steampowered.com') {
                             }
                         }
                     } else {
-                        //特惠
+                        //特惠 and category
                         let facetedbrowse_FacetedBrowseItems = document.querySelector(".facetedbrowse_FacetedBrowseItems_NO-IP");
                         if (facetedbrowse_FacetedBrowseItems && facetedbrowse_FacetedBrowseItems.childElementCount > 0) {
                             let children = facetedbrowse_FacetedBrowseItems.children;
+                            //appids
+                            let appids = [];
                             for (let i = 0; i < children.length; i++) {
                                 let alink = children[i].getElementsByTagName('a')[1];
-                                if (alink) {
+                                if (alink && !alink.getAttribute("dingPost")) {
                                     let ahref = alink.getAttribute("href").split('/');
                                     if (ahref.length > 3 && ahref[3] == 'app') {
-                                        let data = {
-                                            Id: ahref[4]
-                                        };
-                                        if (!alink.getAttribute("dingPost")) {
-                                            alink.setAttribute("dingPost", "dingPost");
-                                            T2Post(
-                                                "https://ddapi.133233.xyz/CheckId",
-                                                data,
-                                                function(response) {
-                                                    console.log("got response");
-                                                    if (response.response.Data.Id == "0") {
-                                                        alink.children[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + alink.children[0].innerHTML;
-                                                    } else {
-                                                        alink.children[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + alink.children[0].innerHTML;
-                                                    }
-                                                    alink.setAttribute("dingPrefix", "dingPrefix");
-                                                }
-                                            );
-                                        }
-                                    } else if (ahref.length > 3 && ahref[3] == "bundle") {
-                                        if (!alink.getAttribute("dingPost")) {
-                                            alink.setAttribute("dingPost", "dingPost");
-                                            alink.children[0].innerHTML = "<span style='color:orange;'>（合集）</span>" + alink.children[0].innerHTML;
-                                            alink.setAttribute("dingPrefix", "dingPrefix");
-                                        }
-                                    } else if (ahref.length > 2 && ahref[3] == "sub") {
-                                        if (!alink.getAttribute("dingPost")) {
-                                            alink.setAttribute("dingPost", "dingPost");
-                                            alink.children[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + alink.children[0].innerHTML;
-                                            alink.setAttribute("dingPrefix", "dingPrefix");
+                                        alink.setAttribute("dingPost", "dingPost");
+                                        let appid = ahref[4];
+                                        if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                                            appids.push(appid);
                                         }
                                     }
                                 }
                             }
-                        }else{
-                            //热门 热销
-                            let application_root = document.querySelector("#application_root");
-                            if (application_root && application_root.childElementCount > 0) {
-                                let children = application_root.children;
-                                for (let i = 0; i < children.length; i++) {
-                                    let alink = children[i].getElementsByTagName('a');
-                                    if (alink) {
-                                        for(var k = 0; k < alink.length; k++){
-                                            let klink = alink[k];
-                                            let ahref = klink.getAttribute("href").split('/');
-                                            if (ahref.length > 3 && ahref[3] == 'app') {
-                                                let data = {
-                                                    Id: ahref[4]
-                                                };
-                                                if (!klink.getAttribute("dingPost")) {
-                                                    klink.setAttribute("dingPost", "dingPost");
-                                                    T2Post(
-                                                        "https://ddapi.133233.xyz/CheckId",
-                                                        data,
-                                                        function(response) {
-                                                            console.log("got response");
-                                                            let index;
-                                                            if (klink.childElementCount > 2){
-                                                                index = 2;
-                                                            }else if (klink.childElementCount > 1){
-                                                                index = 1;
-                                                            }else{
-                                                                index= 0;
-                                                            }
 
-                                                            if (response.response.Data.Id == "0") {
-                                                                klink.children[index].innerHTML = "<span style='color:red;'>（未收录）</span>" + klink.children[index].innerHTML;
+                            if (appids.length != 0) {
+                                let data = {
+                                    "Ids": appids.join()
+                                };
+                                T2Post(
+                                    "https://ddapi.133233.xyz/CheckIds",
+                                    data,
+                                    function (response) {
+                                        for (let i = 0; i < children.length; i++) {
+                                            let alink = children[i].getElementsByTagName('a')[1];
+                                            if (alink) {
+                                                let ahref = alink.getAttribute("href").split('/');
+                                                if (ahref.length > 3 && ahref[3] == 'app') {
+                                                    if (!alink.getAttribute("dingPrefix")) {
+                                                        alink.setAttribute("dingPrefix", "dingPrefix");
+                                                        let appid = ahref[4];
+                                                        if(appids.find(a => a == appid)){
+                                                            if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                                                alink.children[0].insertAdjacentHTML("afterbegin", "<span style='color:green;'>（已收录）</span>");
                                                             } else {
-                                                                klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
+                                                                alink.children[0].insertAdjacentHTML("afterbegin", "<span style='color:red;'>（未收录）</span>");
                                                             }
-                                                            klink.setAttribute("dingPrefix", "dingPrefix");
+                                                            appids.splice(appids.indexOf(appid), 1);
                                                         }
-                                                    );
-                                                }
-                                            } else if (ahref.length > 3 && ahref[3] == "bundle") {
-                                                if (!klink.getAttribute("dingPost")) {
-                                                    let index;
-                                                    if (klink.childElementCount > 2){
-                                                        index = 2;
-                                                    }else if (klink.childElementCount > 1){
-                                                        index = 1;
-                                                    }else{
-                                                        index= 0;
                                                     }
-                                                    klink.setAttribute("dingPost", "dingPost");
-                                                    klink.children[index].innerHTML = "<span style='color:orange;'>（合集）</span>" + klink.children[index].innerHTML;
-                                                    klink.setAttribute("dingPrefix", "dingPrefix");
-                                                }
-                                            } else if (ahref.length > 2 && ahref[3] == "sub") {
-                                                if (!klink.getAttribute("dingPost")) {
-                                                    let index;
-                                                    if (klink.childElementCount > 2){
-                                                        index = 2;
-                                                    }else if (klink.childElementCount > 1){
-                                                        index = 1;
-                                                    }else{
-                                                        index= 0;
+                                                } else if (ahref.length > 3 && ahref[3] == "bundle") {
+                                                    if (!alink.getAttribute("dingPrefix")) {
+                                                        alink.children[0].insertAdjacentHTML("afterbegin", "<span style='color:orange;'>（合集）</span>");
+                                                        alink.setAttribute("dingPrefix", "dingPrefix");
                                                     }
-                                                    klink.setAttribute("dingPost", "dingPost");
-                                                    klink.children[index].innerHTML = "<span style='color:orange;'>（礼包）</span>" + klink.children[index].innerHTML;
-                                                    klink.setAttribute("dingPrefix", "dingPrefix");
+                                                } else if (ahref.length > 2 && ahref[3] == "sub") {
+                                                    if (!alink.getAttribute("dingPrefix")) {
+                                                        alink.children[0].insertAdjacentHTML("afterbegin", "<span style='color:orange;'>（礼包）</span>");
+                                                        alink.setAttribute("dingPrefix", "dingPrefix");
+                                                    }
                                                 }
                                             }
                                         }
 
                                     }
+                                );
+                            }
+
+                        }else{
+                            //热门 热销
+                            let application_root = document.querySelector("#application_root");
+                            if (application_root && application_root.childElementCount > 0 ) {
+                                let children = application_root.children;
+                                //appids
+                                let appids = [];
+                                for (let i = 0; i < children.length; i++) {
+                                    let alink = children[i].getElementsByTagName('a');
+                                    if (alink) {
+                                        for(var k = 0; k < alink.length; k++){
+                                            let klink = alink[k];
+                                            if(!klink.getAttribute("dingPost")){
+                                                let ahref = klink.getAttribute("href").split('/');
+                                                if (ahref.length > 3 && ahref[3] == 'app') {
+                                                    klink.setAttribute("dingPost", "dingPost");
+                                                    let appid = ahref[4];
+                                                    if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                                                        appids.push(appid);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (appids.length != 0) {
+                                    let data = {
+                                        "Ids": appids.join()
+                                    };
+                                    T2Post(
+                                        "https://ddapi.133233.xyz/CheckIds",
+                                        data,
+                                        function (response) {
+                                            for (let i = 0; i < children.length; i++) {
+                                                let alink = children[i].getElementsByTagName('a');
+                                                if (alink) {
+                                                    for(var k = 0; k < alink.length; k++){
+                                                        let klink = alink[k];
+                                                        let ahref = klink.getAttribute("href").split('/');
+                                                        if (ahref.length > 3 && ahref[3] == 'app') {
+                                                            if (!klink.getAttribute("dingPrefix")) {
+                                                                klink.setAttribute("dingPrefix", "dingPrefix");
+                                                                let appid = ahref[4];
+                                                                let index;
+                                                                if (klink.childElementCount > 2){
+                                                                    index = 2;
+                                                                }else if (klink.childElementCount > 1){
+                                                                    index = 1;
+                                                                }else{
+                                                                    index= 0;
+                                                                }
+                                                                if(appids.find(a => a == appid)){
+                                                                    if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                                                        klink.children[index].insertAdjacentHTML("afterbegin", "<span style='color:green;'>（已收录）</span>");
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        klink.children[index].insertAdjacentHTML("afterbegin", "<span style='color:red;'>（未收录）</span>");
+                                                                    }
+                                                                    appids.splice(appids.indexOf(appid), 1);
+                                                                }
+                                                            }
+                                                        } else if (ahref.length > 3 && ahref[3] == "bundle") {
+                                                            if (!klink.getAttribute("dingPrefix")) {
+                                                                let index;
+                                                                if (klink.childElementCount > 2){
+                                                                    index = 2;
+                                                                }else if (klink.childElementCount > 1){
+                                                                    index = 1;
+                                                                }else{
+                                                                    index= 0;
+                                                                }
+                                                                klink.setAttribute("dingPrefix", "dingPrefix");
+                                                                klink.children[index].insertAdjacentHTML("afterbegin","<span style='color:orange;'>（合集）</span>");
+                                                            }
+                                                        } else if (ahref.length > 2 && ahref[3] == "sub") {
+                                                            if (!klink.getAttribute("dingPrefix")) {
+                                                                let index;
+                                                                if (klink.childElementCount > 2){
+                                                                    index = 2;
+                                                                }else if (klink.childElementCount > 1){
+                                                                    index = 1;
+                                                                }else{
+                                                                    index= 0;
+                                                                }
+                                                                klink.children[index].insertAdjacentHTML("afterbegin","<span style='color:orange;'>（礼包）</span>");
+                                                                klink.setAttribute("dingPrefix", "dingPrefix");
+                                                            }
+                                                        }
+                                                    }
+
+                                                }
+                                            }
+                                        }
+                                    );
                                 }
                             }
                         }
