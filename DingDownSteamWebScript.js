@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.50
+// @version      1.0.51
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -2118,15 +2118,15 @@ if (base_url.hostname == 'store.steampowered.com') {
 
                 }
                 let global_hover_content = document.getElementById('global_hover_content');
-                if (global_hover_content) {
+                if (global_hover_content && global_hover_content.childElementCount >0) {
                     let children = global_hover_content.children;
                     for (let i = 0; i < children.length; i++) {
                         let child = children[i];
                         if (!child.getAttribute("dingPost") && child.id.slice(6, 9) == "app") {
+                            child.setAttribute("dingPost", "dingPost");
                             let data = {
                                 Id: child.id.slice(10)
                             };
-                            child.setAttribute("dingPost", "dingPost");
                             T2Post(
                                 "https://ddapi.133233.xyz/CheckId",
                                 data,
@@ -2145,20 +2145,17 @@ if (base_url.hostname == 'store.steampowered.com') {
                                         child.children[1].outerHTML = child.children[1].outerHTML + "<div class=\"hover_release\" style=\"display: initial;\"><span style='color:green;'>叮当分享</span>: " + NickName + "）</div><div></div>";
                                         //child.children[1].innerHTML = "<span style='color:green;'>（已收录）</span>" + child.children[1].innerHTML;
                                     }
-                                    child.setAttribute("dingPrefix", "dingPrefix");
                                 }
                             );
                         } else if (child.id.slice(6, 12) == "bundle") {
                             if (!child.getAttribute("dingPost")) {
                                 child.setAttribute("dingPost", "dingPost");
                                 child.children[1].innerHTML = "<span style='color:orange;'>（合集）</span>" + child.children[1].innerHTML;
-                                child.setAttribute("dingPrefix", "dingPrefix");
                             }
                         } else if (child.id.slice(6, 9) == "sub") {
                             if (!child.getAttribute("dingPost")) {
                                 child.setAttribute("dingPost", "dingPost");
                                 child.children[1].innerHTML = "<span style='color:orange;'>（礼包）</span>" + child.children[1].innerHTML;
-                                child.setAttribute("dingPrefix", "dingPrefix");
                             }
                         }
                     }
@@ -2169,12 +2166,12 @@ if (base_url.hostname == 'store.steampowered.com') {
                         for (let i = 0; i < children.length; i++) {
                             let alink = children[i].getElementsByTagName('a')[0];
                             if (!children[i].getAttribute("dingPost") && alink) {
+                                children[i].setAttribute("dingPost", "dingPost");
                                 let ahref = alink.getAttribute("href").split('/');
                                 if (ahref.length > 3 && ahref[3] == 'app') {
                                     let data = {
                                         Id: ahref[4]
                                     };
-                                    children[i].setAttribute("dingPost", "dingPost");
                                     T2Post(
                                         "https://ddapi.133233.xyz/CheckId",
                                         data,
@@ -2194,22 +2191,19 @@ if (base_url.hostname == 'store.steampowered.com') {
 
                                                 //alink.children[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + alink.children[0].innerHTML;
                                             }
-                                            alink.setAttribute("dingPrefix", "dingPrefix");
                                         }
                                     );
                                 } else if (ahref.length > 3 && ahref[3] == "bundle") {
-                                    if (!alink.getAttribute("dingPost")) {
-                                        alink.setAttribute("dingPost", "dingPost");
+                                    if (!children[i].getAttribute("dingPost")) {
+                                        children[i].setAttribute("dingPost", "dingPost");
                                         //alink.children[0].innerHTML = "<span style='color:orange;'>（合集）</span>" + alink.children[0].innerHTML;
                                         alink.children[0].outerHTML = alink.children[0].outerHTML + "<div style=\"padding: 4px;color: #6b8aaa;display: initial;\"><span style='color:green;font-size: 1.4em;'>叮当分享</span>: <span style='color:red;'><b>合集</b></span></div><div></div>";
-                                        alink.setAttribute("dingPrefix", "dingPrefix");
                                     }
                                 } else if (ahref.length > 2 && ahref[3] == "sub") {
-                                    if (!alink.getAttribute("dingPost")) {
-                                        alink.setAttribute("dingPost", "dingPost");
+                                    if (!children[i].getAttribute("dingPost")) {
+                                        children[i].setAttribute("dingPost", "dingPost");
                                         //alink.children[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + alink.children[0].innerHTML;
                                         alink.children[0].outerHTML = alink.children[0].outerHTML + "<div style=\"padding: 4px;color: #6b8aaa;display: initial;\"><span style='color:green;font-size: 1.4em;'>叮当分享</span>: <span style='color:red;'><b>礼包</b></span></div><div></div>";
-                                        alink.setAttribute("dingPrefix", "dingPrefix");
                                     }
                                 }
                             }
@@ -2709,12 +2703,12 @@ else if (window.location.hostname == "steamdb.info") {
                     if (global_hover_link && global_hover_link.length > 0) {
                         let child = global_hover_link[0];
                         if (!child.getAttribute("dingPost")){
+                            child.setAttribute("dingPost", "dingPost");
                             let href_sp = new URL(child.href).pathname.split('/');
                             if (href_sp[1] == "app") {
                                 let data = {
                                     Id: href_sp[2]
                                 };
-                                child.setAttribute("dingPost", "dingPost");
                                 T2Post(
                                     "https://ddapi.133233.xyz/CheckId",
                                     data,
@@ -2723,6 +2717,7 @@ else if (window.location.hostname == "steamdb.info") {
                                         if (response.response.Data.Id == "0") {
                                             child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\"><span style='color:green;'>叮当分享: </span><span style='color:red;'><b>未收录</b></span></div>";
                                         } else {
+                                            child.setAttribute("dingPost", "dingPost");
                                             let NickName = response.response.Data.NickName;
                                             if (!NickName || NickName.length === 0 || NickName === "") {
                                                 NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span>（" + response.response.Data.Date;
@@ -2731,20 +2726,17 @@ else if (window.location.hostname == "steamdb.info") {
                                             }
                                             child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\"><span style='color:green;'>叮当分享</span>: " + NickName + "）</div>";
                                         }
-                                        child.setAttribute("dingPrefix", "dingPrefix");
                                     }
                                 );
                             } else if (child.id.slice(6, 12) == "bundle") {
                                 if (!child.getAttribute("dingPost")) {
                                     child.setAttribute("dingPost", "dingPost");
                                     child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\">叮当: <span style='color:orange;'><b>合集</b></span></div>";
-                                    child.setAttribute("dingPrefix", "dingPrefix");
                                 }
                             } else if (child.id.slice(6, 9) == "sub") {
                                 if (!child.getAttribute("dingPost")) {
                                     child.setAttribute("dingPost", "dingPost");
                                     child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\">叮当: <span style='color:orange;'><b>礼包</b></span></div>";
-                                    child.setAttribute("dingPrefix", "dingPrefix");
                                 }
                             }
                         }
