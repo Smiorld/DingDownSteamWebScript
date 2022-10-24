@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.51
+// @version      1.0.52
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -2118,7 +2118,7 @@ if (base_url.hostname == 'store.steampowered.com') {
 
                 }
                 let global_hover_content = document.getElementById('global_hover_content');
-                if (global_hover_content && global_hover_content.childElementCount >0) {
+                if (global_hover_content && global_hover_content.childElementCount > 0) {
                     let children = global_hover_content.children;
                     for (let i = 0; i < children.length; i++) {
                         let child = children[i];
@@ -2161,7 +2161,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                     }
                 } else {
                     let gamehover_BottomShelfOffScreen_Vseoa = document.querySelector(".gamehover_BottomShelfOffScreen_Vseoa");
-                    if (gamehover_BottomShelfOffScreen_Vseoa) {
+                    if (gamehover_BottomShelfOffScreen_Vseoa && gamehover_BottomShelfOffScreen_Vseoa.childElementCount > 0) {
                         let children = gamehover_BottomShelfOffScreen_Vseoa.children;
                         for (let i = 0; i < children.length; i++) {
                             let alink = children[i].getElementsByTagName('a')[0];
@@ -2211,7 +2211,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                     } else {
                         //特惠
                         let facetedbrowse_FacetedBrowseItems = document.querySelector(".facetedbrowse_FacetedBrowseItems_NO-IP");
-                        if (facetedbrowse_FacetedBrowseItems) {
+                        if (facetedbrowse_FacetedBrowseItems && facetedbrowse_FacetedBrowseItems.childElementCount > 0) {
                             let children = facetedbrowse_FacetedBrowseItems.children;
                             for (let i = 0; i < children.length; i++) {
                                 let alink = children[i].getElementsByTagName('a')[1];
@@ -2255,7 +2255,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                         }else{
                             //热门 热销
                             let application_root = document.querySelector("#application_root");
-                            if (application_root) {
+                            if (application_root && application_root.childElementCount > 0) {
                                 let children = application_root.children;
                                 for (let i = 0; i < children.length; i++) {
                                     let alink = children[i].getElementsByTagName('a');
@@ -2698,7 +2698,7 @@ else if (window.location.hostname == "steamdb.info") {
         mutations.forEach(mutation => {
             try {
                 let global_hover_content = document.getElementById('js-hover');
-                if (global_hover_content) {
+                if (global_hover_content && global_hover_content.childElementCount > 0) {
                     let global_hover_link = global_hover_content.getElementsByClassName('hover_title');
                     if (global_hover_link && global_hover_link.length > 0) {
                         let child = global_hover_link[0];
