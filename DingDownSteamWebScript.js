@@ -2168,13 +2168,13 @@ if (base_url.hostname == 'store.steampowered.com') {
                         let children = gamehover_BottomShelfOffScreen_Vseoa.children;
                         for (let i = 0; i < children.length; i++) {
                             let alink = children[i].getElementsByTagName('a')[0];
-                            if (!alink.getAttribute("dingPost") && alink) {
+                            if (!children[i].getAttribute("dingPost") && alink) {
                                 let ahref = alink.getAttribute("href").split('/');
                                 if (ahref.length > 3 && ahref[3] == 'app') {
                                     let data = {
                                         Id: ahref[4]
                                     };
-                                    alink.setAttribute("dingPost", "dingPost");
+                                    children[i].setAttribute("dingPost", "dingPost");
                                     T2Post(
                                         "https://ddapi.133233.xyz/CheckId",
                                         data,
@@ -2706,44 +2706,46 @@ else if (window.location.hostname == "steamdb.info") {
                 let global_hover_content = document.getElementById('js-hover');
                 if (global_hover_content) {
                     let global_hover_link = global_hover_content.getElementsByClassName('hover_title');
-                    if (global_hover_link && !global_hover_link.getAttribute("dingPost") && global_hover_link.length > 0) {
+                    if (global_hover_link && global_hover_link.length > 0) {
                         let child = global_hover_link[0];
-                        let href_sp = new URL(child.href).pathname.split('/');
-                        if (href_sp[1] == "app") {
-                            let data = {
-                                Id: href_sp[2]
-                            };
-                            global_hover_link.setAttribute("dingPost", "dingPost");
-                            T2Post(
-                                "https://ddapi.133233.xyz/CheckId",
-                                data,
-                                function(response) {
-                                    console.log("got response");
-                                    if (response.response.Data.Id == "0") {
-                                        child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\"><span style='color:green;'>叮当分享: </span><span style='color:red;'><b>未收录</b></span></div>";
-                                    } else {
-                                        let NickName = response.response.Data.NickName;
-                                        if (!NickName || NickName.length === 0 || NickName === "") {
-                                            NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span>（" + response.response.Data.Date;
-                                        }else{
-                                            NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date;
+                        if (!child.getAttribute("dingPost")){
+                            let href_sp = new URL(child.href).pathname.split('/');
+                            if (href_sp[1] == "app") {
+                                let data = {
+                                    Id: href_sp[2]
+                                };
+                                child.setAttribute("dingPost", "dingPost");
+                                T2Post(
+                                    "https://ddapi.133233.xyz/CheckId",
+                                    data,
+                                    function(response) {
+                                        console.log("got response");
+                                        if (response.response.Data.Id == "0") {
+                                            child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\"><span style='color:green;'>叮当分享: </span><span style='color:red;'><b>未收录</b></span></div>";
+                                        } else {
+                                            let NickName = response.response.Data.NickName;
+                                            if (!NickName || NickName.length === 0 || NickName === "") {
+                                                NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span>（" + response.response.Data.Date;
+                                            }else{
+                                                NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date;
+                                            }
+                                            child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\"><span style='color:green;'>叮当分享</span>: " + NickName + "）</div>";
                                         }
-                                        child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\"><span style='color:green;'>叮当分享</span>: " + NickName + "）</div>";
+                                        child.setAttribute("dingPrefix", "dingPrefix");
                                     }
+                                );
+                            } else if (child.id.slice(6, 12) == "bundle") {
+                                if (!child.getAttribute("dingPost")) {
+                                    child.setAttribute("dingPost", "dingPost");
+                                    child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\">叮当: <span style='color:orange;'><b>合集</b></span></div>";
                                     child.setAttribute("dingPrefix", "dingPrefix");
                                 }
-                            );
-                        } else if (child.id.slice(6, 12) == "bundle") {
-                            if (!child.getAttribute("dingPost")) {
-                                child.setAttribute("dingPost", "dingPost");
-                                child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\">叮当: <span style='color:orange;'><b>合集</b></span></div>";
-                                child.setAttribute("dingPrefix", "dingPrefix");
-                            }
-                        } else if (child.id.slice(6, 9) == "sub") {
-                            if (!child.getAttribute("dingPost")) {
-                                child.setAttribute("dingPost", "dingPost");
-                                child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\">叮当: <span style='color:orange;'><b>礼包</b></span></div>";
-                                child.setAttribute("dingPrefix", "dingPrefix");
+                            } else if (child.id.slice(6, 9) == "sub") {
+                                if (!child.getAttribute("dingPost")) {
+                                    child.setAttribute("dingPost", "dingPost");
+                                    child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\">叮当: <span style='color:orange;'><b>礼包</b></span></div>";
+                                    child.setAttribute("dingPrefix", "dingPrefix");
+                                }
                             }
                         }
                     }
