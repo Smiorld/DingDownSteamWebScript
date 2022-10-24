@@ -434,12 +434,12 @@ function addStyle(styleString) {
     style.textContent = styleString;
     document.head.append(style);
 }
-
 const isInteger = num => /^-?[0-9]+$/.test(num+'');
+
+var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
 let base_url = window.location;
 
 window.addEventListener("load", function() {
-    var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
     //login entry inject
     let SessionId = getCookie('Ding_SessionId');
     if (SessionId === "") {
