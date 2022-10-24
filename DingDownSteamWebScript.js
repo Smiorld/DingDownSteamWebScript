@@ -1725,7 +1725,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                                 }
                             } else if (CheckIdResponse.sharer === UnicodeDecodeB64(getCookie('Ding_NickName')) || freeGameBtn || CheckIdResponse.sharer === "系统/匿名") {
                                 //user can download this game
-                                queueBtnFollow.insertAdjacentHTML('beforeend', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载&启动游戏"><span>叮当试玩</span></a></div>');
+                                queueBtnFollow.insertAdjacentHTML('afterbegin', '<div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载&启动游戏"><span>叮当试玩</span></a></div>');
                                 const dingdown_download = document.getElementById("dingdown_download");
                                 dingdown_download.addEventListener("click", function() {
                                     if (isWebBrowser()) {
@@ -1759,13 +1759,13 @@ if (base_url.hostname == 'store.steampowered.com') {
                                             //请先叮当订阅游戏本体
                                             const ignoreBtn = document.querySelector("#ignoreBtn");
                                             if (ignoreBtn) {
-                                                ignoreBtn.insertAdjacentHTML("beforebegin", '<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_need_game_subscribed" class="queue_control_button" style="flex-grow: 0;"><a href="http://store.steampowered.com/app/' + game_appid + '" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="请在使用叮当订阅dlc前先订阅游戏本体"><span>请先叮当订阅本体（点击跳转本体）</span></a></div></div>')
+                                                ignoreBtn.insertAdjacentHTML("afterbegin", '<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_need_game_subscribed" class="queue_control_button" style="flex-grow: 0;"><a href="http://store.steampowered.com/app/' + game_appid + '" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="请在使用叮当订阅dlc前先订阅游戏本体"><span>请先叮当订阅本体（点击跳转本体）</span></a></div></div>')
                                             }
                                         } else if (response.response.Data.Status === 0) {
                                             //0 this game hasn't been recorded yet
                                             const ignoreBtn = document.querySelector("#ignoreBtn");
                                             if (ignoreBtn) {
-                                                ignoreBtn.insertAdjacentHTML("beforebegin", '<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_need_game_recorded" class="queue_control_button" style="flex-grow: 0;"><a href="http://store.steampowered.com/app/' + game_appid + '" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="本地未收录，无法订阅本dlc"><span>叮当尚未收录本体（点击跳转本体）</span></a></div></div>')
+                                                ignoreBtn.insertAdjacentHTML("afterbegin", '<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_need_game_recorded" class="queue_control_button" style="flex-grow: 0;"><a href="http://store.steampowered.com/app/' + game_appid + '" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="本地未收录，无法订阅本dlc"><span>叮当尚未收录本体（点击跳转本体）</span></a></div></div>')
                                             }
                                         } else if (response.response.Data.Status === -200) {
                                             //-200 this is a dlc and is recorded.
@@ -1775,7 +1775,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                                             const ignoreBtn = document.querySelector("#ignoreBtn");
                                             console.log(ignoreBtn);
                                             if (ignoreBtn) {
-                                                ignoreBtn.insertAdjacentHTML("beforebegin", '<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a href="javascript:void(0);" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载本dlc"><span>叮当试玩</span></a></div></div>')
+                                                ignoreBtn.insertAdjacentHTML("afterbegin", '<div id="queueBtnFollow" class="queue_control_button queue_btn_follow" style="flex-grow: 0;"><div id="dingdown_download" class="queue_control_button" style="flex-grow: 0;"><a href="javascript:void(0);" class="btnv6_lightblue_blue  btnv6_border_2px btn_medium btn_green_steamui" data-tooltip-text="使用叮当软件下载本dlc"><span>叮当试玩</span></a></div></div>')
                                                 const dingdown_download = document.getElementById("dingdown_download");
                                                 dingdown_download.addEventListener("click", function() {
                                                     if (isWebBrowser()) {
