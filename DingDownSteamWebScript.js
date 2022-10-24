@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.49
+// @version      1.0.50
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -2122,34 +2122,32 @@ if (base_url.hostname == 'store.steampowered.com') {
                     let children = global_hover_content.children;
                     for (let i = 0; i < children.length; i++) {
                         let child = children[i];
-                        if (child.id.slice(6, 9) == "app") {
+                        if (!child.getAttribute("dingPost") && child.id.slice(6, 9) == "app") {
                             let data = {
                                 Id: child.id.slice(10)
                             };
-                            if (!child.getAttribute("dingPost")) {
-                                child.setAttribute("dingPost", "dingPost");
-                                T2Post(
-                                    "https://ddapi.133233.xyz/CheckId",
-                                    data,
-                                    function(response) {
-                                        console.log("got response");
-                                        if (response.response.Data.Id == "0") {
-                                            //child.children[1].innerHTML = "<span style='color:red;'>（未收录）</span>" + child.children[1].innerHTML;
-                                            child.children[1].outerHTML = child.children[1].outerHTML + "<div class=\"hover_release\" style=\"display: initial;\"><span style='color:green;'>叮当分享</span>: <span style='color:red;'><b>未收录</b></span></div><div></div>";
-                                        } else {
-                                            let NickName = response.response.Data.NickName;
-                                            if (!NickName || NickName.length === 0 || NickName === "") {
-                                                NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span>（" + response.response.Data.Date;
-                                            }else{
-                                                NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date;
-                                            }
-                                            child.children[1].outerHTML = child.children[1].outerHTML + "<div class=\"hover_release\" style=\"display: initial;\"><span style='color:green;'>叮当分享</span>: " + NickName + "）</div><div></div>";
-                                            //child.children[1].innerHTML = "<span style='color:green;'>（已收录）</span>" + child.children[1].innerHTML;
+                            child.setAttribute("dingPost", "dingPost");
+                            T2Post(
+                                "https://ddapi.133233.xyz/CheckId",
+                                data,
+                                function(response) {
+                                    console.log("got response");
+                                    if (response.response.Data.Id == "0") {
+                                        //child.children[1].innerHTML = "<span style='color:red;'>（未收录）</span>" + child.children[1].innerHTML;
+                                        child.children[1].outerHTML = child.children[1].outerHTML + "<div class=\"hover_release\" style=\"display: initial;\"><span style='color:green;'>叮当分享</span>: <span style='color:red;'><b>未收录</b></span></div><div></div>";
+                                    } else {
+                                        let NickName = response.response.Data.NickName;
+                                        if (!NickName || NickName.length === 0 || NickName === "") {
+                                            NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span>（" + response.response.Data.Date;
+                                        }else{
+                                            NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date;
                                         }
-                                        child.setAttribute("dingPrefix", "dingPrefix");
+                                        child.children[1].outerHTML = child.children[1].outerHTML + "<div class=\"hover_release\" style=\"display: initial;\"><span style='color:green;'>叮当分享</span>: " + NickName + "）</div><div></div>";
+                                        //child.children[1].innerHTML = "<span style='color:green;'>（已收录）</span>" + child.children[1].innerHTML;
                                     }
-                                );
-                            }
+                                    child.setAttribute("dingPrefix", "dingPrefix");
+                                }
+                            );
                         } else if (child.id.slice(6, 12) == "bundle") {
                             if (!child.getAttribute("dingPost")) {
                                 child.setAttribute("dingPost", "dingPost");
@@ -2170,38 +2168,47 @@ if (base_url.hostname == 'store.steampowered.com') {
                         let children = gamehover_BottomShelfOffScreen_Vseoa.children;
                         for (let i = 0; i < children.length; i++) {
                             let alink = children[i].getElementsByTagName('a')[0];
-                            if (alink) {
+                            if (!alink.getAttribute("dingPost") && alink) {
                                 let ahref = alink.getAttribute("href").split('/');
                                 if (ahref.length > 3 && ahref[3] == 'app') {
                                     let data = {
                                         Id: ahref[4]
                                     };
-                                    if (!alink.getAttribute("dingPost")) {
-                                        alink.setAttribute("dingPost", "dingPost");
-                                        T2Post(
-                                            "https://ddapi.133233.xyz/CheckId",
-                                            data,
-                                            function(response) {
-                                                console.log("got response");
-                                                if (response.response.Data.Id == "0") {
-                                                    alink.children[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + alink.children[0].innerHTML;
-                                                } else {
-                                                    alink.children[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + alink.children[0].innerHTML;
+                                    alink.setAttribute("dingPost", "dingPost");
+                                    T2Post(
+                                        "https://ddapi.133233.xyz/CheckId",
+                                        data,
+                                        function(response) {
+                                            console.log("got response");
+                                            if (response.response.Data.Id == "0") {
+                                                alink.children[0].outerHTML = alink.children[0].outerHTML + "<div style=\"padding: 4px;color: #6b8aaa;display: initial;font-size: 1.4em;\"><span style='color:green;'>叮当分享</span>: <span style='color:red;'><b>未收录</b></span></div><div></div>";
+                                                //alink.children[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + alink.children[0].innerHTML;
+                                            } else {
+                                                let NickName = response.response.Data.NickName;
+                                                if (!NickName || NickName.length === 0 || NickName === "") {
+                                                    NickName = "<span style='color:#ff683b;' data-tooltip-text=\"入库于 "+response.response.Data.Date + "\"><b>系统/匿名</b></span>";
+                                                }else{
+                                                    NickName= "<span style='color:#ff683b;' data-tooltip-text=\"入库于 "+response.response.Data.Date + "\"><b>"+ NickName +"</b></span>";
                                                 }
-                                                alink.setAttribute("dingPrefix", "dingPrefix");
+                                                alink.children[0].outerHTML = alink.children[0].outerHTML + "<div style=\"padding: 4px;color: #6b8aaa;display: initial;font-size: 1.4em;\"><span style='color:green;'>叮当分享</span>: " + NickName + "</div><div></div>";
+
+                                                //alink.children[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + alink.children[0].innerHTML;
                                             }
-                                        );
-                                    }
+                                            alink.setAttribute("dingPrefix", "dingPrefix");
+                                        }
+                                    );
                                 } else if (ahref.length > 3 && ahref[3] == "bundle") {
                                     if (!alink.getAttribute("dingPost")) {
                                         alink.setAttribute("dingPost", "dingPost");
-                                        alink.children[0].innerHTML = "<span style='color:orange;'>（合集）</span>" + alink.children[0].innerHTML;
+                                        //alink.children[0].innerHTML = "<span style='color:orange;'>（合集）</span>" + alink.children[0].innerHTML;
+                                        alink.children[0].outerHTML = alink.children[0].outerHTML + "<div style=\"padding: 4px;color: #6b8aaa;display: initial;\"><span style='color:green;font-size: 1.4em;'>叮当分享</span>: <span style='color:red;'><b>合集</b></span></div><div></div>";
                                         alink.setAttribute("dingPrefix", "dingPrefix");
                                     }
                                 } else if (ahref.length > 2 && ahref[3] == "sub") {
                                     if (!alink.getAttribute("dingPost")) {
                                         alink.setAttribute("dingPost", "dingPost");
-                                        alink.children[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + alink.children[0].innerHTML;
+                                        //alink.children[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + alink.children[0].innerHTML;
+                                        alink.children[0].outerHTML = alink.children[0].outerHTML + "<div style=\"padding: 4px;color: #6b8aaa;display: initial;\"><span style='color:green;font-size: 1.4em;'>叮当分享</span>: <span style='color:red;'><b>礼包</b></span></div><div></div>";
                                         alink.setAttribute("dingPrefix", "dingPrefix");
                                     }
                                 }
@@ -2699,35 +2706,33 @@ else if (window.location.hostname == "steamdb.info") {
                 let global_hover_content = document.getElementById('js-hover');
                 if (global_hover_content) {
                     let global_hover_link = global_hover_content.getElementsByClassName('hover_title');
-                    if (global_hover_link && global_hover_link.length > 0) {
+                    if (global_hover_link && !global_hover_link.getAttribute("dingPost") && global_hover_link.length > 0) {
                         let child = global_hover_link[0];
                         let href_sp = new URL(child.href).pathname.split('/');
                         if (href_sp[1] == "app") {
                             let data = {
                                 Id: href_sp[2]
                             };
-                            if (!child.getAttribute("dingPost")) {
-                                child.setAttribute("dingPost", "dingPost");
-                                T2Post(
-                                    "https://ddapi.133233.xyz/CheckId",
-                                    data,
-                                    function(response) {
-                                        console.log("got response");
-                                        if (response.response.Data.Id == "0") {
-                                            child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\"><span style='color:green;'>叮当分享: </span><span style='color:red;'><b>未收录</b></span></div>";
-                                        } else {
-                                            let NickName = response.response.Data.NickName;
-                                            if (!NickName || NickName.length === 0 || NickName === "") {
-                                                NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span>（" + response.response.Data.Date;
-                                            }else{
-                                                NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date;
-                                            }
-                                            child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\"><span style='color:green;'>叮当分享</span>: " + NickName + "）</div>";
+                            global_hover_link.setAttribute("dingPost", "dingPost");
+                            T2Post(
+                                "https://ddapi.133233.xyz/CheckId",
+                                data,
+                                function(response) {
+                                    console.log("got response");
+                                    if (response.response.Data.Id == "0") {
+                                        child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\"><span style='color:green;'>叮当分享: </span><span style='color:red;'><b>未收录</b></span></div>";
+                                    } else {
+                                        let NickName = response.response.Data.NickName;
+                                        if (!NickName || NickName.length === 0 || NickName === "") {
+                                            NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span>（" + response.response.Data.Date;
+                                        }else{
+                                            NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date;
                                         }
-                                        child.setAttribute("dingPrefix", "dingPrefix");
+                                        child.outerHTML = child.outerHTML + "<div class=\"hover_body hover_meta\"><span style='color:green;'>叮当分享</span>: " + NickName + "）</div>";
                                     }
-                                );
-                            }
+                                    child.setAttribute("dingPrefix", "dingPrefix");
+                                }
+                            );
                         } else if (child.id.slice(6, 12) == "bundle") {
                             if (!child.getAttribute("dingPost")) {
                                 child.setAttribute("dingPost", "dingPost");
