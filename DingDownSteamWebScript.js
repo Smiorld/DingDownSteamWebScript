@@ -2283,7 +2283,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                                                                     function(response) {
                                                                         console.log("got response");
                                                                         if (response.response.Data.Id == "0") {
-                                                                            klink.children[0].insertAdjacentHTML("afterbegin", "<div class=\"hover_body hover_meta\"><span style='color:green;'>叮当分享: </span><span style='color:red;'><b>未收录</b></span></div>");
+                                                                            klink.children[0].insertAdjacentHTML("afterbegin", "<div><span style='color:green;'>叮当分享: </span><span style='color:red;'><b>未收录</b></span></div>");
                                                                         } else {
                                                                             let NickName = response.response.Data.NickName;
                                                                             if (!NickName || NickName.length === 0 || NickName === "") {
@@ -2291,7 +2291,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                                                                             }else{
                                                                                 NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date;
                                                                             }
-                                                                            klink.children[0].insertAdjacentHTML("afterbegin", "<div class=\"hover_body hover_meta\"><span style='color:green;'>叮当分享</span>: " + NickName + "）</div>");
+                                                                            klink.children[0].insertAdjacentHTML("afterbegin", "<div><span style='color:green;'>叮当分享</span>: " + NickName + "）</div>");
                                                                         }
                                                                     }
                                                                 );
