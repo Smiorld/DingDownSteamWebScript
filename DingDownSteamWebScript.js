@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.57
+// @version      1.0.58
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -11,12 +11,39 @@
 // @icon         https://gcore.jsdelivr.net/gh/Smiorld/DingDownSteamWebScript@latest/Project.ico
 // @grant        GM_xmlhttpRequest
 // @grant        GM_info
+// @grant             GM_registerMenuCommand
 // @connect      ddapi.133233.xyz
 // @updateURL    https://gcore.jsdelivr.net/gh/Smiorld/DingDownSteamWebScript@latest/DingDownSteamWebScript.js
 // @downloadURL  https://gcore.jsdelivr.net/gh/Smiorld/DingDownSteamWebScript@latest/DingDownSteamWebScript.js
 // @require      https://gcore.jsdelivr.net/npm/sweetalert2@11.4.38/dist/sweetalert2.all.min.js
 // @license MIT
 // ==/UserScript==
+
+// Monkey Menu
+const MONKEY_MENU = {};
+// Switch to Domains
+const DOMAIN_LIST = [
+    'store.steampowered.com',
+    'steamdb.info'
+];
+
+const HOSTNAME = window.location.hostname;
+const base_url = window.location;
+
+for (let i = 0; i < DOMAIN_LIST.length; i++) {
+    const DOMAIN = DOMAIN_LIST[i];
+    MONKEY_MENU.name = `\u{1F500} Switch To ${i + 1} ${HOSTNAME === DOMAIN ? '\u{1F31D}' : '\u{1F31E}'} ${DOMAIN}`;
+    GM_registerMenuCommand(MONKEY_MENU.name, () => {
+        let base_path_sp = window.location.pathname.split('/');
+        if (base_path_sp.length > 2 && (base_path_sp[1] == 'app' || base_path_sp[1] == 'sub') ){
+            let xx = "https://" + DOMAIN + "/" + base_path_sp[1] + "/" + base_path_sp[2];
+            window.location.href = xx;
+        }else{
+            const HREF = window.location.href;
+            window.location.href = HREF.replace(HOSTNAME, DOMAIN);
+        }
+    });
+}
 
 function DD_xmlhttpRequest(option) {
     if (String(option) !== '[object Object]') return undefined
@@ -439,7 +466,6 @@ function addStyle(styleString) {
 const isInteger = num => /^-?[0-9]+$/.test(num+'');
 
 var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
-let base_url = window.location;
 
 window.addEventListener("load", function() {
     //login entry inject
@@ -483,7 +509,7 @@ window.addEventListener("load", function() {
     }
 
     //store
-    if (base_url.hostname == "store.steampowered.com"){
+    if (HOSTNAME == "store.steampowered.com"){
         //page initial post
         let base_path_sp = base_url.pathname.split('/');
         if (base_url.pathname === "/" || (base_path_sp.length > 0 && base_path_sp[1] == 'explore') ) {
@@ -617,7 +643,7 @@ window.addEventListener("load", function() {
         }
     }
     //steamcommunity.com
-    else if (base_url.hostname == "steamcommunity.com"){
+    else if (HOSTNAME == "steamcommunity.com"){
         let base_path_sp = base_url.pathname.split('/');
         //page initial post
         if (base_path_sp.length > 0 && (base_path_sp[1] == 'profiles' || base_path_sp[1] == 'id') && base_path_sp[3] == 'games') {
@@ -862,7 +888,7 @@ window.addEventListener("load", function() {
         }
     }
     //steamdb.info
-    else if (base_url.hostname == "steamdb.info"){
+    else if (HOSTNAME == "steamdb.info"){
         let base_path = window.location.pathname.split('/');
         //app page
         if (base_path.length > 0 && base_path[1] === "app") {
@@ -1311,7 +1337,7 @@ window.addEventListener("load", function() {
 });
 
 //mutation检测是否在搜索结果内部分有变化。若有，触发脚本
-if (base_url.hostname == 'store.steampowered.com') {
+if (HOSTNAME == 'store.steampowered.com') {
     //主页. xxx1是服务于类搜索结果的部分的.
     let base_path_sp = window.location.pathname.split('/');
     if(base_url.pathname === "/" || (base_path_sp.length > 0 && base_path_sp[1] == 'explore') ){
@@ -2719,7 +2745,7 @@ if (base_url.hostname == 'store.steampowered.com') {
 
 }
 //steamdb.info
-else if (window.location.hostname == "steamdb.info") {
+else if (HOSTNAME == "steamdb.info") {
     let base_path_sp = window.location.pathname.split('/');
     //index page
     if (window.location.pathname === "/") {
@@ -3247,3 +3273,8 @@ else if (window.location.hostname == "steamdb.info") {
     const observer0 = new MutationObserver(callback0);
     observer0.observe(targetNode0, config);
 }
+
+
+
+
+
