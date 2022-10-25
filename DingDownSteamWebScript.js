@@ -15,7 +15,7 @@
 // @connect      ddapi.133233.xyz
 // @updateURL    https://gcore.jsdelivr.net/gh/Smiorld/DingDownSteamWebScript@latest/DingDownSteamWebScript.js
 // @downloadURL  https://gcore.jsdelivr.net/gh/Smiorld/DingDownSteamWebScript@latest/DingDownSteamWebScript.js
-// @require      https://gcore.jsdelivr.net/npm/sweetalert2@11.4.38/dist/sweetalert2.all.min.js
+// @require      https://ddapi.133233.xyz/npm/sweetalert2@11.4.38/dist/sweetalert2.all.min.js
 // @license MIT
 // ==/UserScript==
 
@@ -409,7 +409,7 @@ if (document.readyState == "complete" || document.readyState == "loaded" || docu
     document.addEventListener("DOMContentLoaded", function(event) {
         //console.log("Just Loaded");
         let head = document.getElementsByTagName("head")[0];
-        head.insertAdjacentHTML("beforeend", '<script src="https://gcore.jsdelivr.net/npm/sweetalert2@11.4.38/dist/sweetalert2.all.min.js"></script>');
+        head.insertAdjacentHTML("beforeend", '<script src="https://ddapi.133233.xyz/npm/sweetalert2@11.4.38/dist/sweetalert2.all.min.js"></script>');
         let SessionId = getCookie('Ding_SessionId');
         if (SessionId === "") {
             let cart_status_data = document.querySelector("#cart_status_data");
