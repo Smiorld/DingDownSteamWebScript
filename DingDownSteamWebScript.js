@@ -21,28 +21,32 @@
 
 // Monkey Menu
 const MONKEY_MENU = {};
-// Switch to Domains
-const DOMAIN_LIST = [
-    'store.steampowered.com',
-    'steamdb.info'
-];
 
 const HOSTNAME = window.location.hostname;
 const base_url = window.location;
 
-for (let i = 0; i < DOMAIN_LIST.length; i++) {
-    const DOMAIN = DOMAIN_LIST[i];
-    MONKEY_MENU.name = `\u{1F500} Switch To ${i + 1} ${HOSTNAME === DOMAIN ? '\u{1F31D}' : '\u{1F31E}'} ${DOMAIN}`;
+if (HOSTNAME == 'steamdb.info'){
+    MONKEY_MENU.name = `\u{1F500} Switch To \u{1F31D} STEAM商店`;
     GM_registerMenuCommand(MONKEY_MENU.name, () => {
         let base_path_sp = window.location.pathname.split('/');
         if (base_path_sp.length > 2 && (base_path_sp[1] == 'app' || base_path_sp[1] == 'sub') ){
-            let xx = "https://" + DOMAIN + "/" + base_path_sp[1] + "/" + base_path_sp[2];
+            let xx = "https://store.steampowered.com/" + base_path_sp[1] + "/" + base_path_sp[2];
             window.location.href = xx;
         }else{
-            const HREF = window.location.href;
-            window.location.href = HREF.replace(HOSTNAME, DOMAIN);
+            window.location.href = "https://store.steampowered.com/";
         }
     });
+}else if (HOSTNAME == 'store.steampowered.com'){
+    MONKEY_MENU.name = `\u{1F500} Switch To \u{1F31E} SteamDB`;
+    GM_registerMenuCommand(MONKEY_MENU.name, () => {
+        let base_path_sp = window.location.pathname.split('/');
+        if (base_path_sp.length > 2 && (base_path_sp[1] == 'app' || base_path_sp[1] == 'sub') ){
+            let xx = "https://store.steampowered.com/" + base_path_sp[1] + "/" + base_path_sp[2];
+            window.location.href = xx;
+        }else{
+            window.location.href = "https://steamdb.info/";
+        }
+    })
 }
 
 function DD_xmlhttpRequest(option) {
