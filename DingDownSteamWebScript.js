@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.53
+// @version      1.0.54
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -434,6 +434,7 @@ function addStyle(styleString) {
     style.textContent = styleString;
     document.head.append(style);
 }
+
 const isInteger = num => /^-?[0-9]+$/.test(num+'');
 
 var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
@@ -1933,6 +1934,7 @@ if (base_url.hostname == 'store.steampowered.com') {
         observer1.observe(targetNode1, config);
         observer1.observe(targetNode2, config);
     }
+
     //全局。目前主要是global_hover_content.
     let targetNode0 = document.querySelector('body');
     let config = {
@@ -1955,7 +1957,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                             for(var y = 0; y < alink.length; y++){
                                 let klink = alink[y];
                                 let ahref = klink.getAttribute("href").split('/');
-                                if (ahref.length > 3 && ahref[3] == 'app') {
+                                if (ahref.length > 4 && ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
                                     let data = {
                                         Id: ahref[4]
                                     };
@@ -1988,7 +1990,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                                             }
                                         );
                                     }
-                                } else if (ahref.length > 3 && ahref[3] == "bundle") {
+                                } else if (ahref.length > 4 && ahref[3] == "bundle") {
                                     if (!klink.getAttribute("dingPost")) {
                                         let index;
                                         if (klink.childElementCount > 1){
@@ -2000,7 +2002,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                                         klink.children[index].innerHTML = "<span style='color:orange;'><b>（合集）</b></span>" + klink.children[index].innerHTML;
                                         klink.setAttribute("dingPrefix", "dingPrefix");
                                     }
-                                } else if (ahref.length > 2 && ahref[3] == "sub") {
+                                } else if (ahref.length > 4 && ahref[3] == "sub") {
                                     if (!klink.getAttribute("dingPost")) {
                                         let index;
                                         if (klink.childElementCount > 1){
@@ -2027,7 +2029,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                             if (alink && alink.length >2) {
                                 let klink = alink[2];
                                 let ahref = klink.getAttribute("href").split('/');
-                                if (ahref.length > 3 && ahref[3] == 'app') {
+                                if (ahref.length > 4 && ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
                                     let data = {
                                         Id: ahref[4]
                                     };
@@ -2063,7 +2065,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                                             }
                                         );
                                     }
-                                } else if (ahref.length > 3 && ahref[3] == "bundle") {
+                                } else if (ahref.length > 4 && ahref[3] == "bundle") {
                                     if (!klink.getAttribute("dingPost")) {
                                         let index;
                                         if (klink.childElementCount > 2){
@@ -2077,7 +2079,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                                         klink.children[index].innerHTML = "<span style='color:orange;'>（合集）</span>" + klink.children[index].innerHTML;
                                         klink.setAttribute("dingPrefix", "dingPrefix");
                                     }
-                                } else if (ahref.length > 2 && ahref[3] == "sub") {
+                                } else if (ahref.length > 4 && ahref[3] == "sub") {
                                     if (!klink.getAttribute("dingPost")) {
                                         let index;
                                         if (klink.childElementCount > 2){
@@ -2147,7 +2149,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                             let alink = children[i].getElementsByTagName('a')[0];
                             if (!children[i].getAttribute("dingPost") && alink) {
                                 let ahref = alink.getAttribute("href").split('/');
-                                if (ahref.length > 3 && ahref[3] == 'app') {
+                                if (ahref.length > 4 && ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
                                     children[i].setAttribute("dingPost", "dingPost");
                                     let data = {
                                         Id: ahref[4]
@@ -2173,13 +2175,13 @@ if (base_url.hostname == 'store.steampowered.com') {
                                             }
                                         }
                                     );
-                                } else if (ahref.length > 3 && ahref[3] == "bundle") {
+                                } else if (ahref.length > 4 && ahref[3] == "bundle") {
                                     if (!children[i].getAttribute("dingPost")) {
                                         children[i].setAttribute("dingPost", "dingPost");
                                         //alink.children[0].innerHTML = "<span style='color:orange;'>（合集）</span>" + alink.children[0].innerHTML;
                                         alink.children[0].outerHTML = alink.children[0].outerHTML + "<div style=\"padding: 4px;color: #6b8aaa;display: initial;\"><span style='color:green;font-size: 1.4em;'>叮当分享</span>: <span style='color:red;'><b>合集</b></span></div><div></div>";
                                     }
-                                } else if (ahref.length > 2 && ahref[3] == "sub") {
+                                } else if (ahref.length > 4 && ahref[3] == "sub") {
                                     if (!children[i].getAttribute("dingPost")) {
                                         children[i].setAttribute("dingPost", "dingPost");
                                         //alink.children[0].innerHTML = "<span style='color:orange;'>（礼包）</span>" + alink.children[0].innerHTML;
@@ -2199,7 +2201,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                                 let alink = children[i].getElementsByTagName('a')[1];
                                 if (alink && !alink.getAttribute("dingPost")) {
                                     let ahref = alink.getAttribute("href").split('/');
-                                    if (ahref.length > 3 && ahref[3] == 'app') {
+                                    if (ahref.length > 4 && ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
                                         alink.setAttribute("dingPost", "dingPost");
                                         let appid = ahref[4];
                                         if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
@@ -2221,7 +2223,7 @@ if (base_url.hostname == 'store.steampowered.com') {
                                             let alink = children[i].getElementsByTagName('a')[1];
                                             if (alink) {
                                                 let ahref = alink.getAttribute("href").split('/');
-                                                if (ahref.length > 3 && ahref[3] == 'app') {
+                                                if (ahref.length > 4 && ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
                                                     if (!alink.getAttribute("dingPrefix")) {
                                                         alink.setAttribute("dingPrefix", "dingPrefix");
                                                         let appid = ahref[4];
@@ -2234,12 +2236,12 @@ if (base_url.hostname == 'store.steampowered.com') {
                                                             appids.splice(appids.indexOf(appid), 1);
                                                         }
                                                     }
-                                                } else if (ahref.length > 3 && ahref[3] == "bundle") {
+                                                } else if (ahref.length > 4 && ahref[3] == "bundle") {
                                                     if (!alink.getAttribute("dingPrefix")) {
                                                         alink.children[0].insertAdjacentHTML("afterbegin", "<span style='color:orange;'>（合集）</span>");
                                                         alink.setAttribute("dingPrefix", "dingPrefix");
                                                     }
-                                                } else if (ahref.length > 2 && ahref[3] == "sub") {
+                                                } else if (ahref.length > 4 && ahref[3] == "sub") {
                                                     if (!alink.getAttribute("dingPrefix")) {
                                                         alink.children[0].insertAdjacentHTML("afterbegin", "<span style='color:orange;'>（礼包）</span>");
                                                         alink.setAttribute("dingPrefix", "dingPrefix");
@@ -2251,7 +2253,6 @@ if (base_url.hostname == 'store.steampowered.com') {
                                     }
                                 );
                             }
-
                         }else{
                             //热门 热销
                             let application_root = document.querySelector("#application_root");
@@ -2264,13 +2265,71 @@ if (base_url.hostname == 'store.steampowered.com') {
                                     if (alink) {
                                         for(var k = 0; k < alink.length; k++){
                                             let klink = alink[k];
-                                            if(!klink.getAttribute("dingPost")){
+                                            if(!klink.getAttribute("dingPrefix")){
                                                 let ahref = klink.getAttribute("href").split('/');
-                                                if (ahref.length > 3 && ahref[3] == 'app') {
-                                                    klink.setAttribute("dingPost", "dingPost");
-                                                    let appid = ahref[4];
-                                                    if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
-                                                        appids.push(appid);
+                                                if (ahref.length > 4 ){
+                                                    //only news
+                                                    if(ahref[1] == 'news'){
+                                                        if (ahref[2] == 'app'){
+                                                            klink.setAttribute("dingPrefix", "dingPrefix");
+                                                            let appid = ahref[3];
+                                                            if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                                                                let data = {
+                                                                    Id: appid
+                                                                };
+                                                                T2Post(
+                                                                    "https://ddapi.133233.xyz/CheckId",
+                                                                    data,
+                                                                    function(response) {
+                                                                        console.log("got response");
+                                                                        if (response.response.Data.Id == "0") {
+                                                                            klink.children[0].insertAdjacentHTML("afterbegin", "<div class=\"hover_body hover_meta\"><span style='color:green;'>叮当分享: </span><span style='color:red;'><b>未收录</b></span></div>");
+                                                                        } else {
+                                                                            let NickName = response.response.Data.NickName;
+                                                                            if (!NickName || NickName.length === 0 || NickName === "") {
+                                                                                NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span>（" + response.response.Data.Date;
+                                                                            }else{
+                                                                                NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date;
+                                                                            }
+                                                                            klink.children[0].insertAdjacentHTML("afterbegin", "<div class=\"hover_body hover_meta\"><span style='color:green;'>叮当分享</span>: " + NickName + "）</div>");
+                                                                        }
+                                                                    }
+                                                                );
+                                                            }
+                                                        } else if (ahref[2] == "bundle") {
+                                                            if (!klink.getAttribute("dingPrefix")) {
+                                                                let index;
+                                                                if (klink.childElementCount > 2){
+                                                                    index = 2;
+                                                                }else if (klink.childElementCount > 1){
+                                                                    index = 1;
+                                                                }else{
+                                                                    index= 0;
+                                                                }
+                                                                klink.setAttribute("dingPrefix", "dingPrefix");
+                                                                klink.children[index].insertAdjacentHTML("afterbegin","<span style='color:orange;'>（合集）</span>");
+                                                            }
+                                                        } else if (ahref[2] == "sub") {
+                                                            if (!klink.getAttribute("dingPrefix")) {
+                                                                let index;
+                                                                if (klink.childElementCount > 2){
+                                                                    index = 2;
+                                                                }else if (klink.childElementCount > 1){
+                                                                    index = 1;
+                                                                }else{
+                                                                    index= 0;
+                                                                }
+                                                                klink.children[index].insertAdjacentHTML("afterbegin","<span style='color:orange;'>（礼包）</span>");
+                                                                klink.setAttribute("dingPrefix", "dingPrefix");
+                                                            }
+                                                        }
+                                                    }
+                                                    else if (ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
+                                                        klink.setAttribute("dingPost", "dingPost");
+                                                        let appid = ahref[4];
+                                                        if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                                                            appids.push(appid);
+                                                        }
                                                     }
                                                 }
                                             }
@@ -2292,68 +2351,71 @@ if (base_url.hostname == 'store.steampowered.com') {
                                                     for(var k = 0; k < alink.length; k++){
                                                         let klink = alink[k];
                                                         let ahref = klink.getAttribute("href").split('/');
-                                                        if (ahref.length > 3 && ahref[3] == 'app') {
-                                                            if (!klink.getAttribute("dingPrefix")) {
-                                                                klink.setAttribute("dingPrefix", "dingPrefix");
-                                                                let appid = ahref[4];
-                                                                let index;
-                                                                if (klink.childElementCount > 2){
-                                                                    index = 2;
-                                                                }else if (klink.childElementCount > 1){
-                                                                    index = 1;
-                                                                }else{
-                                                                    index= 0;
-                                                                }
-                                                                if(appids.find(a => a == appid)){
-                                                                    if (response.response.Data.AppInfo.find(a => a == appid)) {
-                                                                        klink.children[index].insertAdjacentHTML("afterbegin", "<span style='color:green;'>（已收录）</span>");
+                                                        if (ahref.length > 4 && ahref[2] == "store.steampowered.com")
+                                                        {
+                                                            if (ahref[3] == 'app') {
+                                                                if (!klink.getAttribute("dingPrefix")) {
+                                                                    klink.setAttribute("dingPrefix", "dingPrefix");
+                                                                    let appid = ahref[4];
+                                                                    let index;
+                                                                    if (klink.childElementCount > 2){
+                                                                        index = 2;
+                                                                    }else if (klink.childElementCount > 1){
+                                                                        index = 1;
+                                                                    }else{
+                                                                        index= 0;
                                                                     }
-                                                                    else
-                                                                    {
-                                                                        klink.children[index].insertAdjacentHTML("afterbegin", "<span style='color:red;'>（未收录）</span>");
+                                                                    if(appids.find(a => a == appid)){
+                                                                        if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                                                            klink.children[index].insertAdjacentHTML("afterbegin", "<span style='color:green;'>（已收录）</span>");
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            klink.children[index].insertAdjacentHTML("afterbegin", "<span style='color:red;'>（未收录）</span>");
+                                                                        }
+                                                                        appids.splice(appids.indexOf(appid), 1);
                                                                     }
-                                                                    appids.splice(appids.indexOf(appid), 1);
                                                                 }
-                                                            }
-                                                        } else if (ahref.length > 3 && ahref[3] == "bundle") {
-                                                            if (!klink.getAttribute("dingPrefix")) {
-                                                                let index;
-                                                                if (klink.childElementCount > 2){
-                                                                    index = 2;
-                                                                }else if (klink.childElementCount > 1){
-                                                                    index = 1;
-                                                                }else{
-                                                                    index= 0;
+                                                            } else if (ahref[3] == "bundle") {
+                                                                if (!klink.getAttribute("dingPrefix")) {
+                                                                    let index;
+                                                                    if (klink.childElementCount > 2){
+                                                                        index = 2;
+                                                                    }else if (klink.childElementCount > 1){
+                                                                        index = 1;
+                                                                    }else{
+                                                                        index= 0;
+                                                                    }
+                                                                    klink.setAttribute("dingPrefix", "dingPrefix");
+                                                                    klink.children[index].insertAdjacentHTML("afterbegin","<span style='color:orange;'>（合集）</span>");
                                                                 }
-                                                                klink.setAttribute("dingPrefix", "dingPrefix");
-                                                                klink.children[index].insertAdjacentHTML("afterbegin","<span style='color:orange;'>（合集）</span>");
-                                                            }
-                                                        } else if (ahref.length > 2 && ahref[3] == "sub") {
-                                                            if (!klink.getAttribute("dingPrefix")) {
-                                                                let index;
-                                                                if (klink.childElementCount > 2){
-                                                                    index = 2;
-                                                                }else if (klink.childElementCount > 1){
-                                                                    index = 1;
-                                                                }else{
-                                                                    index= 0;
+                                                            } else if (ahref[3] == "sub") {
+                                                                if (!klink.getAttribute("dingPrefix")) {
+                                                                    let index;
+                                                                    if (klink.childElementCount > 2){
+                                                                        index = 2;
+                                                                    }else if (klink.childElementCount > 1){
+                                                                        index = 1;
+                                                                    }else{
+                                                                        index= 0;
+                                                                    }
+                                                                    klink.children[index].insertAdjacentHTML("afterbegin","<span style='color:orange;'>（礼包）</span>");
+                                                                    klink.setAttribute("dingPrefix", "dingPrefix");
                                                                 }
-                                                                klink.children[index].insertAdjacentHTML("afterbegin","<span style='color:orange;'>（礼包）</span>");
-                                                                klink.setAttribute("dingPrefix", "dingPrefix");
                                                             }
                                                         }
                                                     }
-
                                                 }
+
                                             }
                                         }
+
                                     );
                                 }
                             }
                         }
                     }
                 }
-
 
 
             } catch (e) {
