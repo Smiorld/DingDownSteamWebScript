@@ -1647,9 +1647,9 @@ if (HOSTNAME == 'store.steampowered.com') {
                         let NickName = response.response.Data.NickName;
                         let dateformat = "入库于 "+response.response.Data.Date;
                         if (!NickName || NickName.length === 0 || NickName === "") {
-                            NickName = "<div class=\"summary column ding\"><span style='color:green;' data-tooltip-text=\""+dateformat+"\"><b>系统/匿名</b><span style=\"color: #8f98a0;\">（" + formatDate(response.response.Data.Date) + "</span></span>）</div>";
+                            NickName = "<div class=\"summary column ding\"><span style='color:green;' data-tooltip-text=\""+dateformat+"\"><b>系统/匿名</b><span style=\"color: #556772;\">（" + formatDate(response.response.Data.Date) + "</span></span>）</div>";
                         }else{
-                            NickName= "<div class=\"summary column ding\"><span style='color:#ff683b;' data-tooltip-text=\""+dateformat+"\"><b>"+ NickName +"</b><span style=\"color: #8f98a0;\">（" + formatDate(response.response.Data.Date) + "</span></span>）</div>";
+                            NickName= "<div class=\"summary column ding\"><span style='color:#ff683b;' data-tooltip-text=\""+dateformat+"\"><b>"+ NickName +"</b><span style=\"color: #556772;\">（" + formatDate(response.response.Data.Date) + "</span></span>）</div>";
                         }
                         CheckIdResponse = {
                             'is_recorded': true,
