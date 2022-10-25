@@ -2152,18 +2152,12 @@ if (base_url.hostname == 'store.steampowered.com') {
             let application_root = target_root;
             if (application_root && application_root.childElementCount > 0 ) {
                 let children = application_root.children;
-                if (window.location.pathname != base_path){
-                    base_path = window.location.pathname;
-                    url_change = true;
-                }else{
-                    url_change = false;
-                }
                 for (let i = 0; i < children.length; i++) {
                     let alink = children[i].getElementsByTagName('a');
                     if (alink) {
                         for(var k = 0; k < alink.length; k++){
                             let klink = alink[k];
-                            if(url_change || !klink.getAttribute("dingPost")){
+                            if(!klink.getAttribute("dingPost")){
                                 let ahref = klink.getAttribute("href").split('/');
                                 if (ahref.length > 4 ){
                                     let base_path_sp = window.location.pathname.split('/');
