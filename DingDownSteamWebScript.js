@@ -41,7 +41,7 @@ if (HOSTNAME == 'steamdb.info'){
     GM_registerMenuCommand(MONKEY_MENU.name, () => {
         let base_path_sp = window.location.pathname.split('/');
         if (base_path_sp.length > 2 && (base_path_sp[1] == 'app' || base_path_sp[1] == 'sub') ){
-            let xx = "https://store.steampowered.com/" + base_path_sp[1] + "/" + base_path_sp[2];
+            let xx = "https://steamdb.info/" + base_path_sp[1] + "/" + base_path_sp[2];
             window.location.href = xx;
         }else{
             window.location.href = "https://steamdb.info/";
@@ -3277,8 +3277,3 @@ else if (HOSTNAME == "steamdb.info") {
     const observer0 = new MutationObserver(callback0);
     observer0.observe(targetNode0, config);
 }
-
-
-
-
-
