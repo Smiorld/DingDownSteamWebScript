@@ -661,7 +661,7 @@ window.addEventListener("load", function() {
             }
 
         }
-        else if (base_path.length > 0 && (base_path_sp[1] == 'profiles' || base_path_sp[1] == 'id') && base_path_sp[3] == 'followedgames') {
+        else if (base_path_sp.length > 0 && (base_path_sp[1] == 'profiles' || base_path_sp[1] == 'id') && base_path_sp[3] == 'followedgames') {
             let games_list_rows = document.querySelector('.games_list_rows');
             let children = games_list_rows.children;
             let appid = [];
@@ -703,7 +703,7 @@ window.addEventListener("load", function() {
             }
 
         }
-        else if (base_path.length > 0 && (base_path_sp[1] == 'workshop' || base_path_sp[1] == 'sharedfiles') && base_path_sp[2] == 'filedetails') {
+        else if (base_path_sp.length > 0 && (base_path_sp[1] == 'workshop' || base_path_sp[1] == 'sharedfiles') && base_path_sp[2] == 'filedetails') {
             //if the page is workshop/filedetails
             const SubscribeItemBtn = document.querySelector('#SubscribeItemBtn');
             if (SubscribeItemBtn) {
