@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.60
+// @version      1.0.61
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -2685,6 +2685,113 @@ if (HOSTNAME == 'store.steampowered.com') {
     const observer0 = new MutationObserver(callback0);
     observer0.observe(targetNode0, config);
 
+}
+else if (HOSTNAME == "steamcommunity.com"){
+    let base_path_sp = base_url.pathname.split('/');
+    if (base_path_sp.length > 0 && base_path_sp[1] == 'id' && base_path_sp[3] == 'recommended') {
+        let games_list_rows = document.querySelector('#tabs_basebg');
+        let config = {
+            subtree: true,
+            attributes: true,
+            childList: true,
+            characterData: true
+        };
+        let callback0 = mutations => {
+            mutations.forEach(mutation => {
+                try {
+                    if (games_list_rows && games_list_rows.childElementCount > 1){
+                        let children = games_list_rows.getElementsByClassName("leftcol");
+                        let appids = [];
+                        let childrenLength = children.length;
+                        for (let i = 0; i < childrenLength; i++) {
+                            let tmpnode = children[i];
+                            let tmptext = tmpnode.getElementsByTagName("a");
+                            if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPost")) {
+                                let ahref = tmptext[0].getAttribute("href");
+                                if (ahref){
+                                    ahref = ahref.split('/');
+                                }else{
+                                    continue;
+                                }
+                                if (ahref.length > 4 ){
+                                    if (ahref[3] == 'app' && ahref[2] == "steamcommunity.com") {
+                                        tmptext[0].setAttribute("dingPost", "dingPost");
+                                        let appid = ahref[4];
+                                        if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                                            appids.push(appid);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (appids.length != 0) {
+                            let data = {
+                                "Ids": appids.join()
+                            };
+                            T2Post(
+                                "https://ddapi.133233.xyz/CheckIds",
+                                data,
+                                function(response) {
+                                    console.log("got response for " + response.response.Data.Total + " appid");
+                                    //prefix all titles
+                                    for (let i = 0; i < childrenLength; i++) {
+                                        let tmpnode = children[i];
+                                        let tmptext = tmpnode.getElementsByTagName("a");
+                                        if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPrefix")) {
+                                            let ahref = tmptext[0].getAttribute("href");
+                                            if (ahref){
+                                                ahref = ahref.split('/');
+                                            }else{
+                                                continue;
+                                            }
+                                            if (ahref.length > 4 ){
+                                                if (ahref[3] == 'app' && ahref[2] == "steamcommunity.com") {
+                                                    if (!tmptext[0].getAttribute("dingPrefix")) {
+                                                        tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+                                                        let appid = ahref[4];
+                                                        if(appids.find(a => a == appid)){
+                                                            if ( response.response.Data.AppInfo.find(a => a == appid)) {
+                                                                tmptext[0].insertAdjacentHTML("afterend", "<span style='color:green;'>（叮当已收录）</span>");
+                                                            }else{
+                                                                tmptext[0].insertAdjacentHTML("afterend", "<span style='color:red;'>（叮当未收录）</span>");
+                                                            }
+                                                            tmpnode.setAttribute("style", "text-align: center;");
+                                                            appids.splice(appids.indexOf(appid), 1);
+                                                            tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+
+                                                        }
+                                                    }
+                                                } else if (ahref[3] == "bundle") {
+                                                    if (!tmptext[0].getAttribute("dingPrefix")) {
+                                                        tmptext[0].insertAdjacentHTML("afterend", "<span style='color:orange;'>（合集）</span>");
+                                                        tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+                                                        tmpnode.setAttribute("style", "text-align: center;");
+                                                    }
+                                                } else if (ahref[3] == "sub") {
+                                                    if (!tmptext[0].getAttribute("dingPrefix")) {
+                                                        tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+                                                        tmptext[0].insertAdjacentHTML("afterend", "<span style='color:orange;'>（礼包）</span>");
+                                                        tmpnode.setAttribute("style", "text-align: center;");
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            );
+                        }
+                    }
+                } catch (e) {
+                    //exception handle;
+                }
+            })
+        }
+        if (games_list_rows) {
+            const observer1 = new MutationObserver(callback0);
+            observer1.observe(games_list_rows, config);
+        }
+
+    }
 }
 //steamdb.info
 else if (HOSTNAME == "steamdb.info") {
