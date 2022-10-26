@@ -2693,6 +2693,7 @@ else if (HOSTNAME == "steamcommunity.com"){
         let config = {
             subtree: true,
             attributes: true,
+            childList: true,
             attributeFilter: ['class']
         };
         let callback0 = mutations => {
