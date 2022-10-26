@@ -1551,7 +1551,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                                                                     if (img_node && img_node.length > 0){
                                                                         continue;
                                                                     }else{
-                                                                        klink.children[0].insertAdjacentHTML("beforeend", "<span id='dingPrefix' style='color:green;'>（叮当已收录）</span>");
+                                                                        klink.children[0].insertAdjacentHTML("beforeend", "<span id='dingPrefix' style='color:red;'>（叮当未收录）</span>");
                                                                     }
                                                                 }else if(klink.childElementCount == 0){
                                                                     klink.insertAdjacentHTML("afterend", "<span id='dingPrefix' style='color:red;'>（叮当未收录）</span>");
