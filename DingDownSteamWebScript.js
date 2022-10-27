@@ -1321,7 +1321,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                 //restore all appid
                 let appid = [];
                 let childrenLength = children.length;
-                for (let i = 0; i < childrenLength; i++) {
+                for (; i < childrenLength; i++) {
                     let tmpchild = children[i];
                     if (tmpchild && tmpchild.href && tmpchild.href.split('/')[3] == 'app') {
                         let title = tmpchild.children[x].children[0];
@@ -1348,7 +1348,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                             } else {
                                 i = 1;
                             }
-                            for (let i = 0; i < childrenLength; i++) {
+                            for (; i < childrenLength; i++) {
                                 let tmpchild = children[i];
                                 if (tmpchild.href.split('/')[3] == 'app') {
                                     let title = tmpchild.children[x].children[0];
