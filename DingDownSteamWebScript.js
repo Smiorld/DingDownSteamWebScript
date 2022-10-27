@@ -2685,9 +2685,9 @@ if (HOSTNAME == 'store.steampowered.com') {
                                                     } else {
                                                         let NickName = response.response.Data.NickName;
                                                         if (!NickName || NickName.length === 0 || NickName === "") {
-                                                            NickName = "<span style='color:#ff683b;' data-tooltip-text=\"入库于 "+response.response.Data.Date+"\"><b>系统/匿名</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ response.response.Data.Date + "）</span>";
+                                                            NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ response.response.Data.Date + "）</span>";
                                                         }else{
-                                                            NickName= "<span style='color:#ff683b;' data-tooltip-text=\"入库于 "+response.response.Data.Date+"\"><b>"+ NickName +"</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ response.response.Data.Date + "）</span>";
+                                                            NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ response.response.Data.Date + "）</span>";
                                                         }
                                                         //klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
                                                         klink.children[0].insertAdjacentHTML("beforeend","<div class=\"CapsuleDecorators\"><span style='color:green;'><b>叮当分享</b></span>：" + NickName + "</div>");
