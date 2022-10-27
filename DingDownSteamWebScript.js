@@ -2688,7 +2688,7 @@ if (HOSTNAME == 'store.steampowered.com') {
 }
 else if (HOSTNAME == "steamcommunity.com"){
     let base_path_sp = base_url.pathname.split('/');
-    if (base_path_sp.length > 0 && base_path_sp[1] == 'id' && base_path_sp[3] == 'recommended') {
+    if (base_path_sp.length > 0 && (base_path_sp[1] == 'id' || base_path_sp[1] == 'profiles' )&& base_path_sp[3] == 'recommended') {
         let games_list_rows = document.querySelector('#tabs_basebg');
         let config = {
             subtree: true,
