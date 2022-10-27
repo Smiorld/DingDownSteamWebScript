@@ -2,12 +2,12 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.65
-// @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
+// @version      1.0.66
+// @description  在steam/steamdb网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
-// @match        https://steamdb.info/*
 // @match        https://steamcommunity.com/*
+// @match        https://steamdb.info/*
 // @icon         https://gcore.jsdelivr.net/gh/Smiorld/DingDownSteamWebScript@latest/Project.ico
 // @grant        GM_xmlhttpRequest
 // @grant        GM_info
@@ -1047,7 +1047,7 @@ window.addEventListener("load", function() {
                 }
             }
         }
-         //developer
+        //developer
         else if (base_path.length > 0 && (base_path[1] === "developer" || base_path[1] === "publisher" || base_path[1] === "franchise")) {
             //body
             let children = document.getElementsByTagName("tbody");
@@ -2507,7 +2507,7 @@ if (HOSTNAME == 'store.steampowered.com') {
         mutations.forEach(mutation => {
             try {
                 //banner
-                let ContentHubMainCarouselCapsule = document.getElementsByClassName("maincap");
+                let ContentHubMainCarouselCapsule = targetNode0.getElementsByClassName("maincap");
                 if (ContentHubMainCarouselCapsule && ContentHubMainCarouselCapsule.length > 0) {
                     let children = ContentHubMainCarouselCapsule;
                     for (let i = 0; i < children.length; i++) {
@@ -2580,7 +2580,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                     }
                 }
                 else{
-                    let ContentHubMainCarouselCapsule = document.getElementsByClassName("ContentHubMainCarouselCapsule");
+                    let ContentHubMainCarouselCapsule = targetNode0.getElementsByClassName("ContentHubMainCarouselCapsule");
                     if (ContentHubMainCarouselCapsule && ContentHubMainCarouselCapsule.length > 0) {
                         let children = ContentHubMainCarouselCapsule;
                         for (let i = 0; i < children.length; i++) {
@@ -2655,9 +2655,66 @@ if (HOSTNAME == 'store.steampowered.com') {
                                 }
                             }
                         }
+                    }else{
+                        ///category/scream
+                        let ContentHubMainCarouselCapsule = targetNode0.getElementsByClassName('Panel Focusable');
+                        if (ContentHubMainCarouselCapsule && ContentHubMainCarouselCapsule.length > 0) {
+                            let children = ContentHubMainCarouselCapsule;
+                            for (let i = 0; i < children.length; i++) {
+                                if ( children[i].className != "Panel Focusable")
+                                {
+                                    continue;
+                                }
+                                let alink = children[i].getElementsByTagName('a');
+                                if (alink && alink.length >0) {
+                                    let klink = alink[0];
+                                    let ahref = klink.getAttribute("href").split('/');
+                                    if (ahref.length > 4 && ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
+                                        let data = {
+                                            Id: ahref[4]
+                                        };
+                                        if (!klink.getAttribute("dingPost")) {
+                                            klink.setAttribute("dingPost", "dingPost");
+                                            T2Post(
+                                                "https://ddapi.133233.xyz/CheckId",
+                                                data,
+                                                function(response) {
+                                                    console.log("got response");
+                                                    if (response.response.Data.Id == "0") {
+                                                        klink.children[0].insertAdjacentHTML("beforeend","<div class=\"CapsuleDecorators\"><span style='color:red;'>（叮当未收录）</span></div>");
+                                                    } else {
+                                                        let NickName = response.response.Data.NickName;
+                                                        if (!NickName || NickName.length === 0 || NickName === "") {
+                                                            NickName = "<span style='color:#ff683b;' data-tooltip-text=\"入库于 "+response.response.Data.Date+"\"><b>系统/匿名</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ response.response.Data.Date + "）</span>";
+                                                        }else{
+                                                            NickName= "<span style='color:#ff683b;' data-tooltip-text=\"入库于 "+response.response.Data.Date+"\"><b>"+ NickName +"</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ response.response.Data.Date + "）</span>";
+                                                        }
+                                                        //klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
+                                                        klink.children[0].insertAdjacentHTML("beforeend","<div class=\"CapsuleDecorators\"><span style='color:green;'><b>叮当分享</b></span>：" + NickName + "</div>");
+                                                    }
+                                                    klink.setAttribute("dingPrefix", "dingPrefix");
+                                                }
+                                            );
+                                        }
+                                    } else if (ahref.length > 4 && ahref[3] == "bundle") {
+                                        if (!klink.getAttribute("dingPost")) {
+                                            klink.setAttribute("dingPost", "dingPost");
+                                            klink.children[0].insertAdjacentHTML("beforeend","<div class=\"CapsuleDecorators\"><span style='color:red;'>（合集）</span></div>");
+                                            klink.setAttribute("dingPrefix", "dingPrefix");
+                                        }
+                                    } else if (ahref.length > 4 && ahref[3] == "sub") {
+                                        if (!klink.getAttribute("dingPost")) {
+                                            klink.setAttribute("dingPost", "dingPost");
+                                            klink.children[0].insertAdjacentHTML("beforeend","<div class=\"CapsuleDecorators\"><span style='color:red;'>（礼包）</span></div>");
+                                            klink.setAttribute("dingPrefix", "dingPrefix");
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
-
                 }
+
                 let global_hover_content = document.getElementById('global_hover_content');
                 if (global_hover_content && global_hover_content.childElementCount > 0) {
                     let children = global_hover_content.children;
