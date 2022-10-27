@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.61
+// @version      1.0.62
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -1321,7 +1321,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                 //restore all appid
                 let appid = [];
                 let childrenLength = children.length;
-                for (; i < childrenLength; i++) {
+                for (let i = 0; i < childrenLength; i++) {
                     let tmpchild = children[i];
                     if (tmpchild && tmpchild.href && tmpchild.href.split('/')[3] == 'app') {
                         let title = tmpchild.children[x].children[0];
@@ -1348,7 +1348,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                             } else {
                                 i = 1;
                             }
-                            for (; i < childrenLength; i++) {
+                            for (let i = 0; i < childrenLength; i++) {
                                 let tmpchild = children[i];
                                 if (tmpchild.href.split('/')[3] == 'app') {
                                     let title = tmpchild.children[x].children[0];
@@ -1888,6 +1888,168 @@ if (HOSTNAME == 'store.steampowered.com') {
                 }
             );
         }
+
+        let table_node = document.getElementsByClassName("tableView");
+        if (table_node){
+            //restore all appid
+            let appids = [];
+            let childrenLength = table_node.length;
+            for (let i = 0; i < childrenLength; i++) {
+                let DLC_node = table_node[i].getElementsByClassName("gameDlcBlocks");
+                if (DLC_node){
+                    let tmptext = DLC_node[0].getElementsByTagName("a");
+                    let tmplinkLength = tmptext.length;
+                    for (let y = 0; y < tmplinkLength;y++) {
+                        if (tmptext && tmptext.length >0 && !tmptext[y].getAttribute("dingPost")) {
+                            let ahref = tmptext[y].getAttribute("href");
+                            if (ahref){
+                                ahref = ahref.split('/');
+                            }else{
+                                continue;
+                            }
+                            if (ahref.length > 4 ){
+                                if (ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
+                                    tmptext[y].setAttribute("dingPost", "dingPost");
+                                    let appid = ahref[4];
+                                    if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                                        appids.push(appid);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    DLC_node = table_node[i].querySelector("#game_area_dlc_expanded");
+                    if (DLC_node && DLC_node.childElementCount > 0){
+                        let tmptext = DLC_node.getElementsByTagName("a");
+                        let tmplinkLength = tmptext.length;
+                        for (let y = 0; y < tmplinkLength;y++) {
+                            if (tmptext && tmptext.length >0 && !tmptext[y].getAttribute("dingPost")) {
+                                let ahref = tmptext[y].getAttribute("href");
+                                if (ahref){
+                                    ahref = ahref.split('/');
+                                }else{
+                                    continue;
+                                }
+                                if (ahref.length > 4 ){
+                                    if (ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
+                                        tmptext[y].setAttribute("dingPost", "dingPost");
+                                        let appid = ahref[4];
+                                        if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                                            appids.push(appid);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (appids.length != 0) {
+                let data = {
+                    "Ids": appids.join()
+                };
+                T2Post(
+                    "https://ddapi.133233.xyz/CheckIds",
+                    data,
+                    function (response) {
+                        console.log("got response for " + response.response.Data.Total + " appid");
+                        let childrenLength = table_node.length;
+                        for (let i = 0; i < childrenLength; i++) {
+                            let DLC_node = table_node[i].getElementsByClassName("gameDlcBlocks");
+                            if (DLC_node){
+                                let tmptext = DLC_node[0].getElementsByTagName("a");
+                                let tmplinkLength = tmptext.length;
+                                for (let y = 0; y < tmplinkLength;y++) {
+                                    if (tmptext && tmptext.length >0 && !tmptext[y].getAttribute("dingPrefix")) {
+                                        let ahref = tmptext[y].getAttribute("href");
+                                        if (ahref){
+                                            ahref = ahref.split('/');
+                                        }else{
+                                            continue;
+                                        }
+                                        if (ahref.length > 4 ){
+                                            if (ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
+                                                tmptext[y].setAttribute("dingPrefix", "dingPrefix");
+                                                let appid = ahref[4];
+                                                if(appids.find(a => a == appid)){
+                                                    if ( response.response.Data.AppInfo.find(a => a == appid)) {
+                                                        tmptext[y].children[0].insertAdjacentHTML("afterbegin", "<span id='dingPrefix' style='color:green;'>（叮当已收录）</span>");
+
+                                                    }else{
+                                                        tmptext[y].children[0].insertAdjacentHTML("afterbegin", "<span id='dingPrefix' style='color:red;'>（叮当未收录）</span>");
+
+                                                    }
+                                                    appids.splice(appids.indexOf(appid), 1);
+
+                                                }
+                                            } else if (ahref[3] == 'bundle') {
+                                                if (tmptext && tmptext.length >0 && !tmptext[y].getAttribute("dingPrefix")) {
+                                                    tmptext[y].setAttribute("dingPrefix", "dingPrefix");
+                                                    tmptext[y].children[0].insertAdjacentHTML("afterbegin", "<span id='dingPrefix' style='color:orange;'>（合集）</span>");
+                                                }
+                                            } else if (ahref[3] == 'sub') {
+                                                if (tmptext && tmptext.length >0 && !tmptext[y].getAttribute("dingPrefix")) {
+                                                    tmptext[y].setAttribute("dingPrefix", "dingPrefix");
+                                                    tmptext[y].children[0].insertAdjacentHTML("afterbegin", "<span id='dingPrefix' style='color:orange;'>（合集）</span>");
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            DLC_node = table_node[i].querySelector("#game_area_dlc_expanded");
+                            if (DLC_node && DLC_node.childElementCount > 0){
+                                let tmptext = DLC_node.getElementsByTagName("a");
+                                let tmplinkLength = tmptext.length;
+                                for (let y = 0; y < tmplinkLength;y++) {
+                                    if (tmptext && tmptext.length >0 && !tmptext[y].getAttribute("dingPrefix")) {
+                                        let ahref = tmptext[y].getAttribute("href");
+                                        if (ahref){
+                                            ahref = ahref.split('/');
+                                        }else{
+                                            continue;
+                                        }
+                                        if (ahref.length > 4 ){
+                                            if (ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
+                                                tmptext[y].setAttribute("dingPrefix", "dingPrefix");
+                                                let appid = ahref[4];
+                                                if(appids.find(a => a == appid)){
+                                                    if ( response.response.Data.AppInfo.find(a => a == appid)) {
+                                                        tmptext[y].children[0].insertAdjacentHTML("afterbegin", "<span id='dingPrefix' style='color:green;'>（叮当已收录）</span>");
+
+                                                    }else{
+                                                        tmptext[y].children[0].insertAdjacentHTML("afterbegin", "<span id='dingPrefix' style='color:red;'>（叮当未收录）</span>");
+
+                                                    }
+                                                    appids.splice(appids.indexOf(appid), 1);
+
+                                                }
+                                            } else if (ahref[3] == 'bundle') {
+                                                if (tmptext && tmptext.length >0 && !tmptext[y].getAttribute("dingPrefix")) {
+                                                    tmptext[y].setAttribute("dingPrefix", "dingPrefix");
+                                                    tmptext[y].children[0].insertAdjacentHTML("afterbegin", "<span id='dingPrefix' style='color:orange;'>（合集）</span>");
+                                                }
+                                            } else if (ahref[3] == 'sub') {
+                                                if (tmptext && tmptext.length >0 && !tmptext[y].getAttribute("dingPrefix")) {
+                                                    tmptext[y].setAttribute("dingPrefix", "dingPrefix");
+                                                    tmptext[y].children[0].insertAdjacentHTML("afterbegin", "<span id='dingPrefix' style='color:orange;'>（合集）</span>");
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                );
+            }
+
+
+
+        }
+
 
     }
     //搜索页面
