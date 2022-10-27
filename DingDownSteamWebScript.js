@@ -3017,6 +3017,62 @@ else if (HOSTNAME == "steamdb.info") {
             }
 
 
+            //body
+            let children = document.getElementsByTagName("tbody");
+            if (children){
+                //restore all appid
+                let appids = [];
+
+                let childrenLength = children.length;
+                for (let i = 0; i < childrenLength; i++) {
+                    let tmpchild = children[i].getElementsByTagName("tr");
+                        let tmpchildLength = tmpchild.length;
+                    for (let k = 0; k < tmpchildLength; k++) {
+                        let anode = tmpchild[k].getElementsByTagName("a");
+                        for (let z = 0; z < anode.length; z++) {
+                            let appid = anode[z].getAttribute("data-appid");
+                            if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                                appids.push(appid);
+                            }
+                        }
+                    }
+                }
+
+                if (appids.length != 0) {
+                    let data = {
+                        "Ids": appids.join()
+                    };
+                    T2Post(
+                        "https://ddapi.133233.xyz/CheckIds",
+                        data,
+                        function (response) {
+                            console.log("got response for " + response.response.Data.Total + " appid");
+                            //prefix DLC table
+                            for (let i = 0; i < childrenLength; i++) {
+                                let tmpchild = children[i].getElementsByTagName("tr");
+                                let tmpchildLength = tmpchild.length;
+                                for (let k = 0; k < tmpchildLength; k++) {
+                                    let anode = tmpchild[k].getElementsByTagName("a");
+                                    for (let z = 0; z < anode.length; z++) {
+                                        let tmpnode = anode[z];
+                                        let appid = tmpnode.getAttribute("data-appid");
+                                            if (appids.find(a => a == appid)) {
+                                                if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                                    tmpnode.innerHTML = "<span style='color:green;'>（已收录）</span>" + tmpnode.innerHTML;
+                                                } else {
+                                                    tmpnode.innerHTML = "<span style='color:red;'>（未收录）</span>" + tmpnode.innerHTML;
+                                                }
+                                                appids.splice(appids.indexOf(appid), 1);
+                                            }
+                                    }
+                                }
+                            }
+                        }
+                    );
+                }
+            }
+
+
             //get the dlc table.
             let dlc_node = document.querySelector("#dlc");
             if (dlc_node)
