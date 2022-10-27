@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.66
+// @version      1.0.67
 // @description  在steam/steamdb网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -1942,6 +1942,95 @@ if (HOSTNAME == 'store.steampowered.com') {
 
     }
     //优化单页加载
+    else if (base_path_sp.length > 0 && base_path_sp[1] == 'sub') {
+        let table_node = document.getElementsByClassName("tablet_grid");
+        if (table_node){
+            //restore all appid
+            let appids = [];
+            let bundle_node = table_node[0].querySelectorAll(".tab_item");
+            if (bundle_node){
+                for (let i = 0; i < bundle_node.length; i++) {
+                    let tmptext = bundle_node[i].getElementsByTagName("a");
+                    if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPost")) {
+                        let ahref = tmptext[0].getAttribute("href");
+                        if (ahref){
+                            ahref = ahref.split('/');
+                        }else{
+                            continue;
+                        }
+                        if (ahref.length > 4 ){
+                            if (ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
+                                tmptext[0].setAttribute("dingPost", "dingPost");
+                                let appid = ahref[4];
+                                if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                                    appids.push(appid);
+                                }
+                            }
+                        }
+                    }
+                }
+                if (appids.length != 0) {
+                    let data = {
+                        "Ids": appids.join()
+                    };
+                    T2Post(
+                        "https://ddapi.133233.xyz/CheckIds",
+                        data,
+                        function (response) {
+                            console.log("got response for " + response.response.Data.Total + " appid");
+                            for (let i = 0; i < bundle_node.length; i++) {
+                                let tmptext = bundle_node[i].getElementsByTagName("a");
+                                if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPrefix")) {
+                                    let ahref = tmptext[0].getAttribute("href");
+                                    if (ahref){
+                                        ahref = ahref.split('/');
+                                    }else{
+                                        continue;
+                                    }
+                                    if (ahref.length > 4 ){
+                                        if (ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
+                                            let appid = ahref[4];
+                                            if(appids.find(a => a == appid)){
+                                                tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+                                                let title = bundle_node[i].getElementsByClassName("tab_item_name");
+                                                if (title && title.length > 0){
+                                                    if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                                        title[0].insertAdjacentHTML("afterbegin", "<span id='dingPrefix' style='color:green;'>（已收录）</span>");
+                                                    }else{
+                                                        title[0].insertAdjacentHTML("afterbegin", "<span id='dingPrefix' style='color:red;'>（未收录）</span>");
+                                                    }
+                                                }
+                                                appids.splice(appids.indexOf(appid), 1);
+                                            }
+
+                                        } else if (ahref.length > 4 && ahref[3] == "bundle") {
+                                            if (!tmptext[0].getAttribute("dingPrefix")) {
+                                                tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+                                                let title = bundle_node[i].getElementsByClassName("tab_item_name");
+                                                if (title && title.length > 0){
+                                                    title[0].insertAdjacentHTML("afterbegin", "<span id='dingPrefix' style='color:orange;'>（合集）</span>");
+                                                }
+                                            }
+                                        } else if (ahref.length > 4 && ahref[3] == "sub") {
+                                            if (!tmptext[0].getAttribute("dingPrefix")) {
+                                                tmptext[0].setAttribute("dingPrefix", "dingPrefix");
+                                                let title = bundle_node[i].getElementsByClassName("tab_item_name");
+                                                if (title && title.length > 0){
+                                                    title[0].insertAdjacentHTML("afterbegin", "<span id='dingPrefix' style='color:orange;'>（礼包）</span>");
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                    );
+                }
+            }
+        }
+    }
+    //sub
     else if (base_path_sp.length > 0 && base_path_sp[1] == 'bundle') {
         let table_node = document.getElementsByClassName("tablet_grid");
         if (table_node){
