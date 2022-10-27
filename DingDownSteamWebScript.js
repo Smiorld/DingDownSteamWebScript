@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.63
+// @version      1.0.64
 // @description  在steam网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -837,179 +837,7 @@ window.addEventListener("load", function() {
     //steamdb.info
     else if (HOSTNAME == "steamdb.info"){
         let base_path = window.location.pathname.split('/');
-        //app page
-        if (base_path.length > 0 && base_path[1] === "app") {
-            let head_node = document.getElementsByClassName("pagehead");
-            if (head_node && head_node.length >0){
-                let appids = [];
-                let depots = [];
-                //base appid
-                let base_appid = base_path[2];
-                //trying to get the nickname first.
-                //appids.push(base_appid);
-                if (base_appid && base_appid.length >1 && base_appid.length < 10 && isInteger(base_appid)){
-                    let data = {
-                        Id: base_appid
-                    };
-                    T2Post(
-                        "https://ddapi.133233.xyz/CheckId",
-                        data,
-                        function(response) {
-                            console.log("got response");
-                            let head_name = head_node[0].getElementsByTagName("h1");
-                            if (head_name && head_name.length >0){
-                                if (response.response.Data.Id == "0") {
-                                    head_name[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + head_name[0].innerHTML;
-                                }
-                                else
-                                {
-                                    head_name[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + head_name[0].innerHTML;
-                                    let next_class = head_node[0].nextElementSibling;
-                                    let node_tr = next_class.children[0].getElementsByTagName("tr");
-                                    if (node_tr){
-                                        let NickName = response.response.Data.NickName;
-                                        if (!NickName || NickName.length === 0 || NickName === "") {
-                                            NickName = "<span style='color:green;'><b>系统/匿名</b></span>（" + response.response.Data.Date;
-                                        }else{
-                                            NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date;
-                                        }
-                                        node_tr[1].outerHTML = node_tr[1].outerHTML + "<tr><td>叮当公共库</td><td itemprop=\"dingCategory\">"+NickName+")</td></tr>";
-                                    }
-                                }
-                            }
-                        }
-                    );
-                }
-
-
-                //get the dlc table.
-                let dlc_node = document.querySelector("#dlc");
-                if (dlc_node)
-                {
-                    //body
-                    let children = dlc_node.getElementsByTagName("tbody");
-                    //restore all appid
-                    let childrenLength = children.length;
-                    for (let i = 0; i < childrenLength; i++) {
-                        let tmpchild = children[i].getElementsByTagName("tr");
-                        let tmpchildLength = tmpchild.length;
-                        for (let k = 0; k < tmpchildLength; k++) {
-                            let appid = tmpchild[k].getAttribute("data-appid");
-                            if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
-                                appids.push(appid);
-                            }
-                        }
-                    }
-                }
-                let depot_node = document.querySelector("#depots");
-                if (depot_node && !depot_node.getAttribute("dingPost")){
-                    depot_node.setAttribute("dingPost", "dingPost")
-                    //body
-                    let children = depot_node.getElementsByTagName("tbody");
-                    //restore all appid
-                    let childrenLength = children.length;
-                    for (let i = 0; i < childrenLength; i++) {
-                        let tmpchild = children[i].getElementsByTagName("tr");
-                        let tmpchildLength = tmpchild.length;
-                        for (let k = 0; k < tmpchildLength; k++) {
-                            let depotnode = tmpchild[k].getElementsByTagName("a");
-                            if (depotnode && depotnode.length >0){
-                                let depotid = depotnode[0].innerText;
-                                if (depotid && depotid.length >1 && depotid.length < 10 && isInteger(depotid)){
-                                    depots.push(depotid);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (appids.length != 0) {
-                    let data = {
-                        "Ids": appids.join()
-                    };
-                    T2Post(
-                        "https://ddapi.133233.xyz/CheckIds",
-                        data,
-                        function (response) {
-                            console.log("got response for " + response.response.Data.Total + " appid");
-                            //body
-                            if (dlc_node){
-                                let children = dlc_node.getElementsByTagName("tbody");
-                                //restore all appid
-                                let childrenLength = children.length;
-                                //prefix DLC table
-                                for (let i = 0; i < childrenLength; i++) {
-                                    let tmpchild = children[i].getElementsByTagName("tr");
-                                    let tmpchildLength = tmpchild.length;
-                                    for (let k = 0; k < tmpchildLength; k++) {
-                                        let tmpnode = tmpchild[k];
-                                        let appid = tmpnode.getAttribute("data-appid");
-                                        let tmptext = tmpnode.getElementsByTagName("td");
-                                        if (tmptext && tmptext.length >0) {
-                                            if (appids.find(a => a == appid)) {
-                                                if (response.response.Data.AppInfo.find(a => a == appid)) {
-                                                    tmptext[1].innerHTML = "<span style='color:green;'>（已收录）</span>" + tmptext[1].innerHTML;
-                                                } else {
-                                                    tmptext[1].innerHTML = "<span style='color:red;'>（未收录）</span>" + tmptext[1].innerHTML;
-                                                }
-                                                appids.splice(appids.indexOf(appid), 1);
-                                            }
-
-                                        }
-
-                                    }
-
-                                }
-                            }
-                        }
-                    );
-                }
-                if (depots.length != 0) {
-                    let data = {
-                        "Ids": depots.join()
-                    };
-                    T2Post(
-                        "https://ddapi.133233.xyz/CheckIdsDepot",
-                        data,
-                        function (response) {
-                            console.log("got response for " + response.response.Data.Total + " depots");
-                            //body
-                            if (depot_node){
-                                let children = depot_node.getElementsByTagName("tbody");
-                                //restore all appid
-                                let childrenLength = children.length;
-                                //prefix DLC table
-                                for (let i = 0; i < childrenLength; i++) {
-                                    let tmpchild = children[i].getElementsByTagName("tr");
-                                    let tmpchildLength = tmpchild.length;
-                                    for (let k = 0; k < tmpchildLength; k++) {
-                                        let depotnode = tmpchild[k].getElementsByTagName("a");
-                                        if (depotnode && depotnode.length >0){
-                                            let depotid = depotnode[0].innerText;
-                                            if (depotid && depotid.length >1 && depotid.length < 10){
-                                                if (depots.find(a => a == depotid)) {
-                                                    let tmptext = tmpchild[k].getElementsByTagName("td");
-                                                    if (tmptext && tmptext.length >0) {
-                                                        if (response.response.Data.AppInfo.find(a => a == depotid)) {
-                                                            tmptext[1].innerHTML = "<span style='color:green;font-style: normal;'>（已收录）</span>" + tmptext[1].innerHTML;
-                                                        } else {
-                                                            tmptext[1].innerHTML = "<span style='color:red;font-style: normal;'>（未收录）</span>" + tmptext[1].innerHTML;
-                                                        }
-                                                    }
-                                                    depots.splice(depots.indexOf(depotid), 1);
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                }
-                            }
-                        }
-                    );
-                }
-            }
-        }
-        else if (base_path.length > 0 && base_path[1] === "depot") {
+        if (base_path.length > 0 && base_path[1] === "depot") {
             let head_node = document.getElementsByClassName("pagehead");
             if (head_node && head_node.length >0){
                 let base_depotid = base_path[2];
@@ -3143,6 +2971,239 @@ else if (HOSTNAME == "steamdb.info") {
 
         const observer1 = new MutationObserver(callback1);
         observer1.observe(targetNode1, config);
+    }
+    //app page
+    if (base_path_sp.length > 0 && base_path_sp[1] === "app") {
+        let head_node = document.getElementsByClassName("pagehead");
+        if (head_node && head_node.length >0){
+            let appids = [];
+            let depots = [];
+            //base appid
+            let base_appid = base_path_sp[2];
+            //trying to get the nickname first.
+            //appids.push(base_appid);
+            if (base_appid && base_appid.length >1 && base_appid.length < 10 && isInteger(base_appid)){
+                let data = {
+                    Id: base_appid
+                };
+                T2Post(
+                    "https://ddapi.133233.xyz/CheckId",
+                    data,
+                    function(response) {
+                        console.log("got response");
+                        let head_name = head_node[0].getElementsByTagName("h1");
+                        if (head_name && head_name.length >0){
+                            if (response.response.Data.Id == "0") {
+                                head_name[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + head_name[0].innerHTML;
+                            }
+                            else
+                            {
+                                head_name[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + head_name[0].innerHTML;
+                                let next_class = head_node[0].nextElementSibling;
+                                let node_tr = next_class.children[0].getElementsByTagName("tr");
+                                if (node_tr){
+                                    let NickName = response.response.Data.NickName;
+                                    if (!NickName || NickName.length === 0 || NickName === "") {
+                                        NickName = "<span style='color:green;'><b>系统/匿名</b></span>（" + response.response.Data.Date;
+                                    }else{
+                                        NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date;
+                                    }
+                                    node_tr[1].outerHTML = node_tr[1].outerHTML + "<tr><td>叮当公共库</td><td itemprop=\"dingCategory\">"+NickName+")</td></tr>";
+                                }
+                            }
+                        }
+                    }
+                );
+            }
+
+
+            //get the dlc table.
+            let dlc_node = document.querySelector("#dlc");
+            if (dlc_node)
+            {
+                //body
+                let children = dlc_node.getElementsByTagName("tbody");
+                //restore all appid
+                let childrenLength = children.length;
+                for (let i = 0; i < childrenLength; i++) {
+                    let tmpchild = children[i].getElementsByTagName("tr");
+                    let tmpchildLength = tmpchild.length;
+                    for (let k = 0; k < tmpchildLength; k++) {
+                        let appid = tmpchild[k].getAttribute("data-appid");
+                        if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                            appids.push(appid);
+                        }
+                    }
+                }
+            }
+            let depot_node = document.querySelector("#depots");
+            if (depot_node && !depot_node.getAttribute("dingPost")){
+                depot_node.setAttribute("dingPost", "dingPost")
+                //body
+                let children = depot_node.getElementsByTagName("tbody");
+                //restore all appid
+                let childrenLength = children.length;
+                for (let i = 0; i < childrenLength; i++) {
+                    let tmpchild = children[i].getElementsByTagName("tr");
+                    let tmpchildLength = tmpchild.length;
+                    for (let k = 0; k < tmpchildLength; k++) {
+                        let depotnode = tmpchild[k].getElementsByTagName("a");
+                        if (depotnode && depotnode.length >0){
+                            let depotid = depotnode[0].innerText;
+                            if (depotid && depotid.length >1 && depotid.length < 10 && isInteger(depotid)){
+                                depots.push(depotid);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (appids.length != 0) {
+                let data = {
+                    "Ids": appids.join()
+                };
+                T2Post(
+                    "https://ddapi.133233.xyz/CheckIds",
+                    data,
+                    function (response) {
+                        console.log("got response for " + response.response.Data.Total + " appid");
+                        //body
+                        if (dlc_node){
+                            let children = dlc_node.getElementsByTagName("tbody");
+                            //restore all appid
+                            let childrenLength = children.length;
+                            //prefix DLC table
+                            for (let i = 0; i < childrenLength; i++) {
+                                let tmpchild = children[i].getElementsByTagName("tr");
+                                let tmpchildLength = tmpchild.length;
+                                for (let k = 0; k < tmpchildLength; k++) {
+                                    let tmpnode = tmpchild[k];
+                                    let appid = tmpnode.getAttribute("data-appid");
+                                    let tmptext = tmpnode.getElementsByTagName("td");
+                                    if (tmptext && tmptext.length >0) {
+                                        if (appids.find(a => a == appid)) {
+                                            if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                                tmptext[1].innerHTML = "<span style='color:green;'>（已收录）</span>" + tmptext[1].innerHTML;
+                                            } else {
+                                                tmptext[1].innerHTML = "<span style='color:red;'>（未收录）</span>" + tmptext[1].innerHTML;
+                                            }
+                                            appids.splice(appids.indexOf(appid), 1);
+                                        }
+
+                                    }
+
+                                }
+
+                            }
+                        }
+                    }
+                );
+            }
+            if (depots.length != 0) {
+                let data = {
+                    "Ids": depots.join()
+                };
+                T2Post(
+                    "https://ddapi.133233.xyz/CheckIdsDepot",
+                    data,
+                    function (response) {
+                        console.log("got response for " + response.response.Data.Total + " depots");
+                        //body
+                        if (depot_node){
+                            let children = depot_node.getElementsByTagName("tbody");
+                            //restore all appid
+                            let childrenLength = children.length;
+                            //prefix DLC table
+                            for (let i = 0; i < childrenLength; i++) {
+                                let tmpchild = children[i].getElementsByTagName("tr");
+                                let tmpchildLength = tmpchild.length;
+                                for (let k = 0; k < tmpchildLength; k++) {
+                                    let depotnode = tmpchild[k].getElementsByTagName("a");
+                                    if (depotnode && depotnode.length >0){
+                                        let depotid = depotnode[0].innerText;
+                                        if (depotid && depotid.length >1 && depotid.length < 10){
+                                            if (depots.find(a => a == depotid)) {
+                                                let tmptext = tmpchild[k].getElementsByTagName("td");
+                                                if (tmptext && tmptext.length >0) {
+                                                    if (response.response.Data.AppInfo.find(a => a == depotid)) {
+                                                        tmptext[1].innerHTML = "<span style='color:green;font-style: normal;'>（已收录）</span>" + tmptext[1].innerHTML;
+                                                    } else {
+                                                        tmptext[1].innerHTML = "<span style='color:red;font-style: normal;'>（未收录）</span>" + tmptext[1].innerHTML;
+                                                    }
+                                                }
+                                                depots.splice(depots.indexOf(depotid), 1);
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                );
+            }
+        }
+    }
+    //bundle
+    else if (base_path_sp.length > 0 && base_path_sp[1] === "bundle") {
+        //get the dlc table.
+        //body
+        let children = document.getElementsByTagName("tbody");
+        if (children){
+            //restore all appid
+            let appids = [];
+
+            let childrenLength = children.length;
+            for (let i = 0; i < childrenLength; i++) {
+                let tmpchild = children[i].getElementsByTagName("tr");
+                if (tmpchild && tmpchild[0].className == "app"){
+                    let tmpchildLength = tmpchild.length;
+                    for (let k = 0; k < tmpchildLength; k++) {
+                        let appid = tmpchild[k].getAttribute("data-appid");
+                        if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                            appids.push(appid);
+                        }
+                    }
+                }
+            }
+
+            if (appids.length != 0) {
+                let data = {
+                    "Ids": appids.join()
+                };
+                T2Post(
+                    "https://ddapi.133233.xyz/CheckIds",
+                    data,
+                    function (response) {
+                        console.log("got response for " + response.response.Data.Total + " appid");
+                        //prefix DLC table
+                        for (let i = 0; i < childrenLength; i++) {
+                            let tmpchild = children[i].getElementsByTagName("tr");
+                            if (tmpchild && tmpchild[0].className == "app"){
+                                let tmpchildLength = tmpchild.length;
+                                for (let k = 0; k < tmpchildLength; k++) {
+                                    let tmpnode = tmpchild[k];
+                                    let appid = tmpnode.getAttribute("data-appid");
+                                    let tmptext = tmpnode.getElementsByTagName("td");
+                                    if (tmptext && tmptext.length >0) {
+                                        if (appids.find(a => a == appid)) {
+                                            if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                                tmptext[2].innerHTML = "<span style='color:green;'>（已收录）</span>" + tmptext[2].innerHTML;
+                                            } else {
+                                                tmptext[2].innerHTML = "<span style='color:red;'>（未收录）</span>" + tmptext[2].innerHTML;
+                                            }
+                                            appids.splice(appids.indexOf(appid), 1);
+                                        }
+
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                );
+            }
+        }
     }
     //sales
     else if (base_path_sp.length > 0 && base_path_sp[1] == 'sales') {
