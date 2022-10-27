@@ -3176,9 +3176,9 @@ else if (HOSTNAME == "steamdb.info") {
                                         let appid = tmpnode.getAttribute("data-appid");
                                         if (appids.find(a => a == appid)) {
                                             if (response.response.Data.AppInfo.find(a => a == appid)) {
-                                                tmpnode.innerHTML = "<span style='color:green;'>（叮当已收录）</span>" + tmpnode.innerHTML;
+                                                tmpnode.innerHTML = tmpnode.innerHTML + "<span style='color:green;'>（已收录）</span>";
                                             } else {
-                                                tmpnode.innerHTML = "<span style='color:red;'>（叮当未收录）</span>" + tmpnode.innerHTML;
+                                                tmpnode.innerHTML = tmpnode.innerHTML + "<span style='color:red;'>（未收录）</span>";
                                             }
                                             appids.splice(appids.indexOf(appid), 1);
                                         }
