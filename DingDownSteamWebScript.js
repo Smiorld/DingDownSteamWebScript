@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.67
+// @version      1.0.68
 // @description  在steam/steamdb网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -1456,7 +1456,7 @@ if (HOSTNAME == 'store.steampowered.com') {
         let title = document.getElementById("userReviews");
         let iscomingson = document.querySelector(".game_area_comingsoon");
         if (iscomingson){
-            title.insertAdjacentHTML("beforeend","<span class=\"user_reviews_summary_row\"><div class=\"subtitle column\">叮当分享:</div><div class=\"summary column ding\"><span style='color:#929396;'>游戏未发行</span></div></span>");
+            title.insertAdjacentHTML("afterbegin","<span class=\"user_reviews_summary_row\" style=\"margin-bottom: 8px;\"><div class=\"subtitle column\">叮当分享:</div><div class=\"summary column ding\"><span style='color:#929396;'>游戏未发行</span></div></span>");
         }else if (!title.getAttribute("dingPost")) {
             title.setAttribute("dingPost", "dingPost");
             T2Post(
@@ -1474,7 +1474,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                             'sharer': null
                         };
                         //title.innerHTML += " ----- 公共库未收录";
-                        title.insertAdjacentHTML("afterbegin","<span class=\"user_reviews_summary_row\"><div class=\"subtitle column\">叮当分享:</div><div class=\"summary column\"><span style='color:red;'><b>未收录</b></span></div></span>");
+                        title.insertAdjacentHTML("afterbegin","<span class=\"user_reviews_summary_row\" style=\"margin-bottom: 8px;\"><div class=\"subtitle column\">叮当分享:</div><div class=\"summary column\"><span style='color:red;'><b>未收录</b></span></div></span>");
                     } else {
                         let NickName = response.response.Data.NickName;
                         let dateformat = "入库于 "+response.response.Data.Date;
@@ -1487,7 +1487,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                             'is_recorded': true,
                             'sharer': NickName
                         };
-                        title.insertAdjacentHTML("afterbegin","<span class=\"user_reviews_summary_row\"><div class=\"subtitle column\">叮当分享:</div>" + NickName + "</span>" );
+                        title.insertAdjacentHTML("afterbegin","<span class=\"user_reviews_summary_row\" style=\"margin-bottom: 8px;\"><div class=\"subtitle column\">叮当分享:</div>" + NickName + "</span>" );
                         //title.outerHTML = "<div class=\"user_reviews_summary_row\"><div class=\"subtitle column\">叮当分享:</div>" + NickName + "</div>" + title.outerHTML;
                     }
                     title.setAttribute("dingPrefix", "dingPrefix");
