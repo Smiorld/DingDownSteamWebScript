@@ -5,13 +5,13 @@
 // @version      1.0.69
 // @description  在steam/steamdb网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
-// @match        https://store.steampowered.com/*
-// @match        https://steamcommunity.com/*
-// @match        https://steamdb.info/*
+// @match        *://store.steampowered.com/*
+// @match        *://steamcommunity.com/*
+// @match        *://steamdb.info/*
 // @icon         https://gcore.jsdelivr.net/gh/Smiorld/DingDownSteamWebScript@latest/Project.ico
 // @grant        GM_xmlhttpRequest
 // @grant        GM_info
-// @grant             GM_registerMenuCommand
+// @grant        GM_registerMenuCommand
 // @connect      ddapi.133233.xyz
 // @updateURL    https://gcore.jsdelivr.net/gh/Smiorld/DingDownSteamWebScript@latest/DingDownSteamWebScript.js
 // @downloadURL  https://gcore.jsdelivr.net/gh/Smiorld/DingDownSteamWebScript@latest/DingDownSteamWebScript.js
