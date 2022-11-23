@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.68
+// @version      1.0.69
 // @description  在steam/steamdb网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        https://store.steampowered.com/*
@@ -2796,6 +2796,69 @@ if (HOSTNAME == 'store.steampowered.com') {
                                             klink.setAttribute("dingPost", "dingPost");
                                             klink.children[0].insertAdjacentHTML("beforeend","<div class=\"CapsuleDecorators\"><span style='color:red;'>（礼包）</span></div>");
                                             klink.setAttribute("dingPrefix", "dingPrefix");
+                                        }
+                                    }
+                                }
+                            }
+                        }else{
+                            //2022秋促
+                            let ContentHubMainCarouselCapsule = targetNode0.getElementsByClassName('hero_row focus');
+                            if (ContentHubMainCarouselCapsule && ContentHubMainCarouselCapsule.length > 0) {
+                                let children = ContentHubMainCarouselCapsule;
+                                for (let i = 0; i < children.length; i++) {
+                                    if ( children[i].className != "hero_row focus")
+                                    {
+                                        continue;
+                                    }
+                                    let alink = children[i].getElementsByTagName('a');
+                                    if (alink && alink.length >0) {
+                                        for(var k = 0; k < alink.length; k++){
+                                            let klink = alink[k];
+                                            if (klink.className != "hero_click_overlay")
+                                            {
+                                                continue;
+                                            }
+                                            let ahref = klink.getAttribute("href").split('/');
+                                            if (ahref.length > 4 && ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
+                                                let data = {
+                                                    Id: ahref[4]
+                                                };
+                                                if (!klink.getAttribute("dingPost")) {
+                                                    klink.setAttribute("dingPost", "dingPost");
+                                                    T2Post(
+                                                        "https://ddapi.133233.xyz/CheckId",
+                                                        data,
+                                                        function(response) {
+                                                            console.log("got response");
+                                                            if (response.response.Data.Id == "0") {
+                                                                klink.children[0].insertAdjacentHTML("beforeend","<div style=\"color: #000000;background: #000000c7;padding: 1px;\"><span style='color:red;'>（叮当未收录）</span></div>");
+                                                            } else {
+                                                                let NickName = response.response.Data.NickName;
+                                                                if (!NickName || NickName.length === 0 || NickName === "") {
+                                                                    NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ response.response.Data.Date + "）</span>";
+                                                                }else{
+                                                                    NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ response.response.Data.Date + "）</span>";
+                                                                }
+                                                                //klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
+                                                                klink.insertAdjacentHTML("beforeend","<div style=\"color: #000000;background: #000000c7;padding: 1px;\"><span style='color:green;'><b>叮当分享</b></span>：" + NickName + "</div>");
+                                                            }
+                                                            klink.setAttribute("dingPrefix", "dingPrefix");
+                                                        }
+                                                    );
+                                                }
+                                            } else if (ahref.length > 4 && ahref[3] == "bundle") {
+                                                if (!klink.getAttribute("dingPost")) {
+                                                    klink.setAttribute("dingPost", "dingPost");
+                                                    klink.children[0].insertAdjacentHTML("beforeend","<div style=\"color: #000000;background: #000000c7;padding: 1px;\"><span style='color:red;'>（合集）</span></div>");
+                                                    klink.setAttribute("dingPrefix", "dingPrefix");
+                                                }
+                                            } else if (ahref.length > 4 && ahref[3] == "sub") {
+                                                if (!klink.getAttribute("dingPost")) {
+                                                    klink.setAttribute("dingPost", "dingPost");
+                                                    klink.children[0].insertAdjacentHTML("beforeend","<div style=\"color: #000000;background: #000000c7;padding: 1px;\"><span style='color:red;'>（礼包）</span></div>");
+                                                    klink.setAttribute("dingPrefix", "dingPrefix");
+                                                }
+                                            }
                                         }
                                     }
                                 }
