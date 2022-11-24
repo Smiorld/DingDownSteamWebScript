@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.0.69
+// @version      1.0.70
 // @description  在steam/steamdb网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        *://store.steampowered.com/*
@@ -3040,7 +3040,7 @@ if (HOSTNAME == 'store.steampowered.com') {
 }
 else if (HOSTNAME == "steamcommunity.com"){
     let base_path_sp = base_url.pathname.split('/');
-    if (base_path_sp.length > 0 && (base_path_sp[1] == 'id' || base_path_sp[1] == 'profiles' )&& base_path_sp[3] == 'recommended') {
+    if (base_path_sp.length > 0 && (base_path_sp[1] == 'id' || base_path_sp[1] == 'profiles' )&&( base_path_sp[3] == 'recommended' ||  base_path_sp[3] == 'reviews')) {
         let games_list_rows = document.querySelector('#tabs_basebg');
         let config = {
             subtree: true,
