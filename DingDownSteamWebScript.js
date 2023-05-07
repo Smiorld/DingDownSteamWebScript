@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.1.2
+// @version      1.1.3
 // @description  在steam/steamdb网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        *://store.steampowered.com/*
@@ -3828,7 +3828,7 @@ else if (HOSTNAME == "steamdb.info") {
         }
     }
     //sales
-    else if (base_path_sp.length > 0 && base_path_sp[1] == 'sales') {
+    else if (base_path_sp.length > 0 && (base_path_sp[1] == 'sales')) {
         //get the sales table
         let targetNode1 = document.getElementsByTagName('tbody')[0];
         let config = {
@@ -3926,7 +3926,7 @@ else if (HOSTNAME == "steamdb.info") {
         observer1.observe(targetNode1, config);
     }
     //graph
-    else if (base_path_sp.length > 0 && base_path_sp[1] == 'graph') {
+    else if (base_path_sp.length > 0 && (base_path_sp[1] == 'charts' || base_path_sp[1] == 'graph')) {
         //get the sales table
         let targetNode1 = document.getElementsByTagName('tbody')[0];
         let config = {
@@ -4060,6 +4060,79 @@ else if (HOSTNAME == "steamdb.info") {
                                             appids.splice(appids.indexOf(appid), 1);
                                             tmptext[0].setAttribute("dingPrefix", "dingPrefix");
                                         }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                );
+            }
+
+        }
+
+        const observer1 = new MutationObserver(callback1);
+        observer1.observe(targetNode1, config);
+    }
+     else if (base_path_sp.length > 0 && base_path_sp[1] == 'topsellers') {
+        //get the sales table
+   //get the sales table
+        let targetNode1 = document.getElementsByTagName('tbody')[0];
+        let config = {
+            attributes: true,
+            childList: true,
+            characterData: true,
+            subtree: true
+        };
+
+        let callback1 = mutations => {
+            let children = document.getElementsByTagName("tbody");
+            //restore all appid
+            let appids = [];
+            let childrenLength = children.length;
+            for (let i = 0; i < childrenLength; i++) {
+                let tmpchild = children[i].getElementsByTagName("tr");
+                let tmpchildLength = tmpchild.length;
+                for (let k = 0; k < tmpchildLength; k++) {
+                    let tmpnode = tmpchild[k];
+                    let tmptext = tmpnode.getElementsByClassName("applogo");
+                    if (tmptext && tmptext.length >0 && !tmptext[0].getAttribute("dingPost")) {
+                        tmptext[0].setAttribute("dingPost", "dingPost");
+                        let appid = tmpnode.getAttribute("data-appid");
+                        if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                            appids.push(appid);
+                        }
+                    }
+
+                }
+            }
+
+            if (appids.length != 0) {
+                let data = {
+                    "Ids": appids.join()
+                };
+                T2Post(
+                    "https://api.mmll.ml/CheckIds",
+                    data,
+                    function (response) {
+                        console.log("got response for " + response.response.Data.Total + " appid");
+                        //prefix all titles
+                        for (let i = 0; i < childrenLength; i++) {
+                            let tmpchild = children[i].getElementsByTagName("tr");
+                            let tmpchildLength = tmpchild.length;
+                            for (let k = 0; k < tmpchildLength; k++) {
+                                let tmpnode = tmpchild[k];
+                                let appid = tmpnode.getAttribute("data-appid");
+                                let tmptext = tmpnode.getElementsByClassName("applogo");
+                                if (tmptext && tmptext.length >0) {
+                                    if (appids.find(a => a == appid)) {
+                                        let next_class = tmptext[0].nextElementSibling.nextElementSibling;
+                                        if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                            next_class.children[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + next_class.children[0].innerHTML;
+                                        } else {
+                                            next_class.children[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + next_class.children[0].innerHTML;
+                                        }
+                                        appids.splice(appids.indexOf(appid), 1);
+                                        tmptext[0].setAttribute("dingPrefix", "dingPrefix");
                                     }
                                 }
                             }
