@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.1.3
+// @version      1.1.4
 // @description  在steam/steamdb网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        *://store.steampowered.com/*
@@ -3880,7 +3880,7 @@ else if (HOSTNAME == "steamdb.info") {
                                 let tmplinkLength = tmplink.length;
                                 for (let y = 0; y < tmplinkLength;y++) {
                                     let tmp_href = new URL(tmplink[y].href);
-                                    if (tmp_href.host == 'store.steampowered.com'){
+                                    if (tmp_href.host == 'steamdb.info'){
                                         let path_sp = tmp_href.pathname.split('/');
                                         if (path_sp[1] == 'app') {
                                             let tmptext = tmpnode.getElementsByClassName("applogo");
@@ -4073,9 +4073,9 @@ else if (HOSTNAME == "steamdb.info") {
         const observer1 = new MutationObserver(callback1);
         observer1.observe(targetNode1, config);
     }
-     else if (base_path_sp.length > 0 && base_path_sp[1] == 'topsellers') {
+    else if (base_path_sp.length > 0 && base_path_sp[1] == 'topsellers') {
         //get the sales table
-   //get the sales table
+        //get the sales table
         let targetNode1 = document.getElementsByTagName('tbody')[0];
         let config = {
             attributes: true,
