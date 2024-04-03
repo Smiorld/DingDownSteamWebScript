@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.1.5
+// @version      1.1.6
 // @description  在steam/steamdb网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        *://store.steampowered.com/*
@@ -2638,6 +2638,59 @@ if (HOSTNAME == 'store.steampowered.com') {
     let callback0 = mutations => {
         mutations.forEach(mutation => {
             try {
+                //test 2024 new hover
+                        let Hover_New = targetNode0.getElementsByClassName('ReviewScore Focusable');
+                        if (Hover_New && Hover_New.length > 0) {
+                            let children = Hover_New;
+                            for (let i = 0; i < children.length; i++) {
+                                if ( children[i].classList.contains("ReviewScore Focusable"))
+                                {
+                                    continue;
+                                }
+                                    let klink = children[i];
+                                    let ahref = klink.getAttribute("href").split('/');
+                                    if (ahref.length > 4 && ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
+                                        let data = {
+                                            Id: ahref[4]
+                                        };
+                                        if (!klink.getAttribute("dingPost")) {
+                                            klink.setAttribute("dingPost", "dingPost");
+                                            T2Post(
+                                                "https://ddapi.200403.xyz/CheckId",
+                                                data,
+                                                function(response) {
+                                                    console.log("got response");
+                                                    if (response.response.Data.Id == "0") {
+                                                        klink.children[0].insertAdjacentHTML("afterend","<div class=\"CapsuleDecorators\"><span style='color:red;'>（叮当未收录）</span></div>");
+                                                    } else {
+                                                        let NickName = response.response.Data.NickName;
+                                                        if (!NickName || NickName.length === 0 || NickName === "") {
+                                                            NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ formatDate(response.response.Data.Date)+ "）</span>";
+                                                        }else{
+                                                            NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ formatDate(response.response.Data.Date) + "）</span>";
+                                                        }
+                                                        //klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
+                                                        klink.children[0].insertAdjacentHTML("afterend","<div class=\"CapsuleDecorators\"><span style='color:green;'><b>叮了个当</b></span>：" + NickName + "</div>");
+                                                    }
+                                                    klink.setAttribute("dingPrefix", "dingPrefix");
+                                                }
+                                            );
+                                        }
+                                    } else if (ahref.length > 4 && ahref[3] == "bundle") {
+                                        if (!klink.getAttribute("dingPost")) {
+                                            klink.setAttribute("dingPost", "dingPost");
+                                            klink.children[0].insertAdjacentHTML("afterend","<div class=\"CapsuleDecorators\"><span style='color:red;'>（合集）</span></div>");
+                                            klink.setAttribute("dingPrefix", "dingPrefix");
+                                        }
+                                    } else if (ahref.length > 4 && ahref[3] == "sub") {
+                                        if (!klink.getAttribute("dingPost")) {
+                                            klink.setAttribute("dingPost", "dingPost");
+                                            klink.children[0].insertAdjacentHTML("afterend","<div class=\"CapsuleDecorators\"><span style='color:red;'>（礼包）</span></div>");
+                                            klink.setAttribute("dingPrefix", "dingPrefix");
+                                        }
+                                    }
+                            }
+                        }
                 //banner
                 let ContentHubMainCarouselCapsule = targetNode0.getElementsByClassName("maincap");
                 if (ContentHubMainCarouselCapsule && ContentHubMainCarouselCapsule.length > 0) {
@@ -2708,267 +2761,6 @@ if (HOSTNAME == 'store.steampowered.com') {
                                 }
                             }
 
-                        }
-                    }
-                }
-                else{
-                    let ContentHubMainCarouselCapsule = targetNode0.getElementsByClassName("ContentHubMainCarouselCapsule");
-                    if (ContentHubMainCarouselCapsule && ContentHubMainCarouselCapsule.length > 0) {
-                        let children = ContentHubMainCarouselCapsule;
-                        for (let i = 0; i < children.length; i++) {
-                            let alink = children[i].getElementsByTagName('a');
-                            if (alink && alink.length >2) {
-                                let klink = alink[2];
-                                let ahref = klink.getAttribute("href").split('/');
-                                if (ahref.length > 4 && ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
-                                    let data = {
-                                        Id: ahref[4]
-                                    };
-                                    if (!klink.getAttribute("dingPost")) {
-                                        klink.setAttribute("dingPost", "dingPost");
-                                        T2Post(
-                                            "https://ddapi.200403.xyz/CheckId",
-                                            data,
-                                            function(response) {
-                                                console.log("got response");
-                                                let index;
-                                                if (klink.childElementCount > 2){
-                                                    index = 2;
-                                                }else if (klink.childElementCount > 1){
-                                                    index = 1;
-                                                }else{
-                                                    index= 0;
-                                                }
-
-                                                if (response.response.Data.Id == "0") {
-                                                    klink.children[index].innerHTML = "<span style='color:red;'>（叮当未收录）</span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">|</span>" + klink.children[index].innerHTML;
-                                                } else {
-                                                    let NickName = response.response.Data.NickName;
-                                                    if (!NickName || NickName.length === 0 || NickName === "") {
-                                                        NickName = "<span style='color:#ff683b;' data-tooltip-text=\"入库于 "+response.response.Data.Date+"\"><b>系统/匿名</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">|</span>";
-                                                    }else{
-                                                        NickName= "<span style='color:#ff683b;' data-tooltip-text=\"入库于 "+response.response.Data.Date+"\"><b>"+ NickName +"</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">|</span>";
-                                                    }
-                                                    //klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
-                                                    klink.children[index].outerHTML = "<span style='color:green;'><b>叮了个当</b></span>：" + NickName + klink.children[index].outerHTML;
-                                                }
-                                                klink.setAttribute("dingPrefix", "dingPrefix");
-                                            }
-                                        );
-                                    }
-                                } else if (ahref.length > 4 && ahref[3] == "bundle") {
-                                    if (!klink.getAttribute("dingPost")) {
-                                        let index;
-                                        if (klink.childElementCount > 2){
-                                            index = 2;
-                                        }else if (klink.childElementCount > 1){
-                                            index = 1;
-                                        }else{
-                                            index= 0;
-                                        }
-                                        klink.setAttribute("dingPost", "dingPost");
-                                        klink.children[index].innerHTML = "<span style='color:orange;'>（合集）</span>" + klink.children[index].innerHTML;
-                                        klink.setAttribute("dingPrefix", "dingPrefix");
-                                    }
-                                } else if (ahref.length > 4 && ahref[3] == "sub") {
-                                    if (!klink.getAttribute("dingPost")) {
-                                        let index;
-                                        if (klink.childElementCount > 2){
-                                            index = 2;
-                                        }else if (klink.childElementCount > 1){
-                                            index = 1;
-                                        }else{
-                                            index= 0;
-                                        }
-                                        klink.setAttribute("dingPost", "dingPost");
-                                        klink.children[index].innerHTML = "<span style='color:orange;'>（礼包）</span>" + klink.children[index].innerHTML;
-                                        klink.setAttribute("dingPrefix", "dingPrefix");
-                                    }
-                                }
-                            }
-                        }
-                    }else{
-                        ///category/scream
-                        let ContentHubMainCarouselCapsule = targetNode0.getElementsByClassName('Panel Focusable');
-                        if (ContentHubMainCarouselCapsule && ContentHubMainCarouselCapsule.length > 0) {
-                            let children = ContentHubMainCarouselCapsule;
-                            for (let i = 0; i < children.length; i++) {
-                                if ( children[i].className != "Panel Focusable")
-                                {
-                                    continue;
-                                }
-                                let alink = children[i].getElementsByTagName('a');
-                                if (alink && alink.length >0) {
-                                    let klink = alink[0];
-                                    let ahref = klink.getAttribute("href").split('/');
-                                    if (ahref.length > 4 && ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
-                                        let data = {
-                                            Id: ahref[4]
-                                        };
-                                        if (!klink.getAttribute("dingPost")) {
-                                            klink.setAttribute("dingPost", "dingPost");
-                                            T2Post(
-                                                "https://ddapi.200403.xyz/CheckId",
-                                                data,
-                                                function(response) {
-                                                    console.log("got response");
-                                                    if (response.response.Data.Id == "0") {
-                                                        klink.children[0].insertAdjacentHTML("beforeend","<div class=\"CapsuleDecorators\"><span style='color:red;'>（叮当未收录）</span></div>");
-                                                    } else {
-                                                        let NickName = response.response.Data.NickName;
-                                                        if (!NickName || NickName.length === 0 || NickName === "") {
-                                                            NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ response.response.Data.Date + "）</span>";
-                                                        }else{
-                                                            NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ response.response.Data.Date + "）</span>";
-                                                        }
-                                                        //klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
-                                                        klink.children[0].insertAdjacentHTML("beforeend","<div class=\"CapsuleDecorators\"><span style='color:green;'><b>叮了个当</b></span>：" + NickName + "</div>");
-                                                    }
-                                                    klink.setAttribute("dingPrefix", "dingPrefix");
-                                                }
-                                            );
-                                        }
-                                    } else if (ahref.length > 4 && ahref[3] == "bundle") {
-                                        if (!klink.getAttribute("dingPost")) {
-                                            klink.setAttribute("dingPost", "dingPost");
-                                            klink.children[0].insertAdjacentHTML("beforeend","<div class=\"CapsuleDecorators\"><span style='color:red;'>（合集）</span></div>");
-                                            klink.setAttribute("dingPrefix", "dingPrefix");
-                                        }
-                                    } else if (ahref.length > 4 && ahref[3] == "sub") {
-                                        if (!klink.getAttribute("dingPost")) {
-                                            klink.setAttribute("dingPost", "dingPost");
-                                            klink.children[0].insertAdjacentHTML("beforeend","<div class=\"CapsuleDecorators\"><span style='color:red;'>（礼包）</span></div>");
-                                            klink.setAttribute("dingPrefix", "dingPrefix");
-                                        }
-                                    }
-                                }
-                            }
-                        }else{
-                            //开发商页面 publisher pages
-                            let ContentHubMainCarouselCapsule = targetNode0.getElementsByClassName('landingTable');
-                            if (ContentHubMainCarouselCapsule && ContentHubMainCarouselCapsule.length > 0) {
-                                let children = ContentHubMainCarouselCapsule;
-                                for (let i = 0; i < children.length; i++) {
-                                    if ( children[i].className != "landingTable")
-                                    {
-                                        continue;
-                                    }
-                                    let alink = children[i].getElementsByTagName('a');
-                                    if (alink && alink.length >0) {
-                                        for(var j = 0; j < alink.length; j++){
-                                            let klink = alink[j];
-                                            if (klink.className != "recommendation_link")
-                                            {
-                                                continue;
-                                            }
-                                            let ahref = klink.getAttribute("href").split('/');
-                                            if (ahref.length > 4 && ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
-                                                let data = {
-                                                    Id: ahref[4]
-                                                };
-                                                if (!klink.getAttribute("dingPost")) {
-                                                    klink.setAttribute("dingPost", "dingPost");
-                                                    T2Post(
-                                                        "https://ddapi.200403.xyz/CheckId",
-                                                        data,
-                                                        function(response) {
-                                                            console.log("got response");
-                                                            if (response.response.Data.Id == "0") {
-                                                                klink.children[0].children[0].insertAdjacentHTML("beforeend","<div class=\"recommendation_midcol\" style=\"margin: -5px 0 -3px 0;\"><span style='color:red;'>（叮当未收录）</span></div>");
-                                                            } else {
-                                                                let NickName = response.response.Data.NickName;
-                                                                if (!NickName || NickName.length === 0 || NickName === "") {
-                                                                    NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ response.response.Data.Date + "）</span>";
-                                                                }else{
-                                                                    NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ response.response.Data.Date + "）</span>";
-                                                                }
-                                                                //klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
-                                                                klink.children[0].children[0].insertAdjacentHTML("beforeend","<div class=\"recommendation_stats\" style=\"margin: -5px 0 -3px 0;\"><span style='color:green;'><b>叮了个当</b></span>：" + NickName + "</div>");
-                                                            }
-                                                            klink.setAttribute("dingPrefix", "dingPrefix");
-                                                        }
-                                                    );
-                                                }
-                                            } else if (ahref.length > 4 && ahref[3] == "bundle") {
-                                                if (!klink.getAttribute("dingPost")) {
-                                                    klink.setAttribute("dingPost", "dingPost");
-                                                    klink.children[0].children[0].insertAdjacentHTML("beforeend","<div class=\"recommendation_midcol\" style=\"margin: -5px 0 -3px 0;\"><span style='color:red;'>（合集）</span></div>");
-                                                    klink.setAttribute("dingPrefix", "dingPrefix");
-                                                }
-                                            } else if (ahref.length > 4 && ahref[3] == "sub") {
-                                                if (!klink.getAttribute("dingPost")) {
-                                                    klink.setAttribute("dingPost", "dingPost");
-                                                    klink.children[0].children[0].insertAdjacentHTML("beforeend","<div class=\"recommendation_midcol\" style=\"margin: -5px 0 -3px 0;\"><span style='color:red;'>（礼包）</span></div>");
-                                                    klink.setAttribute("dingPrefix", "dingPrefix");
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }else{
-                                //2022秋促
-                                let ContentHubMainCarouselCapsule = targetNode0.getElementsByClassName('hero_row focus');
-                                if (ContentHubMainCarouselCapsule && ContentHubMainCarouselCapsule.length > 0) {
-                                    let children = ContentHubMainCarouselCapsule;
-                                    for (let i = 0; i < children.length; i++) {
-                                        if ( children[i].className != "hero_row focus")
-                                        {
-                                            continue;
-                                        }
-                                        let alink = children[i].getElementsByTagName('a');
-                                        if (alink && alink.length >0) {
-                                            for(var k = 0; k < alink.length; k++){
-                                                let klink = alink[k];
-                                                if (klink.className != "hero_click_overlay")
-                                                {
-                                                    continue;
-                                                }
-                                                let ahref = klink.getAttribute("href").split('/');
-                                                if (ahref.length > 4 && ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
-                                                    let data = {
-                                                        Id: ahref[4]
-                                                    };
-                                                    if (!klink.getAttribute("dingPost")) {
-                                                        klink.setAttribute("dingPost", "dingPost");
-                                                        T2Post(
-                                                            "https://ddapi.200403.xyz/CheckId",
-                                                            data,
-                                                            function(response) {
-                                                                console.log("got response");
-                                                                if (response.response.Data.Id == "0") {
-                                                                    klink.insertAdjacentHTML("beforeend","<div style=\"color: #000000;background: #000000c7;padding: 1px;\"><span style='color:red;'>（叮当未收录）</span></div>");
-                                                                } else {
-                                                                    let NickName = response.response.Data.NickName;
-                                                                    if (!NickName || NickName.length === 0 || NickName === "") {
-                                                                        NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ response.response.Data.Date + "）</span>";
-                                                                    }else{
-                                                                        NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ response.response.Data.Date + "）</span>";
-                                                                    }
-                                                                    //klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
-                                                                    klink.insertAdjacentHTML("beforeend","<div style=\"color: #000000;background: #000000c7;padding: 1px;\"><span style='color:green;'><b>叮了个当</b></span>：" + NickName + "</div>");
-                                                                }
-                                                                klink.setAttribute("dingPrefix", "dingPrefix");
-                                                            }
-                                                        );
-                                                    }
-                                                } else if (ahref.length > 4 && ahref[3] == "bundle") {
-                                                    if (!klink.getAttribute("dingPost")) {
-                                                        klink.setAttribute("dingPost", "dingPost");
-                                                        klink.insertAdjacentHTML("beforeend","<div style=\"color: #000000;background: #000000c7;padding: 1px;\"><span style='color:red;'>（合集）</span></div>");
-                                                        klink.setAttribute("dingPrefix", "dingPrefix");
-                                                    }
-                                                } else if (ahref.length > 4 && ahref[3] == "sub") {
-                                                    if (!klink.getAttribute("dingPost")) {
-                                                        klink.setAttribute("dingPost", "dingPost");
-                                                        klink.insertAdjacentHTML("beforeend","<div style=\"color: #000000;background: #000000c7;padding: 1px;\"><span style='color:red;'>（礼包）</span></div>");
-                                                        klink.setAttribute("dingPrefix", "dingPrefix");
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
                         }
                     }
                 }
@@ -3063,72 +2855,6 @@ if (HOSTNAME == 'store.steampowered.com') {
                                     }
                                 }
                             }
-                        }
-                    } else {
-                        //特惠 and category
-                        let facetedbrowse_FacetedBrowseItems = document.querySelector(".facetedbrowse_FacetedBrowseItems_NO-IP");
-                        if (facetedbrowse_FacetedBrowseItems && facetedbrowse_FacetedBrowseItems.childElementCount > 0) {
-                            let children = facetedbrowse_FacetedBrowseItems.children;
-                            //appids
-                            let appids = [];
-                            for (let i = 0; i < children.length; i++) {
-                                let alink = children[i].getElementsByTagName('a')[1];
-                                if (alink && !alink.getAttribute("dingPost")) {
-                                    let ahref = alink.getAttribute("href").split('/');
-                                    if (ahref.length > 4 && ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
-                                        alink.setAttribute("dingPost", "dingPost");
-                                        let appid = ahref[4];
-                                        if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
-                                            appids.push(appid);
-                                        }
-                                    }
-                                }
-                            }
-
-                            if (appids.length != 0) {
-                                let data = {
-                                    "Ids": appids.join()
-                                };
-                                T2Post(
-                                    "https://ddapi.200403.xyz/CheckIds",
-                                    data,
-                                    function (response) {
-                                        for (let i = 0; i < children.length; i++) {
-                                            let alink = children[i].getElementsByTagName('a')[1];
-                                            if (alink) {
-                                                let ahref = alink.getAttribute("href").split('/');
-                                                if (ahref.length > 4 && ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
-                                                    if (!alink.getAttribute("dingPrefix")) {
-                                                        alink.setAttribute("dingPrefix", "dingPrefix");
-                                                        let appid = ahref[4];
-                                                        if(appids.find(a => a == appid)){
-                                                            if (response.response.Data.AppInfo.find(a => a == appid)) {
-                                                                alink.children[0].insertAdjacentHTML("afterbegin", "<span style='color:green;'>（已收录）</span>");
-                                                            } else {
-                                                                alink.children[0].insertAdjacentHTML("afterbegin", "<span style='color:red;'>（未收录）</span>");
-                                                            }
-                                                            appids.splice(appids.indexOf(appid), 1);
-                                                        }
-                                                    }
-                                                } else if (ahref.length > 4 && ahref[3] == "bundle") {
-                                                    if (!alink.getAttribute("dingPrefix")) {
-                                                        alink.children[0].insertAdjacentHTML("afterbegin", "<span style='color:orange;'>（合集）</span>");
-                                                        alink.setAttribute("dingPrefix", "dingPrefix");
-                                                    }
-                                                } else if (ahref.length > 4 && ahref[3] == "sub") {
-                                                    if (!alink.getAttribute("dingPrefix")) {
-                                                        alink.children[0].insertAdjacentHTML("afterbegin", "<span style='color:orange;'>（礼包）</span>");
-                                                        alink.setAttribute("dingPrefix", "dingPrefix");
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                    }
-                                );
-                            }
-                        }else{
-                            //move
                         }
                     }
                 }
@@ -4332,4 +4058,3 @@ else if (HOSTNAME == "steamdb.info") {
     const observer0 = new MutationObserver(callback0);
     observer0.observe(targetNode0, config);
 }
-
