@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.1.6
+// @version      1.1.7
 // @description  在steam/steamdb网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        *://store.steampowered.com/*
@@ -2639,58 +2639,69 @@ if (HOSTNAME == 'store.steampowered.com') {
         mutations.forEach(mutation => {
             try {
                 //test 2024 new hover
-                        let Hover_New = targetNode0.getElementsByClassName('ReviewScore Focusable');
-                        if (Hover_New && Hover_New.length > 0) {
-                            let children = Hover_New;
-                            for (let i = 0; i < children.length; i++) {
-                                if ( children[i].classList.contains("ReviewScore Focusable"))
-                                {
-                                    continue;
-                                }
-                                    let klink = children[i];
-                                    let ahref = klink.getAttribute("href").split('/');
-                                    if (ahref.length > 4 && ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
-                                        let data = {
-                                            Id: ahref[4]
-                                        };
-                                        if (!klink.getAttribute("dingPost")) {
-                                            klink.setAttribute("dingPost", "dingPost");
-                                            T2Post(
-                                                "https://ddapi.200403.xyz/CheckId",
-                                                data,
-                                                function(response) {
-                                                    console.log("got response");
-                                                    if (response.response.Data.Id == "0") {
-                                                        klink.children[0].insertAdjacentHTML("afterend","<div class=\"CapsuleDecorators\"><span style='color:red;'>（叮当未收录）</span></div>");
-                                                    } else {
-                                                        let NickName = response.response.Data.NickName;
-                                                        if (!NickName || NickName.length === 0 || NickName === "") {
-                                                            NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ formatDate(response.response.Data.Date)+ "）</span>";
-                                                        }else{
-                                                            NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ formatDate(response.response.Data.Date) + "）</span>";
-                                                        }
-                                                        //klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
-                                                        klink.children[0].insertAdjacentHTML("afterend","<div class=\"CapsuleDecorators\"><span style='color:green;'><b>叮了个当</b></span>：" + NickName + "</div>");
-                                                    }
-                                                    klink.setAttribute("dingPrefix", "dingPrefix");
-                                                }
-                                            );
+                let Hover_New = targetNode0.getElementsByClassName('ReviewScore Focusable');
+                if (Hover_New && Hover_New.length > 0) {
+                    let children = Hover_New;
+                    for (let i = 0; i < children.length; i++) {
+                        if ( children[i].classList.contains("ReviewScore Focusable"))
+                        {
+                            continue;
+                        }
+                        let klink = children[i];
+                        let ahref = klink.getAttribute("href").split('/');
+                        if (ahref.length > 4 && ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
+                            let data = {
+                                Id: ahref[4]
+                            };
+                            if (!klink.getAttribute("dingPost")) {
+                                klink.setAttribute("dingPost", "dingPost");
+                                T2Post(
+                                    "https://ddapi.200403.xyz/CheckId",
+                                    data,
+                                    function(response) {
+                                        console.log("got response");
+                                        var x = klink.nextElementSibling;
+
+                                        if (response.response.Data.Id == "0") {
+                                            if (x){
+                                                x.insertAdjacentHTML("beforebegin","<div class=\"CapsuleDecorators\" style=\"font-size: 1.2em;display: flex;padding: 0 0 4px 4px;\"><span style='color:red;'>（叮当未收录）</span></div>");
+                                            }
+                                            else{
+                                                klink.children[0].insertAdjacentHTML("afterend","<div class=\"CapsuleDecorators\"><span style='color:red;'>（叮当未收录）</span></div>");
+                                            }
+                                        } else {
+                                            let NickName = response.response.Data.NickName;
+                                            if (!NickName || NickName.length === 0 || NickName === "") {
+                                                NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ formatDate(response.response.Data.Date)+ "）</span>";
+                                            }else{
+                                                NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ formatDate(response.response.Data.Date) + "）</span>";
+                                            }
+                                            //klink.children[index].innerHTML = "<span style='color:green;'>（已收录）</span>" + klink.children[index].innerHTML;
+                                            if (x){
+                                                x.insertAdjacentHTML("beforebegin","<div class=\"CapsuleDecorators\" style=\"font-size: 1.2em;display: flex;padding: 0 0 4px 4px;\"><span style='color: #07f907;'>叮了个当</span>：" + NickName + "</div>");
+                                            }else{
+                                                klink.children[0].insertAdjacentHTML("afterend","<div class=\"CapsuleDecorators\"><span style='color: #07f907;'>叮了个当</span>：" + NickName + "</div>");
+                                            }
                                         }
-                                    } else if (ahref.length > 4 && ahref[3] == "bundle") {
-                                        if (!klink.getAttribute("dingPost")) {
-                                            klink.setAttribute("dingPost", "dingPost");
-                                            klink.children[0].insertAdjacentHTML("afterend","<div class=\"CapsuleDecorators\"><span style='color:red;'>（合集）</span></div>");
-                                            klink.setAttribute("dingPrefix", "dingPrefix");
-                                        }
-                                    } else if (ahref.length > 4 && ahref[3] == "sub") {
-                                        if (!klink.getAttribute("dingPost")) {
-                                            klink.setAttribute("dingPost", "dingPost");
-                                            klink.children[0].insertAdjacentHTML("afterend","<div class=\"CapsuleDecorators\"><span style='color:red;'>（礼包）</span></div>");
-                                            klink.setAttribute("dingPrefix", "dingPrefix");
-                                        }
+                                        klink.setAttribute("dingPrefix", "dingPrefix");
                                     }
+                                );
+                            }
+                        } else if (ahref.length > 4 && ahref[3] == "bundle") {
+                            if (!klink.getAttribute("dingPost")) {
+                                klink.setAttribute("dingPost", "dingPost");
+                                klink.children[0].insertAdjacentHTML("afterend","<div class=\"CapsuleDecorators\"><span style='color:red;'>（合集）</span></div>");
+                                klink.setAttribute("dingPrefix", "dingPrefix");
+                            }
+                        } else if (ahref.length > 4 && ahref[3] == "sub") {
+                            if (!klink.getAttribute("dingPost")) {
+                                klink.setAttribute("dingPost", "dingPost");
+                                klink.children[0].insertAdjacentHTML("afterend","<div class=\"CapsuleDecorators\"><span style='color:red;'>（礼包）</span></div>");
+                                klink.setAttribute("dingPrefix", "dingPrefix");
                             }
                         }
+                    }
+                }
                 //banner
                 let ContentHubMainCarouselCapsule = targetNode0.getElementsByClassName("maincap");
                 if (ContentHubMainCarouselCapsule && ContentHubMainCarouselCapsule.length > 0) {
@@ -2975,7 +2986,7 @@ else if (HOSTNAME == "steamcommunity.com"){
             observer1.observe(games_list_rows, config);
         }
     }else if (base_path_sp.length > 0 && (base_path_sp[1] == 'profiles' || base_path_sp[1] == 'id') && base_path_sp[3] == 'games') {
-        let target_root = document.querySelector("#application_root");
+        let targetNode0 = document.querySelector('body');
         let config2 = {
             subtree: true,
             attributes: true,
@@ -2984,68 +2995,84 @@ else if (HOSTNAME == "steamcommunity.com"){
         };
 
         var callback4 = mutations => {
-            //热门 热销
-            let application_root = target_root;
-            if (application_root && application_root.childElementCount > 0 ) {
-                let children = application_root.children;
-                for (let i = 0; i < children.length; i++) {
-                    let alink = children[i].getElementsByTagName('a');
-                    if (alink) {
-                        for(var k = 0; k < alink.length; k++){
-                            let klink = alink[k];
-                            if(klink.children.length ==0 && !klink.getAttribute("dingPost")){
-                                let ahref = klink.getAttribute("href").split('/');
-                                if (ahref.length > 4 ){
-                                    let base_path_sp = window.location.pathname.split('/');
-                                    //only news
-                                    if (ahref[3] == 'app'){
-                                        klink.setAttribute("dingPost", "dingPost");
-                                        let appid = ahref[4];
-                                        if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
-                                            let data = {
-                                                Id: appid
-                                            };
+            mutations.forEach(mutation => {
+                try {
+                    //new 2024 steamcommunity
+                    let Hover_New = targetNode0.getElementsByClassName('Panel Focusable');
+                    if (Hover_New && Hover_New.length > 0) {
+                        let children = Hover_New;
+                        for (let i = 0; i < children.length; i++) {
+                            if (children[i].classList.contains("Focusable"))
+                            {
+                                let alink = children[i].getElementsByTagName('a');
+                                if (alink && alink.length >0) {
+                                    let klink = alink[0];
+                                    let ahref = klink.getAttribute("href").split('/');
+                                    if (ahref.length > 4 && ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
+                                        let data = {
+                                            Id: ahref[4]
+                                        };
+                                        if (!klink.getAttribute("dingPost")) {
+                                            klink.setAttribute("dingPost", "dingPost");
                                             T2Post(
                                                 "https://ddapi.200403.xyz/CheckId",
                                                 data,
                                                 function(response) {
                                                     console.log("got response");
+                                                    var x = klink.nextElementSibling;
                                                     if (response.response.Data.Id == "0") {
-                                                        klink.insertAdjacentHTML("beforeend", "<div style=\"margin-top: 2px;font-weight: 700;letter-spacing: .03em;color: var(--typography-color-neutral);font-size: 13px;\"><span style='color:green;'>叮了个当</span>: <span style='color:red;'><b>未收录</b></span></div>");
+                                                        if (x)
+                                                        {
+                                                            x.insertAdjacentHTML("beforeend","<div class=\"CapsuleDecorators\" style=\"font-size: 12px;\"><span style='color:red;'>（叮当未收录）</span></div>");
+                                                        }
+                                                        else
+                                                        {
+                                                            klink.children[0].insertAdjacentHTML("beforeend","<div class=\"CapsuleDecorators\" style=\"font-size: 12px;\"><span style='color:red;'>（叮当未收录）</span></div>");
+                                                        }
                                                     } else {
                                                         let NickName = response.response.Data.NickName;
                                                         if (!NickName || NickName.length === 0 || NickName === "") {
-                                                            NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span>（" + response.response.Data.Date;
+                                                            NickName = "<span style='color:#ff683b;'><b>系统/匿名</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ response.response.Data.Date + "）</span>";
                                                         }else{
-                                                            NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span>（" + response.response.Data.Date;
+                                                            NickName= "<span style='color:#ff683b;'><b>"+ NickName +"</b></span><span style=\"color: #6b8aaa;margin-right: 4px;margin-left: 4px;\">（"+ response.response.Data.Date + "）</span>";
                                                         }
-                                                        klink.insertAdjacentHTML("beforeend", "<div style=\"margin-top: 2px;font-weight: 700;letter-spacing: .03em;color: var(--typography-color-neutral);font-size: 13px;\"><span style='color:green;'>叮了个当</span>: " + NickName + "）</div>");
+                                                        if (x){
+                                                            x.insertAdjacentHTML("beforeend","<div class=\"CapsuleDecorators\" style=\"font-size: 12px;\"><span style='color:green;'><b>叮了个当</b></span>：" + NickName + "</div>");
+                                                        }else{
+                                                            klink.children[0].insertAdjacentHTML("beforeend","<div class=\"CapsuleDecorators\" style=\"font-size: 12px;\"><span style='color:green;'><b>叮了个当</b></span>：" + NickName + "</div>");
+                                                        }
                                                     }
+                                                    klink.setAttribute("dingPrefix", "dingPrefix");
                                                 }
                                             );
                                         }
-                                    } else if (ahref[3] == "bundle") {
+                                    } else if (ahref.length > 4 && ahref[3] == "bundle") {
                                         if (!klink.getAttribute("dingPost")) {
                                             klink.setAttribute("dingPost", "dingPost");
-                                            klink.insertAdjacentHTML("beforeend","<div style=\"margin-top: 2px;font-weight: 700;letter-spacing: .03em;color: var(--typography-color-neutral);font-size: 13px;\"><span style='color:orange;'>（合集）</span></div>");
+                                            klink.children[0].insertAdjacentHTML("beforeend","<div class=\"CapsuleDecorators\" style=\"font-size: 12px;\"><span style='color:red;'>（合集）</span></div>");
+                                            klink.setAttribute("dingPrefix", "dingPrefix");
                                         }
-                                    } else if (ahref[3] == "sub") {
+                                    } else if (ahref.length > 4 && ahref[3] == "sub") {
                                         if (!klink.getAttribute("dingPost")) {
-                                            klink.insertAdjacentHTML("beforeend","<div style=\"margin-top: 2px;font-weight: 700;letter-spacing: .03em;color: var(--typography-color-neutral);font-size: 13px;\"><span style='color:orange;'>（礼包）</span></div>");
                                             klink.setAttribute("dingPost", "dingPost");
+                                            klink.children[0].insertAdjacentHTML("beforeend","<div class=\"CapsuleDecorators\" style=\"font-size: 12px;\"><span style='color:red;'>（礼包）</span></div>");
+                                            klink.setAttribute("dingPrefix", "dingPrefix");
                                         }
                                     }
                                 }
                             }
                         }
                     }
+
+                } catch (e) {
+                    //exception handle;
                 }
-            }
+            })
         }
 
-        if (target_root) {
+        if (targetNode0) {
             const observer1 = new MutationObserver(callback4);
-            observer1.observe(target_root, config2);
+            observer1.observe(targetNode0, config2);
         }
     }
 }
