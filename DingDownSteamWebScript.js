@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.2.1
+// @version      1.2.2
 // @description  在steam/steamdb网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        *://store.steampowered.com/*
@@ -554,37 +554,42 @@ window.addEventListener("load", function() {
                                         let anode = children[k].getElementsByTagName("a");
                                         for (let z = 0; z < anode.length; z++) {
                                             let tmpnode = anode[z];
-                                            let name_node = tmpnode.getElementsByClassName("tab_item_name");
-                                            let packs = tmpnode.getAttribute("data-ds-packageid");
-                                            if (packs){
-                                                if (name_node && name_node.length > 0)
-                                                {
-                                                    name_node[0].innerHTML = "<span style='color:orange;'>（捆绑包）</span>" + name_node[0].innerHTML ;
-                                                }else{
-                                                    tmpnode.innerHTML = tmpnode.innerHTML + "<span style='color:orange;'>（捆绑包）</span>";
-                                                }
-                                            }
-                                            else{
-                                                let appid = tmpnode.getAttribute("data-ds-appid");
+                                            if (!tmpnode.getAttribute("dingPrefix")){
+                                                let name_node = tmpnode.getElementsByClassName("tab_item_name");
+                                                if (name_node){
+                                                    tmpnode.setAttribute("dingPrefix", "dingPrefix");
+                                                    let packs = tmpnode.getAttribute("data-ds-packageid");
+                                                    if (packs){
+                                                        if (name_node && name_node.length > 0)
+                                                        {
+                                                            name_node[0].innerHTML = "<span style='color:orange;'>（捆绑包）</span>" + name_node[0].innerHTML ;
+                                                        }else{
+                                                            tmpnode.innerHTML = tmpnode.innerHTML + "<span style='color:orange;'>（捆绑包）</span>";
+                                                        }
+                                                    }
+                                                    else{
+                                                        let appid = tmpnode.getAttribute("data-ds-appid");
 
-                                                if (appid){
-                                                    if (appids.find(a => a == appid)){
-                                                        if (response.response.Data.AppInfo.find(a => a == appid)) {
-                                                            if (name_node && name_node.length > 0)
-                                                            {
-                                                                name_node[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + name_node[0].innerHTML ;
-                                                            }else{
-                                                                tmpnode.innerHTML = tmpnode.innerHTML + "<span style='color:green;'>（已收录）</span>";
-                                                            }
-                                                        }else {
-                                                            if (name_node && name_node.length > 0)
-                                                            {
-                                                                name_node[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + name_node[0].innerHTML ;
-                                                            }else{
-                                                                tmpnode.innerHTML = tmpnode.innerHTML + "<span style='color:red;'>（未收录）</span>";
+                                                        if (appid){
+                                                            if (appids.find(a => a == appid)){
+                                                                if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                                                    if (name_node && name_node.length > 0)
+                                                                    {
+                                                                        name_node[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + name_node[0].innerHTML ;
+                                                                    }else{
+                                                                        tmpnode.innerHTML = tmpnode.innerHTML + "<span style='color:green;'>（已收录）</span>";
+                                                                    }
+                                                                }else {
+                                                                    if (name_node && name_node.length > 0)
+                                                                    {
+                                                                        name_node[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + name_node[0].innerHTML ;
+                                                                    }else{
+                                                                        tmpnode.innerHTML = tmpnode.innerHTML + "<span style='color:red;'>（未收录）</span>";
+                                                                    }
+                                                                }
+                                                                appids.splice(appids.indexOf(appid), 1);
                                                             }
                                                         }
-                                                        appids.splice(appids.indexOf(appid), 1);
                                                     }
                                                 }
                                             }
@@ -2256,6 +2261,100 @@ if (HOSTNAME == 'store.steampowered.com') {
     let callback0 = mutations => {
         mutations.forEach(mutation => {
             try {
+                //index
+                    let base_path_sp = window.location.pathname.split('/');
+                //首页重载
+                if (base_url.pathname === "/") {
+                    //index tabs 2024 mod by ding
+                    let children = targetNode0.getElementsByClassName("home_tabs_content");
+                    if (children && children.length > 0)
+                    {
+                        try {
+                            let appids = [];
+                            let childrenLength = children.length;
+                            for (let i = 0; i < childrenLength; i++) {
+                                let anode = children[i].getElementsByTagName("a");
+                                for (let z = 0; z < anode.length; z++) {
+                                    if (!anode[z].getAttribute("dingPrefix")){
+                                        let packs = anode[z].getAttribute("data-ds-packageid");
+                                        if(!packs){
+                                            let appid = anode[z].getAttribute("data-ds-appid");
+                                            if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                                                appids.push(appid);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (appids.length != 0) {
+                                let data = {
+                                    "Ids": appids.join()
+                                };
+                                T2Post(
+                                    "https://ddapi.200403.xyz/CheckIds",
+                                    data,
+                                    function(response) {
+                                        console.log("got response for " + response.response.Data.Total + " appid");
+                                        //prefix all titles
+                                        let children = document.getElementsByClassName("home_tabs_content");
+                                        if (children && children.length > 0)
+                                        {
+                                            let childrenLength = children.length;
+                                            for (let k = 0; k < childrenLength; k++) {
+                                                let anode = children[k].getElementsByTagName("a");
+                                                for (let z = 0; z < anode.length; z++) {
+                                                    let tmpnode = anode[z];
+                                                    if (!tmpnode.getAttribute("dingPrefix")){
+                                                        let name_node = tmpnode.getElementsByClassName("tab_item_name");
+                                                        if (name_node){
+                                                            tmpnode.setAttribute("dingPrefix", "dingPrefix");
+                                                            let packs = tmpnode.getAttribute("data-ds-packageid");
+                                                            if(packs){
+                                                                if (name_node && name_node.length > 0)
+                                                                {
+                                                                    name_node[0].innerHTML = "<span style='color:orange;'>（捆绑包）</span>" + name_node[0].innerHTML ;
+                                                                }else{
+                                                                    tmpnode.innerHTML = tmpnode.innerHTML + "<span style='color:orange;'>（捆绑包）</span>";
+                                                                }
+                                                            }
+                                                            else{
+                                                                let appid = tmpnode.getAttribute("data-ds-appid");
+                                                                if (appid){
+                                                                    if (appids.find(a => a == appid)){
+                                                                        if (response.response.Data.AppInfo.find(a => a == appid)) {
+                                                                            if (name_node && name_node.length > 0)
+                                                                            {
+                                                                                name_node[0].innerHTML = "<span style='color:green;'>（已收录）</span>" + name_node[0].innerHTML ;
+                                                                            }else{
+                                                                                tmpnode.innerHTML = tmpnode.innerHTML + "<span style='color:green;'>（已收录）</span>";
+                                                                            }
+                                                                        }else {
+                                                                            if (name_node && name_node.length > 0)
+                                                                            {
+                                                                                name_node[0].innerHTML = "<span style='color:red;'>（未收录）</span>" + name_node[0].innerHTML ;
+                                                                            }else{
+                                                                                tmpnode.innerHTML = tmpnode.innerHTML + "<span style='color:red;'>（未收录）</span>";
+                                                                            }
+                                                                        }
+                                                                        appids.splice(appids.indexOf(appid), 1);
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+
+                                                }
+                                            }
+                                        }
+                                    }
+                                );
+                            }
+                        }
+                        catch (e) {
+                            //exception handle;
+                        }
+                    }
+                }
                 //test 2024 new hover
                 //only for ReviewScore
                 let Hover_New = targetNode0.getElementsByClassName('ReviewScore');
