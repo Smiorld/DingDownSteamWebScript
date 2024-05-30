@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.2.4
+// @version      1.2.5
 // @description  在steam/steamdb网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        *://store.steampowered.com/*
@@ -12,10 +12,10 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_info
 // @grant        GM_registerMenuCommand
-// @connect      ddapi.200403.xyz
+// @connect      ding.200403.xyz
 // @updateURL    https://gcore.jsdelivr.net/gh/Smiorld/DingDownSteamWebScript@latest/DingDownSteamWebScript.js
 // @downloadURL  https://gcore.jsdelivr.net/gh/Smiorld/DingDownSteamWebScript@latest/DingDownSteamWebScript.js
-// @require      https://ddapi.200403.xyz/npm/sweetalert2@11.4.38/dist/sweetalert2.all.min.js
+// @require      https://ding.200403.xyz/npm/sweetalert2@11.4.38/dist/sweetalert2.all.min.js
 // @license MIT
 // ==/UserScript==
 
@@ -3984,3 +3984,8 @@ else if (HOSTNAME == "steamdb.info") {
     const observer0 = new MutationObserver(callback0);
     observer0.observe(targetNode0, config);
 }
+
+
+
+
+
