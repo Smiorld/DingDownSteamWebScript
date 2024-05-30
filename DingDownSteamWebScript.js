@@ -296,7 +296,7 @@ async function T2LoginPost(username, password) {
         }
     });
     T2Post(
-        'https://ddapi.200403.xyz/AjaxLogin',
+        'https://ding.200403.xyz/AjaxLogin',
         data,
         function(response) {
             if (response.response.Data.Status === 0) {
@@ -344,7 +344,7 @@ function T2LogoutPost() {
         'SessionId': getCookie('Ding_SessionId')
     };
     T2Post(
-        'https://ddapi.200403.xyz/AjaxLogOut',
+        'https://ding.200403.xyz/AjaxLogOut',
         data,
         function(response) {
             if (response.response.Data.Status === 0) {
@@ -409,7 +409,7 @@ if (document.readyState == "complete" || document.readyState == "loaded" || docu
     document.addEventListener("DOMContentLoaded", function(event) {
         //console.log("Just Loaded");
         let head = document.getElementsByTagName("head")[0];
-        head.insertAdjacentHTML("beforeend", '<script src="https://ddapi.200403.xyz/npm/sweetalert2@11.4.38/dist/sweetalert2.all.min.js"></script>');
+        head.insertAdjacentHTML("beforeend", '<script src="https://ding.200403.xyz/npm/sweetalert2@11.4.38/dist/sweetalert2.all.min.js"></script>');
         let SessionId = getCookie('Ding_SessionId');
         if (SessionId === "") {
             let cart_status_data = document.querySelector("#cart_status_data");
@@ -541,7 +541,7 @@ window.addEventListener("load", function() {
                             "Ids": appids.join()
                         };
                         T2Post(
-                            "https://ddapi.200403.xyz/CheckIds",
+                            "https://ding.200403.xyz/CheckIds",
                             data,
                             function(response) {
                                 console.log("got response for " + response.response.Data.Total + " appid");
@@ -641,7 +641,7 @@ window.addEventListener("load", function() {
                         "Ids": appids.join()
                     };
                     T2Post(
-                        "https://ddapi.200403.xyz/CheckIds",
+                        "https://ding.200403.xyz/CheckIds",
                         data,
                         function(response) {
                             console.log("got response for " + response.response.Data.Total + " appid");
@@ -713,7 +713,7 @@ window.addEventListener("load", function() {
                     "Ids": appid.join()
                 };
                 T2Post(
-                    "https://ddapi.200403.xyz/CheckIds",
+                    "https://ding.200403.xyz/CheckIds",
                     data,
                     function(response) {
                         console.log("got response for " + response.response.Data.Total + " appid");
@@ -748,7 +748,7 @@ window.addEventListener("load", function() {
                 //same logic as showing dingdownload button
                 if (getCookie('Ding_SessionId')) {
                     T2Post(
-                        "https://ddapi.200403.xyz/CheckId", {
+                        "https://ding.200403.xyz/CheckId", {
                             "Id": appid
                         },
                         function(response) {
@@ -788,7 +788,7 @@ window.addEventListener("load", function() {
                                 //and the game is not free.
                                 //and the sharer is not "系统/匿名"
                                 T2Post(
-                                    "https://ddapi.200403.xyz/AjaxCheckSub",
+                                    "https://ding.200403.xyz/AjaxCheckSub",
                                     checkSubData,
                                     function(response) {
                                         if (response.response.Data.Credit && response.response.Data.Credit !== 2147483647) {
@@ -825,7 +825,7 @@ window.addEventListener("load", function() {
                                                 if (isWebBrowser()) {
                                                     window.open("ding://install/" + appid + "/" + modid);
                                                 } else {
-                                                    window.open("steam://openurl_external/https://ddapi.200403.xyz/install/" + appid + "/" + modid);
+                                                    window.open("steam://openurl_external/https://ding.200403.xyz/install/" + appid + "/" + modid);
                                                 }
                                             });
                                         } else if (response.response.Data.Status === -2) {
@@ -865,7 +865,7 @@ window.addEventListener("load", function() {
                                     if (isWebBrowser()) {
                                         window.open("ding://install/" + appid + "/" + modid);
                                     } else {
-                                        window.open("steam://openurl_external/https://ddapi.200403.xyz/install/" + appid + "/" + modid);
+                                        window.open("steam://openurl_external/https://ding.200403.xyz/install/" + appid + "/" + modid);
                                     }
                                 });
                             }
@@ -906,7 +906,7 @@ window.addEventListener("load", function() {
                         Id: base_depotid
                     };
                     T2Post(
-                        "https://ddapi.200403.xyz/CheckIdDepot",
+                        "https://ding.200403.xyz/CheckIdDepot",
                         data,
                         function(response) {
                             console.log("got response");
@@ -948,7 +948,7 @@ window.addEventListener("load", function() {
                         "Ids": appids.join()
                     };
                     T2Post(
-                        "https://ddapi.200403.xyz/CheckIds",
+                        "https://ding.200403.xyz/CheckIds",
                         data,
                         function (response) {
                             console.log("got response for " + response.response.Data.Total + " appid");
@@ -1009,7 +1009,7 @@ window.addEventListener("load", function() {
                         "Ids": appids.join()
                     };
                     T2Post(
-                        "https://ddapi.200403.xyz/CheckIds",
+                        "https://ding.200403.xyz/CheckIds",
                         data,
                         function (response) {
                             console.log("got response for " + response.response.Data.Total + " appid");
@@ -1070,7 +1070,7 @@ window.addEventListener("load", function() {
                         "Ids": appids.join()
                     };
                     T2Post(
-                        "https://ddapi.200403.xyz/CheckIds",
+                        "https://ding.200403.xyz/CheckIds",
                         data,
                         function (response) {
                             console.log("got response for " + response.response.Data.Total + " appid");
@@ -1163,7 +1163,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                         "Ids": appid.join()
                     };
                     T2Post(
-                        "https://ddapi.200403.xyz/CheckIds",
+                        "https://ding.200403.xyz/CheckIds",
                         data,
                         function(response) {
                             console.log("got response for " + response.response.Data.Total + " appid");
@@ -1277,7 +1277,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                         "Ids": appids.join()
                     };
                     T2Post(
-                        "https://ddapi.200403.xyz/CheckIds",
+                        "https://ding.200403.xyz/CheckIds",
                         data,
                         function (response) {
                             for (let i = 0; i < children.length; i++) {
@@ -1400,7 +1400,7 @@ if (HOSTNAME == 'store.steampowered.com') {
         }else if (!title.getAttribute("dingPost")) {
             title.setAttribute("dingPost", "dingPost");
             T2Post(
-                "https://ddapi.200403.xyz/CheckId",
+                "https://ding.200403.xyz/CheckId",
                 data,
                 function(response) {
                     console.log("got response");
@@ -1472,7 +1472,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                                 //and the game is not free.
                                 //and the sharer is not "系统/匿名"
                                 T2Post(
-                                    "https://ddapi.200403.xyz/AjaxCheckSub",
+                                    "https://ding.200403.xyz/AjaxCheckSub",
                                     checkSubData,
                                     function(response) {
                                         if (response.response.Data.Credit && response.response.Data.Credit !== 2147483647) {
@@ -1531,7 +1531,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                                                                 }
                                                             });
                                                             T2Post(
-                                                                "https://ddapi.200403.xyz/AjaxSubApp",
+                                                                "https://ding.200403.xyz/AjaxSubApp",
                                                                 subData,
                                                                 function(response) {
                                                                     if (response.response.Data.Status === 0) {
@@ -1597,7 +1597,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                                                 if (isWebBrowser()) {
                                                     window.open("ding://install/" + appid);
                                                 } else {
-                                                    window.open("steam://openurl_external/https://ddapi.200403.xyz/install/" + appid);
+                                                    window.open("steam://openurl_external/https://ding.200403.xyz/install/" + appid);
                                                 }
                                             });
                                         } else if (response.response.Data.Status === -2) {
@@ -1634,7 +1634,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                                     if (isWebBrowser()) {
                                         window.open("ding://install/" + appid);
                                     } else {
-                                        window.open("steam://openurl_external/https://ddapi.200403.xyz/install/" + appid);
+                                        window.open("steam://openurl_external/https://ding.200403.xyz/install/" + appid);
                                     }
                                 });
                             }
@@ -1649,7 +1649,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                             if (CheckIdResponse.is_recorded === true && game_appid) {
                                 //check parent game
                                 T2Post(
-                                    "https://ddapi.200403.xyz/AjaxCheckSub", {
+                                    "https://ding.200403.xyz/AjaxCheckSub", {
                                         'SessionId': getCookie('Ding_SessionId'),
                                         "AppId": game_appid
                                     },
@@ -1684,7 +1684,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                                                     if (isWebBrowser()) {
                                                         window.open("ding://install/" + appid);
                                                     } else {
-                                                        window.open("steam://openurl_external/https://ddapi.200403.xyz/install/" + appid);
+                                                        window.open("steam://openurl_external/https://ding.200403.xyz/install/" + appid);
                                                     }
                                                 });
                                             }
@@ -1779,7 +1779,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                     "Ids": appids.join()
                 };
                 T2Post(
-                    "https://ddapi.200403.xyz/CheckIds",
+                    "https://ding.200403.xyz/CheckIds",
                     data,
                     function (response) {
                         console.log("got response for " + response.response.Data.Total + " appid");
@@ -1914,7 +1914,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                         "Ids": appids.join()
                     };
                     T2Post(
-                        "https://ddapi.200403.xyz/CheckIds",
+                        "https://ding.200403.xyz/CheckIds",
                         data,
                         function (response) {
                             console.log("got response for " + response.response.Data.Total + " appid");
@@ -2004,7 +2004,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                         "Ids": appids.join()
                     };
                     T2Post(
-                        "https://ddapi.200403.xyz/CheckIds",
+                        "https://ding.200403.xyz/CheckIds",
                         data,
                         function (response) {
                             console.log("got response for " + response.response.Data.Total + " appid");
@@ -2101,7 +2101,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                             "Ids": appids.join()
                         };
                         T2Post(
-                            "https://ddapi.200403.xyz/CheckIds",
+                            "https://ding.200403.xyz/CheckIds",
                             data,
                             function (response) {
                                 for (let i = 0; i < children.length; i++) {
@@ -2208,7 +2208,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                                 };
                                 tmpchild.setAttribute("dingPost", "dingPost");
                                 T2Post(
-                                    "https://ddapi.200403.xyz/CheckId",
+                                    "https://ding.200403.xyz/CheckId",
                                     data,
                                     function(response) {
                                         console.log("got response");
@@ -2285,7 +2285,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                                                     Id: appid
                                                 };
                                                 T2Post(
-                                                    "https://ddapi.200403.xyz/CheckId",
+                                                    "https://ding.200403.xyz/CheckId",
                                                     data,
                                                     function(response) {
                                                         let index;
@@ -2357,7 +2357,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                         "Ids": appids.join()
                     };
                     T2Post(
-                        "https://ddapi.200403.xyz/CheckIds",
+                        "https://ding.200403.xyz/CheckIds",
                         data,
                         function (response) {
                             for (let i = 0; i < children.length; i++) {
@@ -2479,7 +2479,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                                                     Id: appid
                                                 };
                                                 T2Post(
-                                                    "https://ddapi.200403.xyz/CheckId",
+                                                    "https://ding.200403.xyz/CheckId",
                                                     data,
                                                     function(response) {
                                                         console.log("got response");
@@ -2565,7 +2565,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                                     "Ids": appids.join()
                                 };
                                 T2Post(
-                                    "https://ddapi.200403.xyz/CheckIds",
+                                    "https://ding.200403.xyz/CheckIds",
                                     data,
                                     function(response) {
                                         console.log("got response for " + response.response.Data.Total + " appid");
@@ -2644,7 +2644,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                             if (!klink.getAttribute("dingPost")) {
                                 klink.setAttribute("dingPost", "dingPost");
                                 T2Post(
-                                    "https://ddapi.200403.xyz/CheckId",
+                                    "https://ding.200403.xyz/CheckId",
                                     data,
                                     function(response) {
                                         console.log("got response");
@@ -2707,7 +2707,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                                     if (!klink.getAttribute("dingPost")) {
                                         klink.setAttribute("dingPost", "dingPost");
                                         T2Post(
-                                            "https://ddapi.200403.xyz/CheckId",
+                                            "https://ding.200403.xyz/CheckId",
                                             data,
                                             function(response) {
                                                 console.log("got response");
@@ -2775,7 +2775,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                                 Id: child.id.slice(10)
                             };
                             T2Post(
-                                "https://ddapi.200403.xyz/CheckId",
+                                "https://ding.200403.xyz/CheckId",
                                 data,
                                 function(response) {
                                     console.log("got response");
@@ -2820,7 +2820,7 @@ if (HOSTNAME == 'store.steampowered.com') {
                                         Id: ahref[4]
                                     };
                                     T2Post(
-                                        "https://ddapi.200403.xyz/CheckId",
+                                        "https://ding.200403.xyz/CheckId",
                                         data,
                                         function(response) {
                                             console.log("got response");
@@ -2912,7 +2912,7 @@ else if (HOSTNAME == "steamcommunity.com"){
                                 "Ids": appids.join()
                             };
                             T2Post(
-                                "https://ddapi.200403.xyz/CheckIds",
+                                "https://ding.200403.xyz/CheckIds",
                                 data,
                                 function(response) {
                                     console.log("got response for " + response.response.Data.Total + " appid");
@@ -3003,7 +3003,7 @@ else if (HOSTNAME == "steamcommunity.com"){
                                         if (!klink.getAttribute("dingPost")) {
                                             klink.setAttribute("dingPost", "dingPost");
                                             T2Post(
-                                                "https://ddapi.200403.xyz/CheckId",
+                                                "https://ding.200403.xyz/CheckId",
                                                 data,
                                                 function(response) {
                                                     console.log("got response");
@@ -3106,7 +3106,7 @@ else if (HOSTNAME == "steamdb.info") {
                     "Ids": appids.join()
                 };
                 T2Post(
-                    "https://ddapi.200403.xyz/CheckIds",
+                    "https://ding.200403.xyz/CheckIds",
                     data,
                     function (response) {
                         console.log("got response for " + response.response.Data.Total + " appid");
@@ -3176,7 +3176,7 @@ else if (HOSTNAME == "steamdb.info") {
                     Id: base_appid
                 };
                 T2Post(
-                    "https://ddapi.200403.xyz/CheckId",
+                    "https://ding.200403.xyz/CheckId",
                     data,
                     function(response) {
                         console.log("got response");
@@ -3232,7 +3232,7 @@ else if (HOSTNAME == "steamdb.info") {
                         "Ids": appids.join()
                     };
                     T2Post(
-                        "https://ddapi.200403.xyz/CheckIds",
+                        "https://ding.200403.xyz/CheckIds",
                         data,
                         function (response) {
                             console.log("got response for " + response.response.Data.Total + " appid");
@@ -3308,7 +3308,7 @@ else if (HOSTNAME == "steamdb.info") {
                     "Ids": appids.join()
                 };
                 T2Post(
-                    "https://ddapi.200403.xyz/CheckIds",
+                    "https://ding.200403.xyz/CheckIds",
                     data,
                     function (response) {
                         console.log("got response for " + response.response.Data.Total + " appid");
@@ -3349,7 +3349,7 @@ else if (HOSTNAME == "steamdb.info") {
                     "Ids": depots.join()
                 };
                 T2Post(
-                    "https://ddapi.200403.xyz/CheckIdsDepot",
+                    "https://ding.200403.xyz/CheckIdsDepot",
                     data,
                     function (response) {
                         console.log("got response for " + response.response.Data.Total + " depots");
@@ -3417,7 +3417,7 @@ else if (HOSTNAME == "steamdb.info") {
                     "Ids": appids.join()
                 };
                 T2Post(
-                    "https://ddapi.200403.xyz/CheckIds",
+                    "https://ding.200403.xyz/CheckIds",
                     data,
                     function (response) {
                         console.log("got response for " + response.response.Data.Total + " appid");
@@ -3478,7 +3478,7 @@ else if (HOSTNAME == "steamdb.info") {
                     "Ids": appids.join()
                 };
                 T2Post(
-                    "https://ddapi.200403.xyz/CheckIds",
+                    "https://ding.200403.xyz/CheckIds",
                     data,
                     function (response) {
                         console.log("got response for " + response.response.Data.Total + " appid");
@@ -3535,7 +3535,7 @@ else if (HOSTNAME == "steamdb.info") {
                     "Ids": appids.join()
                 };
                 T2Post(
-                    "https://ddapi.200403.xyz/CheckIds",
+                    "https://ding.200403.xyz/CheckIds",
                     data,
                     function (response) {
                         console.log("got response for " + response.response.Data.Total + " appid");
@@ -3608,7 +3608,7 @@ else if (HOSTNAME == "steamdb.info") {
                     "Ids": appids.join()
                 };
                 T2Post(
-                    "https://ddapi.200403.xyz/CheckIds",
+                    "https://ding.200403.xyz/CheckIds",
                     data,
                     function (response) {
                         console.log("got response for " + response.response.Data.Total + " appid");
@@ -3688,7 +3688,7 @@ else if (HOSTNAME == "steamdb.info") {
                     "Ids": appids.join()
                 };
                 T2Post(
-                    "https://ddapi.200403.xyz/CheckIds",
+                    "https://ding.200403.xyz/CheckIds",
                     data,
                     function (response) {
                         console.log("got response for " + response.response.Data.Total + " appid");
@@ -3763,7 +3763,7 @@ else if (HOSTNAME == "steamdb.info") {
                     "Ids": appids.join()
                 };
                 T2Post(
-                    "https://ddapi.200403.xyz/CheckIds",
+                    "https://ding.200403.xyz/CheckIds",
                     data,
                     function (response) {
                         console.log("got response for " + response.response.Data.Total + " appid");
@@ -3823,7 +3823,7 @@ else if (HOSTNAME == "steamdb.info") {
                                     Id: href_sp[2]
                                 };
                                 T2Post(
-                                    "https://ddapi.200403.xyz/CheckId",
+                                    "https://ding.200403.xyz/CheckId",
                                     data,
                                     function(response) {
                                         console.log("got response");
@@ -3883,7 +3883,7 @@ else if (HOSTNAME == "steamdb.info") {
                             "Ids": appids.join()
                         };
                         T2Post(
-                            "https://ddapi.200403.xyz/CheckIds",
+                            "https://ding.200403.xyz/CheckIds",
                             data,
                             function (response) {
                                 console.log("got response for " + response.response.Data.Total + " appid");
@@ -3940,7 +3940,7 @@ else if (HOSTNAME == "steamdb.info") {
                             "Ids": depots.join()
                         };
                         T2Post(
-                            "https://ddapi.200403.xyz/CheckIdsDepot",
+                            "https://ding.200403.xyz/CheckIdsDepot",
                             data,
                             function (response) {
                                 console.log("got response for " + response.response.Data.Total + " depots");
