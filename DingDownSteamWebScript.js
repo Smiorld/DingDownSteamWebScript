@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.2.5
+// @version      1.2.6
 // @description  在steam/steamdb网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        *://store.steampowered.com/*
@@ -15,7 +15,7 @@
 // @connect      ding.200403.xyz
 // @updateURL    https://gcore.jsdelivr.net/gh/Smiorld/DingDownSteamWebScript@latest/DingDownSteamWebScript.js
 // @downloadURL  https://gcore.jsdelivr.net/gh/Smiorld/DingDownSteamWebScript@latest/DingDownSteamWebScript.js
-// @require      https://ding.200403.xyz/npm/sweetalert2@11.4.38/dist/sweetalert2.all.min.js
+// @require      https://unpkg.com/sweetalert2@11.14.5/dist/sweetalert2.all.min.js
 // @license MIT
 // ==/UserScript==
 
@@ -409,7 +409,7 @@ if (document.readyState == "complete" || document.readyState == "loaded" || docu
     document.addEventListener("DOMContentLoaded", function(event) {
         //console.log("Just Loaded");
         let head = document.getElementsByTagName("head")[0];
-        head.insertAdjacentHTML("beforeend", '<script src="https://ding.200403.xyz/npm/sweetalert2@11.4.38/dist/sweetalert2.all.min.js"></script>');
+        head.insertAdjacentHTML("beforeend", '<script src="https://unpkg.com/sweetalert2@11.14.5/dist/sweetalert2.all.min.js"></script>');
         let SessionId = getCookie('Ding_SessionId');
         if (SessionId === "") {
             let cart_status_data = document.querySelector("#cart_status_data");
