@@ -2218,25 +2218,26 @@ if (HOSTNAME == 'store.steampowered.com') {
                                                           console.log("got response");
                                                           if (response.response.Data.Id == "0") {
                                                             //klink.innerHTML = "test";
-                                                            klink.insertAdjacentHTML("afterend", "<div><span style='color:red;'><b>未收录</b></span></div>");
+                                                            let xtest = klink.getRootNode();
+                                                            klink.insertAdjacentHTML("beforeend", "<span style='float: right;color:red;'><b>未收录</b></span>");
                                                           } else {
                                                               let NickName = response.response.Data.NickName;
                                                               if (!NickName || NickName.length === 0 || NickName === "") {
-                                                                  NickName = "<span style='color:#ff683b;' title=\"入库于 "+response.response.Data.Date+"\"><b>系统/匿名</b></span>";
+                                                                  NickName = "<span style='float: right;color:#ff683b;' title=\"入库于 "+response.response.Data.Date+"\"><b>系统/匿名</b></span>";
                                                               }else{
-                                                                  NickName= "<span style='color:#ff683b;' title=\"入库于 "+response.response.Data.Date+"\"><b>"+ NickName +"</b></span>";
+                                                                  NickName= "<span style='float: right;color:#ff683b;' title=\"入库于 "+response.response.Data.Date+"\"><b>"+ NickName +"</b></span>";
                                                               }
-                                                              klink.insertAdjacentHTML("afterend", "<div>" + NickName + "</div>");
+                                                              klink.insertAdjacentHTML("beforeend",  NickName);
                                                           }
                                                       }
                                                   );
                                               }
                                           } else if (ahref[3] == "bundle") {
                                               klink.setAttribute("dingPost", "dingPost");
-                                              klink.insertAdjacentHTML("afterend","<div><span style='color:orange;'>（合集）</span></div>");
+                                              klink.insertAdjacentHTML("afterend","<div><span style='float: right;color:orange;'>（合集）</span></div>");
 
                                           } else if (ahref[3] == "sub") {
-                                              klink.insertAdjacentHTML("afterend","<div><span style='color:orange;'>（礼包）</span></div>");
+                                              klink.insertAdjacentHTML("afterend","<div><span style='float: right;color:orange;'>（礼包）</span></div>");
                                               klink.setAttribute("dingPost", "dingPost");
                                           }
                                   }
