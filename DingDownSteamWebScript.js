@@ -2,7 +2,7 @@
 // @name         叮当公共库收录情况（适配油猴tampermoneky与Steam++）
 // @homepage     https://github.com/Smiorld/DingDownSteamWebScript
 // @namespace    https://github.com/Smiorld
-// @version      1.2.6
+// @version      1.2.7
 // @description  在steam/steamdb网页中浏览游戏页面时，在标题后追加显示其在叮当公共库的收录情况。
 // @author       Smiorld
 // @match        *://store.steampowered.com/*
@@ -2174,7 +2174,7 @@ if (HOSTNAME == 'store.steampowered.com') {
     }
     //愿望单
     else if (base_path_sp.length > 0 && base_path_sp[1] == 'wishlist') {
-        let targetNode2 = document.querySelector('#wishlist_ctn')
+        let targetNode2 = document.querySelector('body')
         let config = {
             subtree: true,
             attributes: true,
@@ -2188,52 +2188,61 @@ if (HOSTNAME == 'store.steampowered.com') {
             let childrenLength = children.length;
             for (let i = 0; i < childrenLength; i++) {
                 let tmpchild = children[i];
-                if (tmpchild && !tmpchild.getAttribute("dingPost") ) {
-                    let atitle = tmpchild.getElementsByClassName("title");
+                if (tmpchild) {
+                    let atitle = tmpchild.getElementsByClassName("Panel");
                     if (!atitle || atitle.length < 1){
                         continue;
                     }
-                    let ahref = atitle[0].getAttribute("href");
-                    if (ahref){
-                        ahref = ahref.split('/');
-                    }else{
-                        continue;
-                    }
-                    if (ahref.length > 4 ){
-                        if (ahref[3] == 'app' && ahref[2] == "store.steampowered.com") {
-                            let appid = ahref[4];
-                            if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
-                                let data = {
-                                    Id: appid
-                                };
-                                tmpchild.setAttribute("dingPost", "dingPost");
-                                T2Post(
-                                    "https://ding.200403.xyz/CheckId",
-                                    data,
-                                    function(response) {
-                                        console.log("got response");
-                                        if (response.response.Data.Id == "0") {
-                                            atitle[0].insertAdjacentHTML("afterend", "<div class=\"stats\" style=\"margin-bottom: 1px;\"><div class=\"label\"><span>叮了个当: </span></div><div class=\"value\" style='color:red;'><b>未收录</b></div></div>");
-                                        } else {
-                                            let NickName = response.response.Data.NickName;
-                                            if (!NickName || NickName.length === 0 || NickName === "") {
-                                                NickName = "<div class=\"value\" style='color:#ff683b;' data-tooltip-text=\"入库于 "+response.response.Data.Date+"\"><b>系统/匿名</b><span style='color:#b2b8bd;'>（" + response.response.Data.Date + "）</span></div>";
-                                            }else{
-                                                NickName= "<div class=\"value\" style='color:#ff683b;' data-tooltip-text=\"入库于 "+response.response.Data.Date+"\"><b>"+ NickName +"</b><span style='color:#b2b8bd;'>（" + response.response.Data.Date + "）</span></div>";
-                                            }
-                                            atitle[0].insertAdjacentHTML("afterend", "<div class=\"stats\" style=\"margin-bottom: 1px;\"><div class=\"label\"><span>叮了个当: </span></div>" + NickName + "</div>");
-                                        }
-                                    }
-                                );
 
-                            }
-                        } else if (ahref[3] == "bundle") {
-                            tmpchild.setAttribute("dingPost", "dingPost");
-                            atitle[0].insertAdjacentHTML("afterend", "<div class=\"stats\" style=\"margin-bottom: 1px;\"><div class=\"label\"><span>叮了个当: </span></div><div class=\"value\" style='color:orange;'><b>（合集）</b></div></div>");
-                        } else if (ahref[3] == "sub") {
-                            atitle[0].insertAdjacentHTML("afterend", "<div class=\"stats\" style=\"margin-bottom: 1px;\"><div class=\"label\"><span>叮了个当: </span></div><div class=\"value\" style='color:orange;'><b>（礼包）</b></div></div>");
-                            tmpchild.setAttribute("dingPost", "dingPost");
-                        }
+                    let atitleLength = atitle.length;
+                    for (let i = 0; i < atitleLength; i++) {
+                      let alink = atitle[i].getElementsByTagName('a');
+                      if (alink) {
+                          for(var k = 0; k < alink.length; k++){
+                              let klink = alink[k];
+                              if(klink.childElementCount < 1 && !klink.getAttribute("dingPost")){
+                                  klink.setAttribute("dingPost", "dingPost");
+                                  let ahref = klink.getAttribute("href").split('/');
+                                  if (ahref.length > 4 ){
+                                          if (ahref[3] == 'app'){
+                                              klink.setAttribute("dingPost", "dingPost");
+                                              let appid = ahref[4];
+                                              if (appid && appid.length >1 && appid.length < 10 && isInteger(appid)){
+                                                  let data = {
+                                                      Id: appid
+                                                  };
+                                                  T2Post(
+                                                      "https://ding.200403.xyz/CheckId",
+                                                      data,
+                                                      function(response) {
+                                                          console.log("got response");
+                                                          if (response.response.Data.Id == "0") {
+                                                            //klink.innerHTML = "test";
+                                                            klink.insertAdjacentHTML("afterend", "<div><span style='color:red;'><b>未收录</b></span></div>");
+                                                          } else {
+                                                              let NickName = response.response.Data.NickName;
+                                                              if (!NickName || NickName.length === 0 || NickName === "") {
+                                                                  NickName = "<span style='color:#ff683b;' title=\"入库于 "+response.response.Data.Date+"\"><b>系统/匿名</b></span>";
+                                                              }else{
+                                                                  NickName= "<span style='color:#ff683b;' title=\"入库于 "+response.response.Data.Date+"\"><b>"+ NickName +"</b></span>";
+                                                              }
+                                                              klink.insertAdjacentHTML("afterend", "<div>" + NickName + "</div>");
+                                                          }
+                                                      }
+                                                  );
+                                              }
+                                          } else if (ahref[3] == "bundle") {
+                                              klink.setAttribute("dingPost", "dingPost");
+                                              klink.insertAdjacentHTML("afterend","<div><span style='color:orange;'>（合集）</span></div>");
+
+                                          } else if (ahref[3] == "sub") {
+                                              klink.insertAdjacentHTML("afterend","<div><span style='color:orange;'>（礼包）</span></div>");
+                                              klink.setAttribute("dingPost", "dingPost");
+                                          }
+                                  }
+                              }
+                          }
+                      }
                     }
                 }
             }
@@ -3984,8 +3993,3 @@ else if (HOSTNAME == "steamdb.info") {
     const observer0 = new MutationObserver(callback0);
     observer0.observe(targetNode0, config);
 }
-
-
-
-
-
